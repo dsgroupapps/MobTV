@@ -1,0 +1,312 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* MOBTV brand tokens */
+  --color-navy: var(--navy);
+  --color-navy-soft: var(--navy-soft);
+  --color-indigo: var(--navy-soft);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-off-white: var(--off-white);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-teal: var(--teal);
+  --color-red: var(--red);
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-sans: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* MOBTV brand palette */
+  --navy: oklch(0.18 0.04 260);
+  --navy-soft: oklch(0.28 0.07 265);
+  --gold: oklch(0.81 0.16 85);
+  --gold-deep: oklch(0.66 0.15 75);
+  --off-white: oklch(0.97 0.008 90);
+  --ink: oklch(0.18 0.015 260);
+  --ink-soft: oklch(0.45 0.02 260);
+  --teal: oklch(0.78 0.14 180);
+  --red: oklch(0.58 0.22 27);
+
+  /* shadcn semantic mapping → MOBTV */
+  --background: var(--off-white);
+  --foreground: var(--ink);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--ink);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--ink);
+  --primary: var(--gold);
+  --primary-foreground: var(--navy);
+  --secondary: var(--navy);
+  --secondary-foreground: var(--off-white);
+  --muted: oklch(0.94 0.006 90);
+  --muted-foreground: var(--ink-soft);
+  --accent: var(--gold);
+  --accent-foreground: var(--navy);
+  --destructive: var(--red);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.9 0.01 90);
+  --input: oklch(0.9 0.01 90);
+  --ring: var(--gold);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+}
+
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--gold);
+  color: var(--navy);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  &:hover {
+    background-color: var(--gold-deep);
+  }
+}
+
+@utility btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  color: var(--gold-deep);
+  border: 1.5px solid var(--gold);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  &:hover {
+    background-color: var(--gold);
+    color: var(--navy);
+  }
+}
+
+@keyframes mobtv-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--red) 70%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 18px color-mix(in oklab, var(--red) 0%, transparent);
+  }
+}
+
+@utility animate-mobtv-pulse {
+  animation: mobtv-pulse 2s ease-out infinite;
+}
+
+/* Signal-wave pulse */
+@keyframes signal-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.025);
+    opacity: 0.7;
+  }
+}
+
+/* Hero entrance stagger */
+@keyframes hero-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-stagger {
+  opacity: 0;
+  animation: hero-rise 0.7s ease-out forwards;
+}
+.hero-stagger-1 { animation-delay: 0ms; }
+.hero-stagger-2 { animation-delay: 90ms; }
+.hero-stagger-3 { animation-delay: 180ms; }
+.hero-stagger-4 { animation-delay: 270ms; }
+.hero-stagger-5 { animation-delay: 360ms; }
+
+/* Scroll-reveal (stagger fade+slide) */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+.reveal-root[data-visible="true"] .reveal {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-root[data-visible="true"] .reveal-1 { transition-delay: 0ms; }
+.reveal-root[data-visible="true"] .reveal-2 { transition-delay: 80ms; }
+.reveal-root[data-visible="true"] .reveal-3 { transition-delay: 160ms; }
+.reveal-root[data-visible="true"] .reveal-4 { transition-delay: 240ms; }
+.reveal-root[data-visible="true"] .reveal-5 {
+  transition-delay: 360ms;
+  transform: translateY(18px) scale(0.97);
+}
+.reveal-root[data-visible="true"] .reveal-5 {
+  transform: translateY(0) scale(1);
+}
+
+/* Lateral reveal (right column slides in from the right) */
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.9s ease-out 200ms, transform 0.9s ease-out 200ms;
+}
+.reveal-root[data-visible="true"] .reveal-right {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Benefits highlight card entrance emphasis */
+.reveal-root[data-visible="true"] .benefit-highlight {
+  animation: benefit-pop 0.7s ease-out 200ms both;
+}
+@keyframes benefit-pop {
+  0% { transform: translateY(-0.5rem) scale(0.95); }
+  100% { transform: translateY(-0.5rem) scale(1); }
+}
+
+/* Phone mockup — Menu de Conteúdos */
+.phone-glow {
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.35),
+    0 0 0 1px color-mix(in oklab, var(--gold) 25%, transparent),
+    0 0 40px -4px color-mix(in oklab, var(--gold) 35%, transparent);
+}
+@keyframes phone-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.85); }
+}
+.phone-live {
+  animation: phone-live-pulse 1.6s ease-in-out infinite;
+}
+@keyframes phone-progress-fill {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+.phone-progress {
+  animation: phone-progress-fill 2500ms linear forwards;
+}
+
+/* Media section — phone flow stagger */
+@keyframes media-phone-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.media-phone-stagger {
+  opacity: 0;
+  animation: media-phone-rise 0.6s ease-out forwards;
+}
+
+
+
+/* Points map — dot entrance + halo pulse */
+@keyframes point-appear {
+  from { opacity: 0; transform: scale(0.2); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.point-dot {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: point-appear 0.4s ease-out forwards;
+}
+@keyframes point-halo {
+  0%, 100% { transform: scale(1); opacity: 0.35; }
+  50%      { transform: scale(1.8); opacity: 0; }
+}
+.point-pulse {
+  transform-box: fill-box;
+  animation: point-halo 3s ease-out infinite;
+}
+
+/* Coverage map — pin radar-pop entrance + continuous pulse halo */
+@keyframes pin-pop {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.pin-pop {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+  animation: pin-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-play-state: paused;
+}
+.reveal-root[data-visible="true"] .pin-pop {
+  animation-play-state: running;
+}
+@keyframes pin-halo {
+  0%   { transform: scale(1); opacity: 0.45; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.pin-halo {
+  animation: pin-halo 2.4s ease-out infinite;
+}
+
+/* Gallery — card stagger entrance */
+@keyframes gallery-card-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.gallery-card {
+  animation: gallery-card-enter 0.6s ease-out both;
+  animation-play-state: paused;
+}
+.reveal-root[data-visible="true"] .gallery-card {
+  animation-play-state: running;
+}
