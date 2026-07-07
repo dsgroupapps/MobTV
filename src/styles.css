@@ -298,6 +298,20 @@
   animation: pin-halo 2.4s ease-out infinite;
 }
 
+/* Onde Estamos — infinite low-key ticker */
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: marquee-scroll 42s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
 /* Gallery — card stagger entrance */
 @keyframes gallery-card-enter {
   from { opacity: 0; transform: translateY(18px); }

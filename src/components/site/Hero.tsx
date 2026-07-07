@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 export function Hero() {
   // raios crescentes, opacidade decrescente, cores alternando
   const arcs = [
@@ -64,39 +66,35 @@ export function Hero() {
 
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         <div className="max-w-3xl">
-          <div className="hero-stagger hero-stagger-1 font-mono text-xs uppercase tracking-[0.3em] text-gold mb-6">
-            / INÍCIO
-          </div>
-
-          <h1 className="hero-stagger hero-stagger-2 font-display font-bold text-white text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
-            <span className="text-gold">+10 milhões</span> de impactos por mês em{" "}
+          <h1 className="hero-stagger hero-stagger-1 font-display font-bold text-white text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
+            <span className="text-gold">+15 milhões</span> de impactos por mês em{" "}
             <span className="text-gold">WiFi</span>,{" "}
             <span className="text-gold">DOOH</span> e{" "}
             <span className="text-gold">Painéis LED</span> no DF
           </h1>
 
-          <p className="hero-stagger hero-stagger-3 mt-6 text-lg sm:text-xl text-off-white/70 max-w-2xl leading-relaxed">
+          <p className="hero-stagger hero-stagger-2 mt-6 text-lg sm:text-xl text-off-white/70 max-w-2xl leading-relaxed">
             A maior cobertura indoor do Distrito Federal — auditada e em tempo real.
           </p>
 
-          <div className="hero-stagger hero-stagger-4 mt-10 flex flex-wrap items-center gap-4">
-            <a href="#rede" className="btn-primary">
+          <div className="hero-stagger hero-stagger-3 mt-10 flex flex-wrap items-center gap-4">
+            <Link to="/rede" className="btn-primary">
               Mapa de Cobertura
-            </a>
-            <a
-              href="#contato"
+            </Link>
+            <Link
+              to="/contato"
               className="inline-flex items-center justify-center bg-transparent text-gold border border-gold rounded-lg px-6 py-3 font-semibold transition-colors hover:bg-gold hover:text-navy"
             >
               Anuncie Agora
-            </a>
+            </Link>
           </div>
 
-          <div className="hero-stagger hero-stagger-5 mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-sm text-off-white/60">
+          <div className="hero-stagger hero-stagger-4 mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-sm text-off-white/60">
             <span>53 pontos</span>
             <span className="h-3 w-px bg-off-white/25" />
             <span>16 cidades do DF</span>
             <span className="h-3 w-px bg-off-white/25" />
-            <span>39 telas / 27 locais</span>
+            <span>+15 milhões de impactos/mês</span>
           </div>
         </div>
       </div>
