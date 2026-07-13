@@ -287,6 +287,23 @@
   animation: pin-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   animation-play-state: paused;
 }
+/* Scale-only entrance (no translate) — for elements whose position is already
+   set via an inline transform, so the animation doesn't clobber it (a running
+   CSS animation on `transform` always overrides any other value for that
+   element, inline style included). */
+@keyframes pin-pop-scale {
+  from { opacity: 0; transform: scale(0); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.pin-pop-scale {
+  opacity: 0;
+  transform: scale(0);
+  animation: pin-pop-scale 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-play-state: paused;
+}
+.reveal-root[data-visible="true"] .pin-pop-scale {
+  animation-play-state: running;
+}
 .reveal-root[data-visible="true"] .pin-pop {
   animation-play-state: running;
 }
