@@ -12,25 +12,76 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+// Arcos de sinal — mesmo motivo usado em Hero.tsx, reduzido para uma versão
+// discreta de fundo nas telas utilitárias (404 / erro).
+function SignalArcs() {
+  const arcs = [
+    { r: 150, color: "#F2B705", opacity: 0.22, delay: 0 },
+    { r: 280, color: "#2DD4BF", opacity: 0.16, delay: 1 },
+    { r: 420, color: "#F2B705", opacity: 0.1, delay: 2 },
+  ];
+  const arcFraction = 140 / 360;
+
+  return (
+    <svg
+      aria-hidden
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      style={{ overflow: "visible" }}
+    >
+      {arcs.map((a, i) => {
+        const circ = 2 * Math.PI * a.r;
+        const arcLen = circ * arcFraction;
+        return (
+          <circle
+            key={i}
+            cx="95%"
+            cy="-5%"
+            r={a.r}
+            fill="none"
+            stroke={a.color}
+            strokeWidth={1.25}
+            strokeLinecap="round"
+            strokeDasharray={`${arcLen} ${circ - arcLen}`}
+            strokeDashoffset={-circ * 0.25}
+            strokeOpacity={a.opacity}
+            style={{
+              transformBox: "fill-box",
+              transformOrigin: "center",
+              animation: `signal-pulse 7s ease-in-out ${a.delay}s infinite`,
+            }}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function UtilityPageShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy px-6 text-off-white">
+      <SignalArcs />
+      <div className="relative z-10 max-w-md text-center">{children}</div>
+    </div>
+  );
+}
+
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+    <UtilityPageShell>
+      <div className="font-mono text-sm tracking-widest text-gold">/ ERRO 404</div>
+      <h1 className="mt-4 font-display text-7xl font-bold text-white">404</h1>
+      <h2 className="mt-4 font-display text-xl font-semibold text-off-white">
+        Página não encontrada
+      </h2>
+      <p className="mt-2 text-sm text-off-white/70">
+        A página que você procura não existe ou foi movida.
+      </p>
+      <div className="mt-8">
+        <Link to="/" className="btn-primary">
+          Voltar para a Home
+        </Link>
       </div>
-    </div>
+    </UtilityPageShell>
   );
 }
 
@@ -42,33 +93,32 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Try again
-          </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
-          >
-            Go home
-          </a>
-        </div>
+    <UtilityPageShell>
+      <div className="font-mono text-sm tracking-widest text-gold">/ ERRO</div>
+      <h1 className="mt-4 font-display text-xl font-semibold text-white">
+        Essa página não carregou
+      </h1>
+      <p className="mt-2 text-sm text-off-white/70">
+        Algo deu errado do nosso lado. Você pode tentar novamente ou voltar para o início.
+      </p>
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <button
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
+          className="btn-primary"
+        >
+          Tentar novamente
+        </button>
+        <a
+          href="/"
+          className="inline-flex items-center justify-center bg-transparent text-gold border border-gold rounded-lg px-6 py-3 font-semibold transition-colors hover:bg-gold hover:text-navy"
+        >
+          Voltar ao início
+        </a>
       </div>
-    </div>
+    </UtilityPageShell>
   );
 }
 
@@ -80,10 +130,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "MOBTV — Mídia DOOH + WiFi Ads no Distrito Federal" },
       { name: "description", content: "Rede de mídia DOOH e WiFi Ads no Distrito Federal." },
       { name: "author", content: "MOBTV" },
-      { property: "og:title", content: "MOBTV — Mídia DOOH + WiFi Ads no DF" },
+      { property: "og:title", content: "MOBTV — Mídia DOOH + WiFi Ads no Distrito Federal" },
       { property: "og:description", content: "Rede de mídia DOOH e WiFi Ads no Distrito Federal." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
+      { property: "og:locale", content: "pt_BR" },
+      { property: "og:image", content: "/og-image.jpg" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "MOBTV — Mídia DOOH + WiFi Ads no Distrito Federal" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "MOBTV — Mídia DOOH + WiFi Ads no Distrito Federal" },
+      {
+        name: "twitter:description",
+        content: "Rede de mídia DOOH e WiFi Ads no Distrito Federal.",
+      },
+      { name: "twitter:image", content: "/og-image.jpg" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -93,6 +154,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
       },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+      { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/favicon-192.png" },
+      { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -103,7 +168,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>

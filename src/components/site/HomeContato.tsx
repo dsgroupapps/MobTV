@@ -5,11 +5,7 @@ export function HomeContato() {
   const { ref, visible } = useReveal<HTMLElement>({ threshold: 0.15 });
 
   return (
-    <section
-      ref={ref}
-      data-visible={visible}
-      className="reveal-root bg-navy py-20 md:py-28 px-6"
-    >
+    <section ref={ref} data-visible={visible} className="reveal-root bg-navy py-20 md:py-28 px-6">
       <div className="max-w-3xl mx-auto text-center">
         <p className="reveal reveal-1 font-mono text-sm text-gold tracking-widest mb-4">
           / CONTATO
@@ -22,9 +18,10 @@ export function HomeContato() {
         </p>
         <div className="reveal reveal-4 flex flex-col items-center gap-5">
           <a
-            href="#"
+            href="https://wa.me/5561992590234"
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn-primary text-base md:text-lg px-8 py-4"
-            // TODO: link real — substituir por https://wa.me/5561992590234
           >
             Anuncie Agora
           </a>

@@ -1,11 +1,12 @@
 import { useReveal } from "@/hooks/useReveal";
 import phoneWifi from "@/assets/about-phone-wifi.jpg";
+import { marketProfile } from "@/data/mobtv-data";
 
 const stats = [
-  { value: "R$ 328,8 bi", label: "PIB do Distrito Federal" },
-  { value: "Maior", label: "renda per capita do país" },
-  { value: "~3 milhões", label: "de habitantes" },
-  { value: "Serviços", label: "setor econômico predominante" },
+  { value: marketProfile.pib, label: "PIB do Distrito Federal" },
+  { value: marketProfile.incomeRanking, label: "renda per capita do país" },
+  { value: marketProfile.population, label: "de habitantes" },
+  { value: marketProfile.economySector, label: "setor econômico predominante" },
 ];
 
 export function About() {
@@ -30,13 +31,11 @@ export function About() {
           </h2>
 
           <p className="reveal reveal-3 mt-6 text-ink-soft text-base sm:text-lg leading-relaxed max-w-2xl">
-            A MOBTV atua em Brasília no mercado de comunicação digital e
-            opera a maior rede de WiFi e DOOH do Distrito Federal,
-            por intermédio do programa WiFi Social do GDF. Com anos de
-            experiência em mídia digital embarcada em ônibus — monitores e
-            redes WiFi — desenvolvemos sistemas e tecnologias próprias que
-            impulsionam a inovação no setor. Tecnologia de ponta e
-            qualidade são a nossa marca.
+            A MOBTV atua em Brasília no mercado de comunicação digital e opera a maior rede de WiFi
+            e DOOH do Distrito Federal, por intermédio do programa WiFi Social do GDF. Com anos de
+            experiência em mídia digital embarcada em ônibus — monitores e redes WiFi —
+            desenvolvemos sistemas e tecnologias próprias que impulsionam a inovação no setor.
+            Tecnologia de ponta e qualidade são a nossa marca.
           </p>
 
           <div className="reveal reveal-4 mt-8">
@@ -60,9 +59,7 @@ export function About() {
                   <div className="font-mono text-2xl sm:text-3xl text-gold leading-none">
                     {s.value}
                   </div>
-                  <div className="mt-2 text-sm text-off-white/70 leading-snug">
-                    {s.label}
-                  </div>
+                  <div className="mt-2 text-sm text-off-white/70 leading-snug">{s.label}</div>
                 </div>
               ))}
             </div>

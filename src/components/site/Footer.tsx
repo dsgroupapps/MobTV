@@ -10,11 +10,15 @@ function WhatsAppIcon({ size = 16 }: { size?: number }) {
 
 export function Footer() {
   const socialLinks = [
-    { Icon: Instagram, label: "Instagram" },
-    { Icon: Facebook, label: "Facebook" },
-    { Icon: Linkedin, label: "LinkedIn" },
-    { Icon: MapPin, label: "Google Maps" },
-    { Icon: WhatsAppIcon, label: "WhatsApp", isSvg: true },
+    // TODO: link real — substituir pelo link do Instagram
+    { Icon: Instagram, label: "Instagram", href: "#" },
+    // TODO: link real — substituir pelo link do Facebook
+    { Icon: Facebook, label: "Facebook", href: "#" },
+    // TODO: link real — substituir pelo link do LinkedIn
+    { Icon: Linkedin, label: "LinkedIn", href: "#" },
+    // TODO: link real — substituir pelo link do Google Maps
+    { Icon: MapPin, label: "Google Maps", href: "#" },
+    { Icon: WhatsAppIcon, label: "WhatsApp", href: "https://wa.me/5561992590234", isSvg: true },
   ];
 
   return (
@@ -27,17 +31,20 @@ export function Footer() {
 
         {/* Social icons */}
         <div className="flex items-center gap-3">
-          {socialLinks.map(({ Icon, label, isSvg }) => (
-            <a
-              key={label}
-              href="#"
-              className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-navy hover:border-gold transition-colors duration-200"
-              aria-label={label}
-              // TODO: link real — substituir pelo link do {label}
-            >
-              {isSvg ? <Icon size={18} /> : <Icon size={18} />}
-            </a>
-          ))}
+          {socialLinks.map(({ Icon, label, href, isSvg }) => {
+            const isRealLink = href !== "#";
+            return (
+              <a
+                key={label}
+                href={href}
+                {...(isRealLink ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-navy hover:border-gold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                aria-label={label}
+              >
+                {isSvg ? <Icon size={18} /> : <Icon size={18} />}
+              </a>
+            );
+          })}
         </div>
 
         {/* Copyright */}

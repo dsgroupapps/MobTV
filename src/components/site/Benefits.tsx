@@ -20,6 +20,7 @@ import {
   BatteryMedium,
 } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
+import { wifiAdsEfficiency, costComparison } from "@/data/mobtv-data";
 
 const perks = [
   { icon: KeyRound, label: "Sem Senha" },
@@ -32,7 +33,7 @@ const perks = [
 const efficiency = [
   {
     icon: Eye,
-    metric: "100%",
+    metric: wifiAdsEfficiency.viewability,
     title: "Viewability",
     desc: "Só são computados engajamentos entregues 100%.",
   },
@@ -50,46 +51,29 @@ const efficiency = [
   },
   {
     icon: MousePointerClick,
-    metric: ">65%",
+    metric: wifiAdsEfficiency.ctr,
     title: "CTR",
-    desc: "Muito acima da média de mercado: 2,7% em vídeo e 0,4% em banner.",
+    desc: `Muito acima da média de mercado: ${wifiAdsEfficiency.ctrBenchmarkVideo} em vídeo e ${wifiAdsEfficiency.ctrBenchmarkBanner} em banner.`,
   },
 ];
 
-const compare = [
-  {
-    name: "Banner Display",
-    kpi: "CPM",
-    kpiValue: "R$ 25,00",
-    conv: "0,04%",
-    invest: "R$ 62.500,00",
-    highlight: false,
-  },
-  {
-    name: "Video Ads",
-    kpi: "CPM",
-    kpiValue: "R$ 250,00",
-    conv: "2,7%",
-    invest: "R$ 9.259,26",
-    highlight: false,
-  },
-  {
-    name: "Wi-Fi Ads MOBTV",
-    kpi: "CPE",
-    kpiValue: "R$ 8,00",
-    conv: "100%",
-    invest: "R$ 8.000,00",
-    highlight: true,
-  },
-];
+const compare = costComparison;
 
 const categories = [
   { icon: Smile, title: "Humor", desc: "Vídeos de humor para descontrair." },
   { icon: Trophy, title: "Esportes", desc: "Últimas notícias, jogadas e curiosidades." },
-  { icon: GraduationCap, title: "Educação e Trabalho", desc: "Conteúdo para estudar e se preparar para o mercado." },
+  {
+    icon: GraduationCap,
+    title: "Educação e Trabalho",
+    desc: "Conteúdo para estudar e se preparar para o mercado.",
+  },
   { icon: HeartPulse, title: "Saúde e Beleza", desc: "Dicas para melhorar a qualidade de vida." },
   { icon: Film, title: "Entretenimento", desc: "Filmes, séries e muito mais." },
-  { icon: Sparkles, title: "Personalizado", desc: "Menu sob medida para a necessidade do cliente." },
+  {
+    icon: Sparkles,
+    title: "Personalizado",
+    desc: "Menu sob medida para a necessidade do cliente.",
+  },
 ];
 
 const SLIDE_MS = 2500;
@@ -110,7 +94,6 @@ export function Benefits() {
     return () => window.clearInterval(id);
   }, []);
 
-
   return (
     <section
       id="beneficios"
@@ -118,11 +101,7 @@ export function Benefits() {
     >
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
-        <div
-          ref={header.ref}
-          data-visible={header.visible}
-          className="reveal-root max-w-3xl"
-        >
+        <div ref={header.ref} data-visible={header.visible} className="reveal-root max-w-3xl">
           <p className="reveal reveal-1 font-mono text-xs tracking-widest text-[var(--gold-deep)]">
             / BENEFÍCIOS
           </p>
@@ -130,18 +109,13 @@ export function Benefits() {
             Uma rede de benefícios
           </h2>
           <p className="reveal reveal-3 mt-5 text-lg text-[var(--ink-soft)] leading-relaxed">
-            Não basta conectar a população a um WiFi de qualidade. Antes da
-            conexão, a pessoa é impactada por três telas — processo que
-            chamamos de conexão de engajamento.
+            Não basta conectar a população a um WiFi de qualidade. Antes da conexão, a pessoa é
+            impactada por três telas — processo que chamamos de conexão de engajamento.
           </p>
         </div>
 
         {/* Block 1 — 5 perks strip */}
-        <div
-          ref={block1.ref}
-          data-visible={block1.visible}
-          className="reveal-root mt-16"
-        >
+        <div ref={block1.ref} data-visible={block1.visible} className="reveal-root mt-16">
           <div className="flex flex-wrap items-center justify-between gap-y-8 rounded-2xl bg-white border border-black/5 shadow-sm px-6 py-8">
             {perks.map((p, i) => {
               const Icon = p.icon;
@@ -153,9 +127,7 @@ export function Benefits() {
                   <div className="w-14 h-14 rounded-full bg-white border border-[var(--gold)]/40 flex items-center justify-center shadow-sm">
                     <Icon className="w-6 h-6 text-[var(--gold-deep)]" />
                   </div>
-                  <span className="mt-3 font-medium text-[var(--ink)]">
-                    {p.label}
-                  </span>
+                  <span className="mt-3 font-medium text-[var(--ink)]">{p.label}</span>
                   {i < perks.length - 1 && (
                     <span className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 h-10 w-px bg-black/10" />
                   )}
@@ -166,11 +138,7 @@ export function Benefits() {
         </div>
 
         {/* Block 2 — Efficiency cards */}
-        <div
-          ref={block2.ref}
-          data-visible={block2.visible}
-          className="reveal-root mt-20"
-        >
+        <div ref={block2.ref} data-visible={block2.visible} className="reveal-root mt-20">
           <h3 className="reveal reveal-1 font-display text-2xl md:text-3xl font-semibold text-[var(--ink)]">
             Eficiência acima da média
           </h3>
@@ -189,9 +157,7 @@ export function Benefits() {
                   <div className="mt-1 font-mono text-xs uppercase tracking-wider text-[var(--ink-soft)]">
                     {c.title}
                   </div>
-                  <p className="mt-3 text-sm text-[var(--ink-soft)] leading-relaxed">
-                    {c.desc}
-                  </p>
+                  <p className="mt-3 text-sm text-[var(--ink-soft)] leading-relaxed">{c.desc}</p>
                 </div>
               );
             })}
@@ -199,11 +165,7 @@ export function Benefits() {
         </div>
 
         {/* Block 3 — Cost comparison */}
-        <div
-          ref={block3.ref}
-          data-visible={block3.visible}
-          className="reveal-root mt-20"
-        >
+        <div ref={block3.ref} data-visible={block3.visible} className="reveal-root mt-20">
           <h3 className="reveal reveal-1 font-display text-2xl md:text-3xl font-semibold text-[var(--ink)]">
             Compare o custo x benefício
           </h3>
@@ -222,25 +184,19 @@ export function Benefits() {
                     Melhor custo-benefício
                   </div>
                 )}
-                <div className="font-display font-semibold text-xl text-[var(--ink)]">
-                  {c.name}
-                </div>
+                <div className="font-display font-semibold text-xl text-[var(--ink)]">{c.name}</div>
                 <dl className="mt-6 space-y-4 flex-1">
                   <div className="flex items-baseline justify-between border-b border-black/5 pb-3">
                     <dt className="font-mono text-xs uppercase tracking-wider text-[var(--ink-soft)]">
                       {c.kpi}
                     </dt>
-                    <dd className="font-mono text-lg text-[var(--ink)]">
-                      {c.kpiValue}
-                    </dd>
+                    <dd className="font-mono text-lg text-[var(--ink)]">{c.kpiValue}</dd>
                   </div>
                   <div className="flex items-baseline justify-between border-b border-black/5 pb-3">
                     <dt className="font-mono text-xs uppercase tracking-wider text-[var(--ink-soft)]">
                       Conversão
                     </dt>
-                    <dd className="font-mono text-lg text-[var(--ink)]">
-                      {c.conv}
-                    </dd>
+                    <dd className="font-mono text-lg text-[var(--ink)]">{c.conv}</dd>
                   </div>
                   <div>
                     <dt className="font-mono text-xs uppercase tracking-wider text-[var(--ink-soft)]">
@@ -261,11 +217,7 @@ export function Benefits() {
         </div>
 
         {/* Block 4 — Menu de Conteúdos */}
-        <div
-          ref={block4.ref}
-          data-visible={block4.visible}
-          className="reveal-root mt-24"
-        >
+        <div ref={block4.ref} data-visible={block4.visible} className="reveal-root mt-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Phone mockup */}
             <div className="reveal reveal-1 lg:col-span-5 flex justify-center">
@@ -279,9 +231,7 @@ export function Benefits() {
                 <div className="relative w-full h-full rounded-[2.4rem] bg-gradient-to-br from-[var(--navy)] to-[var(--indigo)] overflow-hidden">
                   {/* Fake status bar */}
                   <div className="absolute top-0 left-0 right-0 h-8 px-6 pt-2 flex items-center justify-between text-[var(--off-white)]/70 z-10">
-                    <span className="font-mono text-[10px] tracking-wider">
-                      9:41
-                    </span>
+                    <span className="font-mono text-[10px] tracking-wider">9:41</span>
                     <div className="flex items-center gap-1">
                       <Signal className="w-3 h-3" />
                       <Wifi className="w-3 h-3" />
@@ -320,7 +270,8 @@ export function Benefits() {
                             {c.title}
                           </div>
                           <div className="mt-2 font-mono text-[10px] tracking-wider text-[var(--off-white)]/50">
-                            {String(i + 1).padStart(2, "0")} / {String(categories.length).padStart(2, "0")}
+                            {String(i + 1).padStart(2, "0")} /{" "}
+                            {String(categories.length).padStart(2, "0")}
                           </div>
                         </div>
                       );
@@ -329,10 +280,7 @@ export function Benefits() {
 
                   {/* Progress bar */}
                   <div className="absolute bottom-4 left-6 right-6 h-1 rounded-full bg-white/10 overflow-hidden">
-                    <div
-                      key={activeIdx}
-                      className="h-full bg-[var(--gold)] phone-progress"
-                    />
+                    <div key={activeIdx} className="h-full bg-[var(--gold)] phone-progress" />
                   </div>
                 </div>
               </div>
@@ -341,10 +289,9 @@ export function Benefits() {
             {/* Right column: intro + grid */}
             <div className="lg:col-span-7">
               <p className="reveal reveal-2 text-lg text-[var(--ink-soft)] leading-relaxed">
-                A MOBTV conta com exclusividade de um Menu de Conteúdos — um
-                canal multiplataforma com entretenimento, humor, esportes,
-                saúde e educação. Também é possível desenvolver um menu 100%
-                personalizado de acordo com a necessidade de cada cliente.
+                A MOBTV conta com exclusividade de um Menu de Conteúdos — um canal multiplataforma
+                com entretenimento, humor, esportes, saúde e educação. Também é possível desenvolver
+                um menu 100% personalizado de acordo com a necessidade de cada cliente.
               </p>
               <div className="reveal reveal-3 mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map((c, i) => {
@@ -371,9 +318,7 @@ export function Benefits() {
                       <div className="mt-3 font-display font-semibold text-[var(--ink)]">
                         {c.title}
                       </div>
-                      <p className="mt-1 text-sm text-[var(--ink-soft)]">
-                        {c.desc}
-                      </p>
+                      <p className="mt-1 text-sm text-[var(--ink-soft)]">{c.desc}</p>
                     </div>
                   );
                 })}

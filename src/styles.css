@@ -92,6 +92,21 @@
     scroll-behavior: smooth;
   }
 
+  /* Respeita a preferência de movimento reduzido do sistema operacional:
+     achata toda animação/transição (arcos de sinal, halos do mapa, pulso do
+     CTA flutuante, reveals de scroll, marquee etc.) para o estado final,
+     quase instantaneamente, sem precisar listar cada animação uma a uma. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -99,7 +114,12 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
     font-weight: 700;
     letter-spacing: -0.01em;
@@ -116,7 +136,9 @@
   font-weight: 600;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
   &:hover {
     background-color: var(--gold-deep);
   }
@@ -133,7 +155,9 @@
   font-weight: 600;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
   &:hover {
     background-color: var(--gold);
     color: var(--navy);
@@ -141,7 +165,8 @@
 }
 
 @keyframes mobtv-pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 color-mix(in oklab, var(--red) 70%, transparent);
   }
   50% {
@@ -155,7 +180,8 @@
 
 /* Signal-wave pulse */
 @keyframes signal-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
@@ -167,33 +193,59 @@
 
 /* Hero entrance stagger */
 @keyframes hero-rise {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .hero-stagger {
   opacity: 0;
   animation: hero-rise 0.7s ease-out forwards;
 }
-.hero-stagger-1 { animation-delay: 0ms; }
-.hero-stagger-2 { animation-delay: 90ms; }
-.hero-stagger-3 { animation-delay: 180ms; }
-.hero-stagger-4 { animation-delay: 270ms; }
-.hero-stagger-5 { animation-delay: 360ms; }
+.hero-stagger-1 {
+  animation-delay: 0ms;
+}
+.hero-stagger-2 {
+  animation-delay: 90ms;
+}
+.hero-stagger-3 {
+  animation-delay: 180ms;
+}
+.hero-stagger-4 {
+  animation-delay: 270ms;
+}
+.hero-stagger-5 {
+  animation-delay: 360ms;
+}
 
 /* Scroll-reveal (stagger fade+slide) */
 .reveal {
   opacity: 0;
   transform: translateY(18px);
-  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s ease-out;
 }
 .reveal-root[data-visible="true"] .reveal {
   opacity: 1;
   transform: translateY(0);
 }
-.reveal-root[data-visible="true"] .reveal-1 { transition-delay: 0ms; }
-.reveal-root[data-visible="true"] .reveal-2 { transition-delay: 80ms; }
-.reveal-root[data-visible="true"] .reveal-3 { transition-delay: 160ms; }
-.reveal-root[data-visible="true"] .reveal-4 { transition-delay: 240ms; }
+.reveal-root[data-visible="true"] .reveal-1 {
+  transition-delay: 0ms;
+}
+.reveal-root[data-visible="true"] .reveal-2 {
+  transition-delay: 80ms;
+}
+.reveal-root[data-visible="true"] .reveal-3 {
+  transition-delay: 160ms;
+}
+.reveal-root[data-visible="true"] .reveal-4 {
+  transition-delay: 240ms;
+}
 .reveal-root[data-visible="true"] .reveal-5 {
   transition-delay: 360ms;
   transform: translateY(18px) scale(0.97);
@@ -206,7 +258,9 @@
 .reveal-right {
   opacity: 0;
   transform: translateX(40px);
-  transition: opacity 0.9s ease-out 200ms, transform 0.9s ease-out 200ms;
+  transition:
+    opacity 0.9s ease-out 200ms,
+    transform 0.9s ease-out 200ms;
 }
 .reveal-root[data-visible="true"] .reveal-right {
   opacity: 1;
@@ -218,8 +272,12 @@
   animation: benefit-pop 0.7s ease-out 200ms both;
 }
 @keyframes benefit-pop {
-  0% { transform: translateY(-0.5rem) scale(0.95); }
-  100% { transform: translateY(-0.5rem) scale(1); }
+  0% {
+    transform: translateY(-0.5rem) scale(0.95);
+  }
+  100% {
+    transform: translateY(-0.5rem) scale(1);
+  }
 }
 
 /* Phone mockup — Menu de Conteúdos */
@@ -230,15 +288,26 @@
     0 0 40px -4px color-mix(in oklab, var(--gold) 35%, transparent);
 }
 @keyframes phone-live-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50%      { opacity: 0.35; transform: scale(0.85); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
 }
 .phone-live {
   animation: phone-live-pulse 1.6s ease-in-out infinite;
 }
 @keyframes phone-progress-fill {
-  from { width: 0%; }
-  to   { width: 100%; }
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
 }
 .phone-progress {
   animation: phone-progress-fill 2500ms linear forwards;
@@ -246,20 +315,30 @@
 
 /* Media section — phone flow stagger */
 @keyframes media-phone-rise {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .media-phone-stagger {
   opacity: 0;
   animation: media-phone-rise 0.6s ease-out forwards;
 }
 
-
-
 /* Points map — dot entrance + halo pulse */
 @keyframes point-appear {
-  from { opacity: 0; transform: scale(0.2); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .point-dot {
   opacity: 0;
@@ -268,8 +347,15 @@
   animation: point-appear 0.4s ease-out forwards;
 }
 @keyframes point-halo {
-  0%, 100% { transform: scale(1); opacity: 0.35; }
-  50%      { transform: scale(1.8); opacity: 0; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
 }
 .point-pulse {
   transform-box: fill-box;
@@ -278,8 +364,14 @@
 
 /* Coverage map — pin radar-pop entrance + continuous pulse halo */
 @keyframes pin-pop {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 .pin-pop {
   opacity: 0;
@@ -292,8 +384,14 @@
    CSS animation on `transform` always overrides any other value for that
    element, inline style included). */
 @keyframes pin-pop-scale {
-  from { opacity: 0; transform: scale(0); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .pin-pop-scale {
   opacity: 0;
@@ -308,8 +406,14 @@
   animation-play-state: running;
 }
 @keyframes pin-halo {
-  0%   { transform: scale(1); opacity: 0.45; }
-  100% { transform: scale(2.2); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
 }
 .pin-halo {
   animation: pin-halo 2.4s ease-out infinite;
@@ -317,8 +421,12 @@
 
 /* Onde Estamos — infinite low-key ticker */
 @keyframes marquee-scroll {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 .marquee-track {
   animation: marquee-scroll 42s linear infinite;
@@ -331,8 +439,14 @@
 
 /* Gallery — card stagger entrance */
 @keyframes gallery-card-enter {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .gallery-card {
   animation: gallery-card-enter 0.6s ease-out both;

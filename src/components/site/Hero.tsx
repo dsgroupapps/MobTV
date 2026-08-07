@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { approxReach, networkFootprint } from "@/data/mobtv-data";
 
 export function Hero() {
   // raios crescentes, opacidade decrescente, cores alternando
@@ -67,10 +68,10 @@ export function Hero() {
       <div className="relative z-10 max-w-7xl mx-auto w-full">
         <div className="max-w-3xl">
           <h1 className="hero-stagger hero-stagger-1 font-display font-bold text-white text-4xl sm:text-5xl lg:text-6xl leading-[1.05] tracking-tight">
-            <span className="text-gold">+15 milhões</span> de impactos por mês em{" "}
-            <span className="text-gold">WiFi</span>,{" "}
-            <span className="text-gold">DOOH</span> e{" "}
-            <span className="text-gold">Painéis LED</span> no DF
+            <span className="text-gold">+{approxReach.combinedMillions} milhões</span> de impactos
+            por mês em <span className="text-gold">WiFi</span>,{" "}
+            <span className="text-gold">DOOH</span> e <span className="text-gold">Painéis LED</span>{" "}
+            no DF
           </h1>
 
           <p className="hero-stagger hero-stagger-2 mt-6 text-lg sm:text-xl text-off-white/70 max-w-2xl leading-relaxed">
@@ -90,11 +91,11 @@ export function Hero() {
           </div>
 
           <div className="hero-stagger hero-stagger-4 mt-12 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-sm text-off-white/60">
-            <span>53 pontos</span>
+            <span>{networkFootprint.points} pontos</span>
             <span className="h-3 w-px bg-off-white/25" />
-            <span>16 cidades do DF</span>
+            <span>{networkFootprint.cities} cidades do DF</span>
             <span className="h-3 w-px bg-off-white/25" />
-            <span>+15 milhões de impactos/mês</span>
+            <span>+{approxReach.combinedMillions} milhões de impactos/mês</span>
           </div>
         </div>
       </div>

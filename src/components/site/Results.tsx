@@ -1,6 +1,14 @@
 import { useReveal } from "@/hooks/useReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import { ShoppingBag, GraduationCap, HeartPulse } from "lucide-react";
+import {
+  auditedImpacts,
+  networkFootprint,
+  approxReach,
+  ledNetwork,
+  audienceProfile,
+  consumerResearch,
+} from "@/data/mobtv-data";
 
 function formatBR(n: number) {
   return n.toLocaleString("pt-BR");
@@ -8,7 +16,7 @@ function formatBR(n: number) {
 
 function HeadlineNumber() {
   const { ref, visible } = useReveal<HTMLDivElement>({ threshold: 0.3 });
-  const value = useCountUp(11986541, visible, 1800);
+  const value = useCountUp(auditedImpacts.value, visible, 1800);
   return (
     <div ref={ref} className="text-center">
       <div
@@ -61,24 +69,32 @@ function StatCard({
 function StatsGrid() {
   const { ref, visible } = useReveal<HTMLDivElement>({ threshold: 0.2 });
   return (
-    <div
-      ref={ref}
-      className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5"
-    >
-      <StatCard value={53} label="pontos de cobertura" delay={0} visible={visible} />
-      <StatCard value={16} label="cidades do Distrito Federal" delay={120} visible={visible} />
+    <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
       <StatCard
-        value={39}
+        value={networkFootprint.points}
+        label="pontos de cobertura"
+        delay={0}
+        visible={visible}
+      />
+      <StatCard
+        value={networkFootprint.cities}
+        label="cidades do Distrito Federal"
+        delay={120}
+        visible={visible}
+      />
+      <StatCard
+        value={ledNetwork.screens}
         label={
           <>
-            telas · <span className="font-mono text-gold">27</span> locais com monitores e painéis LED
+            telas · <span className="font-mono text-gold">{ledNetwork.locations}</span> locais com
+            monitores e painéis LED
           </>
         }
         delay={240}
         visible={visible}
       />
       <StatCard
-        value={3.5}
+        value={approxReach.wifiOnlyMillions}
         prefix="+"
         suffix=" mi"
         label="impactos mensais só na rede WiFi Ads"
@@ -131,7 +147,9 @@ function AudienceCol({
       <h3 className="font-display text-xl md:text-2xl text-off-white">{title}</h3>
       <dl className="mt-5 space-y-5 text-sm">
         <div>
-          <dt className="font-mono text-xs uppercase tracking-wider text-gold/80">Faixa etária predominante</dt>
+          <dt className="font-mono text-xs uppercase tracking-wider text-gold/80">
+            Faixa etária predominante
+          </dt>
           <dd className="mt-1 text-off-white/85">{age}</dd>
         </div>
         <div>
@@ -141,11 +159,15 @@ function AudienceCol({
           </dd>
         </div>
         <div>
-          <dt className="font-mono text-xs uppercase tracking-wider text-gold/80">Tempo médio de permanência</dt>
+          <dt className="font-mono text-xs uppercase tracking-wider text-gold/80">
+            Tempo médio de permanência
+          </dt>
           <dd className="mt-1 text-off-white/85">{time}</dd>
         </div>
         <div>
-          <dt className="font-mono text-xs uppercase tracking-wider text-gold/80">Categorias de consumo</dt>
+          <dt className="font-mono text-xs uppercase tracking-wider text-gold/80">
+            Categorias de consumo
+          </dt>
           <dd className="mt-1 text-off-white/85">{cats}</dd>
         </div>
       </dl>
@@ -215,11 +237,7 @@ export function Results() {
 
       <div className="relative mx-auto max-w-7xl px-6">
         {/* Header */}
-        <div
-          ref={header.ref}
-          data-visible={header.visible}
-          className="reveal-root max-w-3xl"
-        >
+        <div ref={header.ref} data-visible={header.visible} className="reveal-root max-w-3xl">
           <div className="reveal reveal-1 font-mono text-sm text-gold tracking-wider">
             / RESULTADOS
           </div>
@@ -227,19 +245,15 @@ export function Results() {
             Não é estimativa. É auditado.
           </h2>
           <p className="reveal reveal-3 mt-5 text-off-white/70 text-base md:text-lg leading-relaxed">
-            Os impactos da MOBTV são auditados pela Datavisiooh, empresa especializada em
-            ciência de dados para o mercado publicitário. Câmeras instaladas nos painéis,
-            associadas a Inteligência Artificial, fazem a contagem real de impactos e
-            identificam perfil de faixa etária e sexo da audiência.
+            Os impactos da MOBTV são auditados pela Datavisiooh, empresa especializada em ciência de
+            dados para o mercado publicitário. Câmeras instaladas nos painéis, associadas a
+            Inteligência Artificial, fazem a contagem real de impactos e identificam perfil de faixa
+            etária e sexo da audiência.
           </p>
         </div>
 
         {/* Block 1 — headline number */}
-        <div
-          ref={block1.ref}
-          data-visible={block1.visible}
-          className="reveal-root mt-20 md:mt-24"
-        >
+        <div ref={block1.ref} data-visible={block1.visible} className="reveal-root mt-20 md:mt-24">
           <div className="reveal reveal-1">
             <HeadlineNumber />
           </div>
@@ -251,11 +265,7 @@ export function Results() {
         </div>
 
         {/* Block 3 — audience profile */}
-        <div
-          ref={block3.ref}
-          data-visible={block3.visible}
-          className="reveal-root mt-20 md:mt-24"
-        >
+        <div ref={block3.ref} data-visible={block3.visible} className="reveal-root mt-20 md:mt-24">
           <div className="reveal reveal-1 font-mono text-xs uppercase tracking-wider text-gold/80">
             / Perfil de audiência
           </div>
@@ -263,32 +273,28 @@ export function Results() {
             <div className="reveal reveal-2">
               <AudienceCol
                 title="Metrô e BRT"
-                age="18 a 45 anos"
-                female={53.4}
-                male={45.4}
-                time="6 a 15 minutos"
-                cats="alimentação rápida, tecnologia, moda, serviços financeiros"
+                age={audienceProfile.metroBrt.age}
+                female={audienceProfile.metroBrt.female}
+                male={audienceProfile.metroBrt.male}
+                time={audienceProfile.metroBrt.dwellTime}
+                cats={audienceProfile.metroBrt.categories}
               />
             </div>
             <div className="reveal reveal-3">
               <AudienceCol
                 title="UPAs e Hospitais"
-                age="25 a 60 anos"
-                female={51}
-                male={49}
-                time="1 hora ou mais"
-                cats="planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros"
+                age={audienceProfile.upasHospitais.age}
+                female={audienceProfile.upasHospitais.female}
+                male={audienceProfile.upasHospitais.male}
+                time={audienceProfile.upasHospitais.dwellTime}
+                cats={audienceProfile.upasHospitais.categories}
               />
             </div>
           </div>
         </div>
 
         {/* Block 4 — consumer research pills */}
-        <div
-          ref={block4.ref}
-          data-visible={block4.visible}
-          className="reveal-root mt-20 md:mt-24"
-        >
+        <div ref={block4.ref} data-visible={block4.visible} className="reveal-root mt-20 md:mt-24">
           <div className="reveal reveal-1 font-mono text-xs uppercase tracking-wider text-gold/80">
             / Pesquisa de consumo
           </div>
@@ -296,22 +302,22 @@ export function Results() {
             <div className="reveal reveal-2">
               <Pill
                 icon={ShoppingBag}
-                value="55,6%"
-                text="planejam comprar eletrônicos de consumo nos próximos meses"
+                value={consumerResearch[0].value}
+                text={consumerResearch[0].text}
               />
             </div>
             <div className="reveal reveal-3">
               <Pill
                 icon={GraduationCap}
-                value="46,9%"
-                text="pretendem fazer faculdade este ano"
+                value={consumerResearch[1].value}
+                text={consumerResearch[1].text}
               />
             </div>
             <div className="reveal reveal-4">
               <Pill
                 icon={HeartPulse}
-                value="38,1%"
-                text="apontam saúde da mulher como tema de saúde mais relevante"
+                value={consumerResearch[2].value}
+                text={consumerResearch[2].text}
               />
             </div>
           </div>
