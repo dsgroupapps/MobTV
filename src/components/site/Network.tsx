@@ -4,6 +4,7 @@ import saudeImg from "@/assets/network-saude.jpg";
 import transportesImg from "@/assets/network-transportes.jpg";
 import servicosImg from "@/assets/network-servicos.jpg";
 import feirasImg from "@/assets/network-feiras.jpg";
+import { environmentMonthlyFlow } from "@/data/mobtv-data";
 
 type Connectivity = "dual" | "wifi";
 
@@ -21,8 +22,8 @@ const cards: {
     icon: HeartPulse,
     title: "Saúde",
     body: "O Distrito Federal possui uma grande rede de atendimento à saúde — hospitais, UPAs e postos da Família, que recebem milhares de pessoas todos os dias. A rede WiFi grátis e DOOH da MOBTV já opera nesses locais, funcionando 24 horas por dia.",
-    number: "250 mil",
-    unit: "pessoas/mês",
+    number: environmentMonthlyFlow.saude.display,
+    unit: environmentMonthlyFlow.saude.unit,
     image: saudeImg,
     connectivity: "dual",
   },
@@ -30,8 +31,8 @@ const cards: {
     icon: Bus,
     title: "Transportes",
     body: "Presente nas rodoviárias, Estações BRT e terminais do Metrô, de onde partem e chegam pessoas de todas as regiões do DF e entorno.",
-    number: "3 milhões",
-    unit: "pessoas/mês",
+    number: environmentMonthlyFlow.transportes.display,
+    unit: environmentMonthlyFlow.transportes.unit,
     image: transportesImg,
     connectivity: "dual",
   },
@@ -39,8 +40,8 @@ const cards: {
     icon: Wifi,
     title: "Serviços",
     body: "Rede de internet de fácil acesso e sem custos através do projeto WiFi Social — presente em Restaurantes Comunitários, Bibliotecas Públicas, SESI Lab e Agências do Na Hora.",
-    number: "90 mil",
-    unit: "pessoas/mês",
+    number: environmentMonthlyFlow.servicos.display,
+    unit: environmentMonthlyFlow.servicos.unit,
     image: servicosImg,
     connectivity: "wifi",
   },
@@ -48,8 +49,8 @@ const cards: {
     icon: Store,
     title: "Feiras",
     body: "Múltiplos impactos, tanto nas telas quanto na nossa exclusiva solução de WiFi patrocinado, em locais de alto fluxo e permanência prolongada.",
-    number: "1,2 milhão",
-    unit: "pessoas/mês",
+    number: environmentMonthlyFlow.feiras.display,
+    unit: environmentMonthlyFlow.feiras.unit,
     image: feirasImg,
     connectivity: "dual",
   },
@@ -69,11 +70,7 @@ export function Network() {
     <section id="rede" className="bg-off-white text-ink py-24 md:py-32 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div
-          ref={header.ref}
-          data-visible={header.visible}
-          className="reveal-root max-w-3xl"
-        >
+        <div ref={header.ref} data-visible={header.visible} className="reveal-root max-w-3xl">
           <div className="reveal reveal-1 font-mono text-xs uppercase tracking-[0.3em] text-gold-deep mb-5">
             / NOSSA REDE
           </div>
@@ -81,16 +78,13 @@ export function Network() {
             Onde o seu público já está
           </h2>
           <p className="reveal reveal-3 mt-5 text-ink-soft text-base md:text-lg leading-relaxed">
-            A MOBTV possui a maior rede de WiFi e DOOH do Distrito Federal, presente nos locais de maior circulação de pessoas — não em qualquer lugar, nos lugares certos.
+            A MOBTV possui a maior rede de WiFi e DOOH do Distrito Federal, presente nos locais de
+            maior circulação de pessoas — não em qualquer lugar, nos lugares certos.
           </p>
         </div>
 
         {/* Block 1 — 4 photo cards, asymmetric grid */}
-        <div
-          ref={grid.ref}
-          data-visible={grid.visible}
-          className="reveal-root mt-16 md:mt-20"
-        >
+        <div ref={grid.ref} data-visible={grid.visible} className="reveal-root mt-16 md:mt-20">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6 auto-rows-fr">
             {cards.map((c, i) => (
               <article
@@ -133,9 +127,7 @@ export function Network() {
                     <div className="mt-2 font-display font-bold text-white leading-none text-4xl md:text-5xl lg:text-[3.25rem]">
                       {c.number}
                     </div>
-                    <div className="mt-1.5 font-mono text-xs text-white/70">
-                      {c.unit}
-                    </div>
+                    <div className="mt-1.5 font-mono text-xs text-white/70">{c.unit}</div>
                     <p className="mt-4 text-sm leading-relaxed text-white/65 opacity-80 transition-opacity duration-300 group-hover:opacity-100">
                       {c.body}
                     </p>
@@ -147,11 +139,7 @@ export function Network() {
         </div>
 
         {/* Block 2 — WiFi Ads / DOOH */}
-        <div
-          ref={below.ref}
-          data-visible={below.visible}
-          className="reveal-root mt-20 md:mt-24"
-        >
+        <div ref={below.ref} data-visible={below.visible} className="reveal-root mt-20 md:mt-24">
           <div className="grid gap-6 md:grid-cols-2">
             {/* WiFi Ads card — teal: rede/conectividade */}
             <div
@@ -171,7 +159,10 @@ export function Network() {
                 Eficiência e Assertividade
               </h3>
               <p className="mt-4 text-ink-soft text-base leading-relaxed">
-                O meio WiFi Ads tem crescido por ser referência de mídia eficiente, com entrega garantida, altos índices de qualidade (CTR e VTR) e por promover a inclusão digital de milhões de pessoas que diariamente acessam essas redes gratuitas, 100% financiadas pelo esforço publicitário.
+                O meio WiFi Ads tem crescido por ser referência de mídia eficiente, com entrega
+                garantida, altos índices de qualidade (CTR e VTR) e por promover a inclusão digital
+                de milhões de pessoas que diariamente acessam essas redes gratuitas, 100%
+                financiadas pelo esforço publicitário.
               </p>
             </div>
 
@@ -193,7 +184,10 @@ export function Network() {
                 Excelente Cobertura
               </h3>
               <p className="mt-4 text-ink-soft text-base leading-relaxed">
-                O meio DOOH é hoje o mais importante canal de comunicação exterior disponível no mercado. Onde o cliente está, há uma tela exercendo o papel de trazer informação para essas pessoas — alcançando milhares todos os dias em locais de grande concentração.
+                O meio DOOH é hoje o mais importante canal de comunicação exterior disponível no
+                mercado. Onde o cliente está, há uma tela exercendo o papel de trazer informação
+                para essas pessoas — alcançando milhares todos os dias em locais de grande
+                concentração.
               </p>
             </div>
           </div>

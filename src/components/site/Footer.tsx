@@ -1,5 +1,3 @@
-import { Facebook, Linkedin, MapPin, Instagram } from "lucide-react";
-
 function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -8,19 +6,10 @@ function WhatsAppIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+// Instagram, Facebook, LinkedIn e Google Maps foram removidos daqui: o Media
+// Kit oficial não lista os perfis/handles reais da MOBTV, e um link "#" é
+// pior do que nenhum link. Reintroduzir assim que a MOBTV informar as URLs.
 export function Footer() {
-  const socialLinks = [
-    // TODO: link real — substituir pelo link do Instagram
-    { Icon: Instagram, label: "Instagram", href: "#" },
-    // TODO: link real — substituir pelo link do Facebook
-    { Icon: Facebook, label: "Facebook", href: "#" },
-    // TODO: link real — substituir pelo link do LinkedIn
-    { Icon: Linkedin, label: "LinkedIn", href: "#" },
-    // TODO: link real — substituir pelo link do Google Maps
-    { Icon: MapPin, label: "Google Maps", href: "#" },
-    { Icon: WhatsAppIcon, label: "WhatsApp", href: "https://wa.me/5561992590234", isSvg: true },
-  ];
-
   return (
     <footer className="bg-navy border-t border-gold/20">
       <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -29,22 +18,17 @@ export function Footer() {
           MOB<span className="text-gold">TV</span>
         </div>
 
-        {/* Social icons */}
+        {/* Contato direto */}
         <div className="flex items-center gap-3">
-          {socialLinks.map(({ Icon, label, href, isSvg }) => {
-            const isRealLink = href !== "#";
-            return (
-              <a
-                key={label}
-                href={href}
-                {...(isRealLink ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-navy hover:border-gold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                aria-label={label}
-              >
-                {isSvg ? <Icon size={18} /> : <Icon size={18} />}
-              </a>
-            );
-          })}
+          <a
+            href="https://wa.me/5561992590234"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-navy hover:border-gold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            aria-label="WhatsApp"
+          >
+            <WhatsAppIcon size={18} />
+          </a>
         </div>
 
         {/* Copyright */}

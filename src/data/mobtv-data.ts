@@ -9,6 +9,12 @@
  * Métricas diferentes representam universos diferentes e não devem ser
  * somadas ou tratadas como equivalentes entre si (ver campo `scope` em
  * cada bloco).
+ *
+ * O rate card comercial granular (preço por ponto, por inserção, CPE do
+ * WiFi Ads, inventário de monitores nomeado) vive em `rate-card-2026.ts`,
+ * no mesmo diretório — separado deste arquivo porque tem outro formato
+ * (listas de pontos, não KPIs agregados) e outra fonte de página do PDF
+ * (p.28, p.39, p.60–62).
  */
 
 /** Total de impactos com contagem auditada por câmera + IA (Metrô + BRT). */
@@ -122,3 +128,42 @@ export const consumerResearch = [
   { value: "38,1%", text: "apontam saúde da mulher como tema de saúde mais relevante" },
 ] as const;
 // Media Kit p.10 (eletrônicos), p.11 (faculdade) e p.14 (saúde da mulher).
+
+/**
+ * Fluxo mensal aproximado de pessoas por ambiente/categoria de ponto.
+ * Cada valor vem de uma página distinta do Media Kit e descreve um
+ * ambiente específico — não são somáveis entre si nem com os totais de
+ * rede acima (ver `networkFootprint`/`approxReach`).
+ */
+export const environmentMonthlyFlow = {
+  saude: {
+    label: "Saúde",
+    display: "250 mil",
+    unit: "pessoas/mês",
+    source: 'Media Kit p.49 — "Hospitais: fluxo mensal de mais de 250 mil pessoas!".',
+  },
+  transportes: {
+    label: "Transportes",
+    display: "3 milhões",
+    unit: "pessoas/mês",
+    source: 'Media Kit p.51 — "Transporte Público: fluxo mensal de mais de 3 milhões de pessoas!".',
+  },
+  servicos: {
+    label: "Serviços (Na Hora)",
+    display: "90 mil",
+    unit: "pessoas/mês",
+    source: 'Media Kit p.46 — "Na Hora: fluxo mensal de mais de 90 mil pessoas!".',
+  },
+  feiras: {
+    label: "Feiras",
+    display: "1,2 milhão",
+    unit: "pessoas/mês",
+    source: 'Media Kit p.48 — "Feiras: fluxo mensal de mais de 1,2 milhão de pessoas!".',
+  },
+  upasUbs: {
+    label: "UPAs e UBSs",
+    display: "210 mil",
+    unit: "pessoas/mês",
+    source: 'Media Kit p.50 — "UPAs e UBSs: fluxo mensal de mais de 210 mil pessoas!".',
+  },
+} as const;

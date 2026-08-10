@@ -4,6 +4,7 @@ import { Footer } from "@/components/site/Footer";
 import { FloatingCTA } from "@/components/site/FloatingCTA";
 import { Hero } from "@/components/site/Hero";
 import { HomeNumeros } from "@/components/site/HomeNumeros";
+import { HomeCases } from "@/components/site/HomeCases";
 import { HomeDiferenciais } from "@/components/site/HomeDiferenciais";
 import { OndeEstamos } from "@/components/site/OndeEstamos";
 import { HomeSobre } from "@/components/site/HomeSobre";
@@ -31,6 +32,7 @@ function Index() {
       <main className="flex-1 pt-20">
         <Hero />
         <HomeNumeros />
+        <HomeCases />
         <HomeDiferenciais />
         <OndeEstamos />
         <HomeSobre />

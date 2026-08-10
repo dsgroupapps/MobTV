@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import { useCountUp } from "@/hooks/useCountUp";
+import { auditedImpacts, networkFootprint, approxReach } from "@/data/mobtv-data";
 
 function formatBR(n: number) {
   return n.toLocaleString("pt-BR");
 }
 
 function DominantNumber({ visible }: { visible: boolean }) {
-  const v = useCountUp(11986541, visible, 1800);
+  const v = useCountUp(auditedImpacts.value, visible, 1800);
   return (
     <div>
       <div
@@ -77,15 +78,18 @@ export function HomeNumeros() {
 
           <div className="reveal reveal-2 mt-12 md:mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/10 pt-8 font-mono text-sm text-off-white/60">
             <span>
-              <span className="text-gold font-medium">53</span> pontos
+              <span className="text-gold font-medium">{networkFootprint.points}</span> pontos
             </span>
             <span className="hidden sm:block h-3 w-px bg-off-white/25" />
             <span>
-              <span className="text-gold font-medium">16</span> cidades
+              <span className="text-gold font-medium">{networkFootprint.cities}</span> cidades
             </span>
             <span className="hidden sm:block h-3 w-px bg-off-white/25" />
             <span>
-              <span className="text-gold font-medium">+3,5 mi</span> impactos WiFi
+              <span className="text-gold font-medium">
+                +{formatBR(approxReach.wifiOnlyMillions)} mi
+              </span>{" "}
+              impactos WiFi
             </span>
           </div>
         </div>

@@ -1,14 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { approxReach, networkFootprint } from "@/data/mobtv-data";
+import heroPhoto from "@/assets/hero-estacao-central.jpg";
 
 export function Hero() {
   // raios crescentes, opacidade decrescente, cores alternando
   const arcs = [
-    { r: 150, color: "#F2B705", opacity: 0.35, delay: 0 },
-    { r: 280, color: "#2DD4BF", opacity: 0.26, delay: 1 },
-    { r: 420, color: "#F2B705", opacity: 0.18, delay: 2 },
-    { r: 580, color: "#2DD4BF", opacity: 0.12, delay: 3 },
-    { r: 740, color: "#F2B705", opacity: 0.08, delay: 4 },
+    { r: 150, color: "#F2B705", opacity: 0.55, delay: 0 },
+    { r: 280, color: "#2DD4BF", opacity: 0.42, delay: 1 },
+    { r: 420, color: "#F2B705", opacity: 0.3, delay: 2 },
+    { r: 580, color: "#2DD4BF", opacity: 0.2, delay: 3 },
+    { r: 740, color: "#F2B705", opacity: 0.14, delay: 4 },
   ];
 
   // arco de ~140° (mostra apenas uma fração do círculo)
@@ -19,7 +20,34 @@ export function Hero() {
       id="inicio"
       className="relative overflow-hidden bg-navy text-off-white min-h-[92vh] flex items-center px-6 py-24"
     >
-      {/* Ondas de sinal — SVG cobrindo a seção inteira */}
+      {/* Fotografia real — Estação Central do Metrô-DF, painel MOBTV instalado
+          (Media Kit p.16). Navy funciona como moldura: a foto aparece mais
+          forte à direita, sob os arcos, e se dissolve em navy sob o texto. */}
+      <img
+        src={heroPhoto}
+        alt=""
+        aria-hidden
+        loading="eager"
+        className="absolute inset-0 h-full w-full object-cover object-[70%_45%] opacity-55 saturate-[0.8]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(100deg, var(--navy) 0%, var(--navy) 32%, color-mix(in oklab, var(--navy) 78%, transparent) 55%, color-mix(in oklab, var(--navy) 45%, transparent) 100%)",
+        }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(0deg, var(--navy) 0%, transparent 30%, transparent 78%, color-mix(in oklab, var(--navy) 60%, transparent) 100%)",
+        }}
+      />
+
+      {/* Ondas de sinal — agora funcionam como enquadramento sobre a foto */}
       <svg
         aria-hidden
         className="pointer-events-none absolute inset-0 w-full h-full z-[1]"
@@ -40,7 +68,7 @@ export function Hero() {
               r={a.r}
               fill="none"
               stroke={a.color}
-              strokeWidth={1.25}
+              strokeWidth={1.5}
               strokeLinecap="round"
               strokeDasharray={`${arcLen} ${gapLen}`}
               strokeDashoffset={dashOffset}
@@ -98,6 +126,11 @@ export function Hero() {
             <span>+{approxReach.combinedMillions} milhões de impactos/mês</span>
           </div>
         </div>
+      </div>
+
+      {/* Legenda da foto real — reforça "isso existe de verdade em Brasília" */}
+      <div className="hero-stagger hero-stagger-4 absolute bottom-6 right-6 z-10 hidden sm:block font-mono text-[11px] uppercase tracking-[0.2em] text-off-white/45">
+        Estação Central · Metrô-DF
       </div>
     </section>
   );
