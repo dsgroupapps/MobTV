@@ -3,7 +3,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { FloatingCTA } from "@/components/site/FloatingCTA";
 import { Network } from "@/components/site/Network";
-import { Points } from "@/components/site/Points";
+import { AssetExplorer } from "@/components/site/AssetExplorer";
 import { ExploreCoverage } from "@/components/site/ExploreCoverage";
 
 export const Route = createFileRoute("/rede")({
@@ -26,7 +26,7 @@ function RedePage() {
       <Header />
       <main className="flex-1 pt-20">
         <Network />
-        <Points />
+        <AssetExplorer />
         <ExploreCoverage />
       </main>
       <Footer />

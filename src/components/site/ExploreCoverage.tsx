@@ -22,14 +22,15 @@ export function ExploreCoverage() {
           {/* Header */}
           <div className="max-w-3xl">
             <div className="reveal reveal-1 font-mono text-xs uppercase tracking-[0.3em] text-gold-deep mb-5">
-              / COBERTURA REAL
+              / EXPLORAÇÃO GEOGRÁFICA
             </div>
             <h2 className="reveal reveal-2 font-display font-bold text-ink text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">
-              Explore nossa cobertura
+              O mapa real, rua a rua
             </h2>
             <p className="reveal reveal-3 mt-5 text-ink-soft text-base md:text-lg leading-relaxed">
-              Veja onde a MOBTV está presente no Distrito Federal e explore os pontos reais de LED,
-              monitores indoor e redes WiFi.
+              O mapa executivo mostrou a cobertura por cidade. Este é o mapa geográfico real — a
+              localização exata de cada ponto de LED, monitor indoor e rede WiFi no Distrito
+              Federal.
             </p>
           </div>
 
