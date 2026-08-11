@@ -108,13 +108,13 @@ export function Hero() {
 
           <div className="hero-stagger hero-stagger-3 mt-10 flex flex-wrap items-center gap-4">
             <Link to="/rede" className="btn-primary">
-              Mapa de Cobertura
+              Ver Mapa de Cobertura
             </Link>
             <Link
-              to="/contato"
+              to="/planejador"
               className="inline-flex items-center justify-center bg-transparent text-gold border border-gold rounded-lg px-6 py-3 font-semibold transition-colors hover:bg-gold hover:text-navy"
             >
-              Anuncie Agora
+              Monte sua Campanha
             </Link>
           </div>
 

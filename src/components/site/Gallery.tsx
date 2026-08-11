@@ -5,6 +5,32 @@ import transportesImg from "@/assets/network-transportes.jpg";
 import saudeImg from "@/assets/network-saude.jpg";
 import feirasImg from "@/assets/network-feiras.jpg";
 import servicosImg from "@/assets/network-servicos.jpg";
+import { networkPoints } from "@/data/network-points";
+
+// Mesma fonte de fotos por ponto do Explorador de Ativos (network-points.ts)
+// — evita duplicar o mapeamento de arquivos de public/. Alguns nomes aqui na
+// Galeria usam redação um pouco diferente da do dataset; o alias cobre só
+// essas divergências pontuais de texto, sem duplicar a lista inteira.
+const nameAlias: Record<string, string> = {
+  "Estação Central": "Estação Central (Plano Piloto)",
+  "Feira Central da Ceilândia": "Feira da Ceilândia",
+  "Shopping Popular de Ceilândia": "Shopping Popular Ceilândia",
+  "Restaurante Comunitário de Brazlândia": "Brazlândia",
+  "Restaurante Comunitário do Recanto": "Recanto",
+  "Restaurante Comunitário do Gama": "Gama",
+};
+
+const pointImageByName = new Map<string, string>();
+for (const cat of networkPoints) {
+  for (const p of cat.points) {
+    if (p.images?.[0]) pointImageByName.set(p.nome, p.images[0]);
+  }
+}
+
+function resolveImage(name: string, fallback: string): string {
+  const real = pointImageByName.get(name) ?? pointImageByName.get(nameAlias[name] ?? "");
+  return real ?? fallback;
+}
 
 type CategoryKey = "metro" | "terminais" | "saude" | "feiras" | "restaurantes" | "servicos";
 
@@ -47,45 +73,105 @@ const categoryImages: Record<CategoryKey, string> = {
   servicos: servicosImg,
 };
 
-const items: GalleryItem[] = [
+const rawItems: Omit<GalleryItem, "image">[] = [
   // Metro
-  { name: "Estação Central", category: "metro", categoryLabel: "Estações de Metrô", badge: "1M+ impactos/mês", image: categoryImages.metro },
-  { name: "Estação Shopping", category: "metro", categoryLabel: "Estações de Metrô", badge: "730 mil+ impactos/mês", image: categoryImages.metro },
-  { name: "Estação Guará", category: "metro", categoryLabel: "Estações de Metrô", image: categoryImages.metro },
-  { name: "Estação Praça do Relógio", category: "metro", categoryLabel: "Estações de Metrô", badge: "1M+ impactos/mês", image: categoryImages.metro },
-  { name: "Estação Arniqueiras", category: "metro", categoryLabel: "Estações de Metrô", badge: "1,1M+ impactos/mês", image: categoryImages.metro },
-  { name: "Estação Águas Claras", category: "metro", categoryLabel: "Estações de Metrô", badge: "1M+ impactos/mês", image: categoryImages.metro },
-  { name: "Estação Ceilândia Centro", category: "metro", categoryLabel: "Estações de Metrô", image: categoryImages.metro },
+  {
+    name: "Estação Central",
+    category: "metro",
+    categoryLabel: "Estações de Metrô",
+    badge: "1M+ impactos/mês",
+  },
+  {
+    name: "Estação Shopping",
+    category: "metro",
+    categoryLabel: "Estações de Metrô",
+    badge: "730 mil+ impactos/mês",
+  },
+  { name: "Estação Guará", category: "metro", categoryLabel: "Estações de Metrô" },
+  {
+    name: "Estação Praça do Relógio",
+    category: "metro",
+    categoryLabel: "Estações de Metrô",
+    badge: "1M+ impactos/mês",
+  },
+  {
+    name: "Estação Arniqueiras",
+    category: "metro",
+    categoryLabel: "Estações de Metrô",
+    badge: "1,1M+ impactos/mês",
+  },
+  {
+    name: "Estação Águas Claras",
+    category: "metro",
+    categoryLabel: "Estações de Metrô",
+    badge: "1M+ impactos/mês",
+  },
+  { name: "Estação Ceilândia Centro", category: "metro", categoryLabel: "Estações de Metrô" },
   // Terminais
-  { name: "Rodoviária do Plano Piloto", category: "terminais", categoryLabel: "Terminais Rodoviários", image: categoryImages.terminais },
-  { name: "Terminal Interestadual de Brasília", category: "terminais", categoryLabel: "Terminais Rodoviários", image: categoryImages.terminais },
-  { name: "Terminal BRT Santa Maria", category: "terminais", categoryLabel: "Terminais Rodoviários", badge: "3M+ impactos/mês", image: categoryImages.terminais },
-  { name: "Terminal BRT Gama", category: "terminais", categoryLabel: "Terminais Rodoviários", badge: "1,5M+ impactos/mês", image: categoryImages.terminais },
-  { name: 'Terminal Setor "O"', category: "terminais", categoryLabel: "Terminais Rodoviários", image: categoryImages.terminais },
+  {
+    name: "Rodoviária do Plano Piloto",
+    category: "terminais",
+    categoryLabel: "Terminais Rodoviários",
+  },
+  {
+    name: "Terminal Interestadual de Brasília",
+    category: "terminais",
+    categoryLabel: "Terminais Rodoviários",
+  },
+  {
+    name: "Terminal BRT Santa Maria",
+    category: "terminais",
+    categoryLabel: "Terminais Rodoviários",
+    badge: "3M+ impactos/mês",
+  },
+  {
+    name: "Terminal BRT Gama",
+    category: "terminais",
+    categoryLabel: "Terminais Rodoviários",
+    badge: "1,5M+ impactos/mês",
+  },
+  { name: 'Terminal Setor "O"', category: "terminais", categoryLabel: "Terminais Rodoviários" },
   // Saúde
-  { name: "UPA Brazlândia", category: "saude", categoryLabel: "Saúde", image: categoryImages.saude },
-  { name: "UPA Samambaia", category: "saude", categoryLabel: "Saúde", image: categoryImages.saude },
-  { name: "UPA São Sebastião", category: "saude", categoryLabel: "Saúde", image: categoryImages.saude },
-  { name: "Hospital Regional de Ceilândia", category: "saude", categoryLabel: "Saúde", image: categoryImages.saude },
-  { name: "Hospital Regional de Taguatinga", category: "saude", categoryLabel: "Saúde", image: categoryImages.saude },
-  { name: "Hospital Regional do Gama", category: "saude", categoryLabel: "Saúde", image: categoryImages.saude },
+  { name: "UPA Brazlândia", category: "saude", categoryLabel: "Saúde" },
+  { name: "UPA Samambaia", category: "saude", categoryLabel: "Saúde" },
+  { name: "UPA São Sebastião", category: "saude", categoryLabel: "Saúde" },
+  { name: "Hospital Regional de Ceilândia", category: "saude", categoryLabel: "Saúde" },
+  { name: "Hospital Regional de Taguatinga", category: "saude", categoryLabel: "Saúde" },
+  { name: "Hospital Regional do Gama", category: "saude", categoryLabel: "Saúde" },
   // Feiras
-  { name: "Feira do Guará", category: "feiras", categoryLabel: "Feiras", image: categoryImages.feiras },
-  { name: "Feira Central da Ceilândia", category: "feiras", categoryLabel: "Feiras", image: categoryImages.feiras },
-  { name: "Feira Azul do Gama", category: "feiras", categoryLabel: "Feiras", image: categoryImages.feiras },
-  { name: "Feira dos Goianos", category: "feiras", categoryLabel: "Feiras", image: categoryImages.feiras },
-  { name: "Shopping Popular de Ceilândia", category: "feiras", categoryLabel: "Feiras", image: categoryImages.feiras },
+  { name: "Feira do Guará", category: "feiras", categoryLabel: "Feiras" },
+  { name: "Feira Central da Ceilândia", category: "feiras", categoryLabel: "Feiras" },
+  { name: "Feira Azul do Gama", category: "feiras", categoryLabel: "Feiras" },
+  { name: "Feira dos Goianos", category: "feiras", categoryLabel: "Feiras" },
+  { name: "Shopping Popular de Ceilândia", category: "feiras", categoryLabel: "Feiras" },
   // Restaurantes
-  { name: "Restaurante Comunitário de Brazlândia", category: "restaurantes", categoryLabel: "Restaurantes Comunitários", image: categoryImages.restaurantes },
-  { name: "Restaurante Comunitário do Recanto", category: "restaurantes", categoryLabel: "Restaurantes Comunitários", image: categoryImages.restaurantes },
-  { name: "Restaurante Comunitário do Gama", category: "restaurantes", categoryLabel: "Restaurantes Comunitários", image: categoryImages.restaurantes },
+  {
+    name: "Restaurante Comunitário de Brazlândia",
+    category: "restaurantes",
+    categoryLabel: "Restaurantes Comunitários",
+  },
+  {
+    name: "Restaurante Comunitário do Recanto",
+    category: "restaurantes",
+    categoryLabel: "Restaurantes Comunitários",
+  },
+  {
+    name: "Restaurante Comunitário do Gama",
+    category: "restaurantes",
+    categoryLabel: "Restaurantes Comunitários",
+  },
   // Serviços
-  { name: "Na Hora Ceilândia", category: "servicos", categoryLabel: "Serviços", image: categoryImages.servicos },
-  { name: "Na Hora Taguatinga", category: "servicos", categoryLabel: "Serviços", image: categoryImages.servicos },
-  { name: "Na Hora Rodoviária Plano Piloto", category: "servicos", categoryLabel: "Serviços", image: categoryImages.servicos },
-  { name: "SESI LAB", category: "servicos", categoryLabel: "Serviços", image: categoryImages.servicos },
-  { name: "Biblioteca da Ceilândia", category: "servicos", categoryLabel: "Serviços", image: categoryImages.servicos },
+  { name: "Na Hora Ceilândia", category: "servicos", categoryLabel: "Serviços" },
+  { name: "Na Hora Taguatinga", category: "servicos", categoryLabel: "Serviços" },
+  { name: "Na Hora Rodoviária Plano Piloto", category: "servicos", categoryLabel: "Serviços" },
+  { name: "SESI LAB", category: "servicos", categoryLabel: "Serviços" },
+  { name: "Biblioteca da Ceilândia", category: "servicos", categoryLabel: "Serviços" },
 ];
+
+const items: GalleryItem[] = rawItems.map((it) => ({
+  ...it,
+  image: resolveImage(it.name, categoryImages[it.category]),
+}));
 
 export function Gallery() {
   const [active, setActive] = useState<CategoryKey | "todos">("todos");
@@ -94,7 +180,7 @@ export function Gallery() {
 
   const filtered = useMemo(
     () => (active === "todos" ? items : items.filter((i) => i.category === active)),
-    [active]
+    [active],
   );
 
   return (
@@ -156,7 +242,10 @@ export function Gallery() {
                 className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
               {/* Gradient overlay */}
-              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20" />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20"
+              />
 
               {/* Category tag + DOOH/WiFi connectivity badge */}
               <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5">

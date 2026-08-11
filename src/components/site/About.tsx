@@ -17,7 +17,7 @@ export function About() {
       id="sobre"
       ref={ref}
       data-visible={visible}
-      className="bg-off-white text-ink py-24 px-6 reveal-root"
+      className="bg-off-white text-ink py-24 px-6 reveal-root overflow-hidden"
     >
       <div className="max-w-7xl mx-auto grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-start">
         {/* LEFT COLUMN */}

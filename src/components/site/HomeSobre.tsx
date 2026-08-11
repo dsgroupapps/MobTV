@@ -9,7 +9,7 @@ export function HomeSobre() {
     <section
       ref={ref}
       data-visible={visible}
-      className="reveal-root bg-off-white text-ink py-24 md:py-32 px-6"
+      className="reveal-root bg-off-white text-ink py-24 md:py-32 px-6 overflow-hidden"
     >
       <div className="max-w-7xl mx-auto grid lg:grid-cols-[55%_45%] gap-12 lg:gap-16 items-center">
         {/* LEFT COLUMN */}
@@ -23,17 +23,18 @@ export function HomeSobre() {
           </h2>
 
           <p className="reveal reveal-3 mt-6 text-ink-soft text-base sm:text-lg leading-relaxed max-w-2xl">
-            A MOBTV atua em Brasília no mercado de comunicação digital e
-            opera a maior rede de WiFi e DOOH do Distrito Federal, por
-            intermédio do programa WiFi Social do GDF. Com anos de
-            experiência em mídia digital embarcada em ônibus — monitores e
-            redes WiFi — desenvolvemos sistemas e tecnologias próprias que
-            impulsionam a inovação no setor. Tecnologia de ponta e
-            qualidade são a nossa marca.
+            A MOBTV atua em Brasília no mercado de comunicação digital e opera a maior rede de WiFi
+            e DOOH do Distrito Federal, por intermédio do programa WiFi Social do GDF. Com anos de
+            experiência em mídia digital embarcada em ônibus — monitores e redes WiFi —
+            desenvolvemos sistemas e tecnologias próprias que impulsionam a inovação no setor.
+            Tecnologia de ponta e qualidade são a nossa marca.
           </p>
 
           <div className="reveal reveal-4 mt-8">
-            <Link to="/sobre" className="font-mono text-sm text-gold-deep hover:text-ink transition-colors">
+            <Link
+              to="/sobre"
+              className="font-mono text-sm text-gold-deep hover:text-ink transition-colors"
+            >
               Conheça a MOBTV →
             </Link>
           </div>

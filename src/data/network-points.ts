@@ -81,6 +81,7 @@ export const networkPoints: Category[] = [
         produtos: [{ tipo: "LED 4x1,2m / 3x1,2m", telas: 2, custoInsercao15s: 4.9 }],
         valorPorCpe: WIFI_CPE,
         fluxoMensal: 478_000,
+        images: ["/central_rodoviaria.jpg", "/central_rodoviaria2.jpg"],
       },
       {
         nome: "Estação Shopping",
@@ -89,10 +90,15 @@ export const networkPoints: Category[] = [
         fluxoMensal: 263_000,
         // Auditoria (p.39) lista "Metrô Shopping" — mesmo painel, nome abreviado.
         impactosAuditadosMes: 732_239,
+        images: ["/estacao_shopping.jpg"],
       },
-      { nome: "Estação Feira", valorPorCpe: WIFI_CPE },
-      { nome: "Estação Guará", valorPorCpe: WIFI_CPE },
-      { nome: "Estação Ceilândia Centro", valorPorCpe: WIFI_CPE },
+      { nome: "Estação Feira", valorPorCpe: WIFI_CPE, images: ["/estacao_metro_feira_guara.jpg"] },
+      { nome: "Estação Guará", valorPorCpe: WIFI_CPE, images: ["/estacao_metro_guara.png"] },
+      {
+        nome: "Estação Ceilândia Centro",
+        valorPorCpe: WIFI_CPE,
+        images: ["/estacao_metro_ceilandia_centro.png"],
+      },
       { nome: "Estação Ceilândia Sul", valorPorCpe: WIFI_CPE },
       { nome: "Estação Ceilândia Norte", valorPorCpe: WIFI_CPE },
       { nome: "Estação Guariroba", valorPorCpe: WIFI_CPE },
@@ -103,6 +109,7 @@ export const networkPoints: Category[] = [
         fluxoMensal: 269_000,
         // Auditoria (p.39): "Metrô Águas Claras".
         impactosAuditadosMes: 1_000_000,
+        images: ["/estacao_aguas.jpg"],
       },
       {
         nome: "Estação Arniqueiras",
@@ -111,6 +118,7 @@ export const networkPoints: Category[] = [
         fluxoMensal: 275_000,
         // Auditoria (p.39): "Metrô Arniqueiras".
         impactosAuditadosMes: 1_128_365,
+        images: ["/estacao_arniqueiras.jpg"],
       },
       {
         nome: "Estação Praça do Relógio",
@@ -119,6 +127,7 @@ export const networkPoints: Category[] = [
         fluxoMensal: 204_000,
         // Auditoria (p.39): "Metrô Praça do Relógio".
         impactosAuditadosMes: 1_063_504,
+        images: ["/estacao_praca.jpg"],
       },
     ],
   },
@@ -140,6 +149,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/brt_santamaria.jpg"],
       },
       {
         nome: "Terminal BRT Gama",
@@ -149,6 +159,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/brt_gama.jpg"],
       },
       {
         nome: 'Terminal Setor "O"',
@@ -156,8 +167,12 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 3, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/terminal_setor_o.jpg"],
       },
-      { nome: "Terminal Interestadual de Brasília" },
+      {
+        nome: "Terminal Interestadual de Brasília",
+        images: ["/terminal_interestadual_bsb"],
+      },
     ],
   },
   {
@@ -178,6 +193,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_samambaia.png"],
       },
       {
         nome: "UPA São Sebastião",
@@ -185,6 +201,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        images: ["/upa_sao_sebatiao.png"],
       },
       {
         nome: "UPA Sobradinho II",
@@ -199,6 +216,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_gama.jpg"],
       },
       {
         nome: "UPA Recanto das Emas",
@@ -206,6 +224,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_recanto_emas.webp"],
       },
       {
         nome: "UPA Riacho Fundo II",
@@ -215,6 +234,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_riachofundo.jpg", "/upa_riacho_2.jpg"],
       },
       {
         nome: "UPA Planaltina",
@@ -224,6 +244,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_planaltina.jpg"],
       },
       {
         nome: "UPA Vicente Pires",
@@ -231,6 +252,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_vicentepires.jpg"],
       },
       {
         nome: "UPA Brazlândia",
@@ -238,6 +260,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_brazlandia.jpeg"],
       },
       {
         nome: "UPA Ceilândia Setor O",
@@ -246,6 +269,7 @@ export const networkPoints: Category[] = [
         // isso aparece a tela, mas não o preço por inserção.
         produtos: [{ tipo: 'Monitor 49"', telas: 1 }],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_ceilandia_ii_setor_o.png"],
       },
     ],
   },
@@ -260,6 +284,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/hospital_regional_taguatinga.png"],
       },
       {
         nome: "Hospital Regional de Ceilândia",
@@ -267,6 +292,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/hospital_regional_ceilandia.jpeg"],
       },
       {
         nome: "Hospital Regional do Gama",
@@ -274,6 +300,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/hospital_regional_gama.png"],
       },
       { nome: "Hospital Regional de Sobradinho" },
       {
@@ -296,12 +323,21 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/feira_guara.png"],
       },
-      { nome: "Feira dos Goianos", valorPorCpe: WIFI_CPE },
-      { nome: "Feira Azul do Gama" },
-      { nome: "Feira Modelo de Sobradinho I", valorPorCpe: WIFI_CPE },
-      { nome: "Feira da Ceilândia", valorPorCpe: WIFI_CPE },
-      { nome: "Shopping Popular Ceilândia" },
+      { nome: "Feira dos Goianos", valorPorCpe: WIFI_CPE, images: ["/feira_goianos.jpg"] },
+      { nome: "Feira Azul do Gama", images: ["/feira_azul_gama.png"] },
+      {
+        nome: "Feira Modelo de Sobradinho I",
+        valorPorCpe: WIFI_CPE,
+        images: ["/feira_modelo.jpeg", "/feira_sobradinho1.jpg"],
+      },
+      {
+        nome: "Feira da Ceilândia",
+        valorPorCpe: WIFI_CPE,
+        images: ["/feira_central_ceilandia.jpeg"],
+      },
+      { nome: "Shopping Popular Ceilândia", images: ["/shopping_popular_ceilandia.jpeg"] },
       // "Feira de Samambaia": a tabela de WiFi Ads lista DUAS feiras de
       // Samambaia ("Feira Samambaia" e "Feira Samambaia 2") — sem forma segura
       // de saber qual das duas é esta, o CPE não foi associado.
@@ -315,12 +351,12 @@ export const networkPoints: Category[] = [
     // O rate card não tem uma categoria própria para Restaurantes Comunitários
     // — nenhum destes 6 pontos tem preço/CPE individual documentado.
     points: [
-      { nome: "Brazlândia" },
+      { nome: "Brazlândia", images: ["/restaurante_comunitario_braslandia.webp"] },
       { nome: "Sobradinho II" },
       { nome: "Ceilândia" },
       { nome: "São Sebastião" },
-      { nome: "Gama" },
-      { nome: "Recanto" },
+      { nome: "Gama", images: ["/restaurante_comunitario_gama.jpg"] },
+      { nome: "Recanto", images: ["/restaurante_comunitario_recanto.jpg"] },
     ],
   },
   {
@@ -328,14 +364,18 @@ export const networkPoints: Category[] = [
     label: "Serviços",
     connectivity: "wifi",
     points: [
-      { nome: "Na Hora Ceilândia", valorPorCpe: WIFI_CPE },
-      { nome: "Na Hora Taguatinga", valorPorCpe: WIFI_CPE },
-      { nome: "Na Hora Rodoviária Plano Piloto", valorPorCpe: WIFI_CPE },
+      { nome: "Na Hora Ceilândia", valorPorCpe: WIFI_CPE, images: ["/na_hora_ceilandia.jpg"] },
+      { nome: "Na Hora Taguatinga", valorPorCpe: WIFI_CPE, images: ["/na_hora_taguatinga.jpg"] },
+      {
+        nome: "Na Hora Rodoviária Plano Piloto",
+        valorPorCpe: WIFI_CPE,
+        images: ["/na_hora_rodoviaria_plano.png"],
+      },
       { nome: "Na Hora Gama", valorPorCpe: WIFI_CPE },
       { nome: "Na Hora Brazlândia" },
       { nome: "Na Hora Sobradinho", valorPorCpe: WIFI_CPE },
-      { nome: "SESI LAB" },
-      { nome: "Biblioteca da Ceilândia" },
+      { nome: "SESI LAB", images: ["/sesi_lab.jpg"] },
+      { nome: "Biblioteca da Ceilândia", images: ["/biblioteca_ceilandia.webp"] },
     ],
   },
 ];

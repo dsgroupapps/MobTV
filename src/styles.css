@@ -330,38 +330,6 @@
 }
 
 /* Points map — dot entrance + halo pulse */
-@keyframes point-appear {
-  from {
-    opacity: 0;
-    transform: scale(0.2);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.point-dot {
-  opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: point-appear 0.4s ease-out forwards;
-}
-@keyframes point-halo {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.35;
-  }
-  50% {
-    transform: scale(1.8);
-    opacity: 0;
-  }
-}
-.point-pulse {
-  transform-box: fill-box;
-  animation: point-halo 3s ease-out infinite;
-}
-
 /* Coverage map — pin radar-pop entrance + continuous pulse halo */
 @keyframes pin-pop {
   from {

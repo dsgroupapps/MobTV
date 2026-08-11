@@ -303,21 +303,21 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
       </div>
 
       <div className="mt-auto pt-8 flex flex-col gap-3">
+        <Link
+          to="/planejador"
+          search={{ ponto: point.nome, categoria: category.key }}
+          className="btn-primary w-full flex items-center justify-center gap-2 text-center"
+        >
+          Adicionar ao planejador →
+        </Link>
         <a
           href={buildInterestUrl(point.nome)}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-primary w-full flex items-center justify-center gap-2 text-center"
-        >
-          Tenho interesse neste ponto
-        </a>
-        <Link
-          to="/planejador"
-          search={{ ponto: point.nome, categoria: category.key }}
           className="cursor-pointer w-full text-center font-mono text-xs uppercase tracking-wider text-off-white/55 hover:text-gold transition-colors py-2"
         >
-          + Adicionar ao planejador de campanha
-        </Link>
+          Ou fale sobre este ponto no WhatsApp
+        </a>
       </div>
     </div>
   );
@@ -484,6 +484,18 @@ export function AssetExplorer() {
             </div>
           )}
         </div>
+
+        {/* CTA de fechamento — para quem já explorou o suficiente sem abrir um ponto específico */}
+        {visiblePoints.length > 0 && (
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-gold/25 bg-gold/5 px-6 py-5">
+            <p className="text-sm text-white/75">
+              Já sabe quais pontos fazem sentido para sua marca?
+            </p>
+            <Link to="/planejador" className="btn-primary shrink-0">
+              Monte sua campanha →
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Detail panel — bottom sheet no mobile, painel lateral no desktop */}
