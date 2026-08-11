@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import {
   Check,
@@ -20,7 +21,7 @@ const possibilidades = [
   "Nome da empresa no SSID da rede (ex: WiFi Free Minha Empresa)",
   "Background personalizado",
   "Banner de boas-vindas (Banner 1)",
-  "Vídeo de até 30\" da campanha",
+  'Vídeo de até 30" da campanha',
   "Banner de liberação de acesso ao WiFi (Banner 2)",
   "Menu personalizado no Canal de Conteúdos, com vídeos e textos",
   "Enquete/pesquisa para coleta de dados que ajudam na jornada de vendas",
@@ -36,9 +37,15 @@ const fluxo = [
 
 const jornada = [
   { icon: Wifi, body: "Usuário acessa uma das redes WiFi e aceita os Termos de Uso." },
-  { icon: MessageCircle, body: "É impactado pela publicidade e clica em \"Conecte-se e Saiba Mais\"." },
+  {
+    icon: MessageCircle,
+    body: 'É impactado pela publicidade e clica em "Conecte-se e Saiba Mais".',
+  },
   { icon: Send, body: "O anunciante recebe os leads qualificados em tempo real." },
-  { icon: ShoppingBag, body: "Usuário recebe atendimento personalizado e pode finalizar a compra." },
+  {
+    icon: ShoppingBag,
+    body: "Usuário recebe atendimento personalizado e pode finalizar a compra.",
+  },
 ];
 
 const metroCards = [
@@ -89,9 +96,7 @@ function PhoneScreen({
             {title}
           </div>
           <div className="font-sans text-[10px] text-ink-soft leading-snug">{body}</div>
-          <div className="mt-auto font-mono text-[9px] text-gold-deep">
-            0{index}/05
-          </div>
+          <div className="mt-auto font-mono text-[9px] text-gold-deep">0{index}/05</div>
         </div>
       </div>
     </div>
@@ -109,11 +114,7 @@ export function Media() {
     <section id="midia" className="bg-off-white text-ink py-24 md:py-32 px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div
-          ref={header.ref}
-          data-visible={header.visible}
-          className="reveal-root max-w-3xl mb-16"
-        >
+        <div ref={header.ref} data-visible={header.visible} className="reveal-root max-w-3xl mb-16">
           <div className="reveal reveal-1 font-mono text-xs uppercase tracking-[0.3em] text-gold-deep mb-5">
             / MÍDIA
           </div>
@@ -121,25 +122,19 @@ export function Media() {
             Sua marca, do WiFi ao vagão do Metrô
           </h2>
           <p className="reveal reveal-3 mt-6 text-ink-soft text-lg leading-relaxed">
-            A rede WiFi Ads da MOBTV possui um exclusivo conjunto de possibilidades de mídia — e vai muito além da tela do celular.
+            A rede WiFi Ads da MOBTV possui um exclusivo conjunto de possibilidades de mídia — e vai
+            muito além da tela do celular.
           </p>
         </div>
 
         {/* BLOCO 1 — Possibilidades */}
-        <div
-          ref={bloco1.ref}
-          data-visible={bloco1.visible}
-          className="reveal-root mb-24"
-        >
+        <div ref={bloco1.ref} data-visible={bloco1.visible} className="reveal-root mb-24">
           <h3 className="reveal reveal-1 font-display font-semibold text-ink text-2xl mb-8">
             Possibilidades de Anúncio
           </h3>
           <ul className="grid md:grid-cols-2 gap-x-10 gap-y-4">
             {possibilidades.map((p, i) => (
-              <li
-                key={p}
-                className={`reveal reveal-${Math.min(i + 2, 5)} flex items-start gap-3`}
-              >
+              <li key={p} className={`reveal reveal-${Math.min(i + 2, 5)} flex items-start gap-3`}>
                 <span className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-full bg-gold/15 flex items-center justify-center">
                   <Check size={14} className="text-gold-deep" strokeWidth={3} />
                 </span>
@@ -150,11 +145,7 @@ export function Media() {
         </div>
 
         {/* BLOCO 2 — Como funciona a conexão */}
-        <div
-          ref={bloco2.ref}
-          data-visible={bloco2.visible}
-          className="reveal-root mb-24"
-        >
+        <div ref={bloco2.ref} data-visible={bloco2.visible} className="reveal-root mb-24">
           <h3 className="font-display font-semibold text-ink text-2xl mb-10 text-center">
             Como funciona a conexão
           </h3>
@@ -171,10 +162,7 @@ export function Media() {
                   <PhoneScreen index={i + 1} title={f.title} Icon={f.icon} body={f.body} />
                 </div>
                 {i < fluxo.length - 1 && (
-                  <div
-                    className="hidden lg:block mx-1 h-px w-8 bg-gold/50 relative"
-                    aria-hidden
-                  >
+                  <div className="hidden lg:block mx-1 h-px w-8 bg-gold/50 relative" aria-hidden>
                     <span className="absolute -right-1 -top-1 w-2 h-2 border-t border-r border-gold rotate-45" />
                   </div>
                 )}
@@ -182,16 +170,14 @@ export function Media() {
             ))}
           </div>
           <p className="max-w-3xl mx-auto text-center font-display font-semibold text-ink text-lg md:text-xl leading-relaxed">
-            Sempre que uma pessoa se conecta à rede, são exibidas telas personalizadas com a campanha do anunciante — um conjunto exclusivo de vídeo e banners. Isso tudo em um único preço.
+            Sempre que uma pessoa se conecta à rede, são exibidas telas personalizadas com a
+            campanha do anunciante — um conjunto exclusivo de vídeo e banners. Isso tudo em um único
+            preço.
           </p>
         </div>
 
         {/* BLOCO 3 — Captação de Leads via WhatsApp */}
-        <div
-          ref={bloco3.ref}
-          data-visible={bloco3.visible}
-          className="reveal-root mb-24"
-        >
+        <div ref={bloco3.ref} data-visible={bloco3.visible} className="reveal-root mb-24">
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-navy to-navy-soft text-off-white p-8 md:p-14">
             <div className="max-w-3xl">
               <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold mb-4">
@@ -201,7 +187,9 @@ export function Media() {
                 Captação de Leads
               </h3>
               <p className="text-off-white/80 leading-relaxed mb-10">
-                Oferecemos a possibilidade do usuário iniciar uma conversa com o anunciante pelo WhatsApp. Clicando no botão "Saber mais e conectar", o usuário recebe a internet gratuita e o anunciante recebe o lead do interessado no produto ou serviço.
+                Oferecemos a possibilidade do usuário iniciar uma conversa com o anunciante pelo
+                WhatsApp. Clicando no botão "Saber mais e conectar", o usuário recebe a internet
+                gratuita e o anunciante recebe o lead do interessado no produto ou serviço.
               </p>
             </div>
 
@@ -235,9 +223,7 @@ export function Media() {
                     <div className="relative z-10 w-16 h-16 rounded-full bg-gold text-navy flex items-center justify-center shadow-lg">
                       <Icon size={24} />
                     </div>
-                    <div className="mt-3 font-mono text-xs text-gold">
-                      0{i + 1}
-                    </div>
+                    <div className="mt-3 font-mono text-xs text-gold">0{i + 1}</div>
                     <p className="mt-2 text-sm text-off-white/85 leading-snug max-w-[220px]">
                       {step.body}
                     </p>
@@ -249,11 +235,7 @@ export function Media() {
         </div>
 
         {/* BLOCO 4 — Mídia Estática no Metrô */}
-        <div
-          ref={bloco4.ref}
-          data-visible={bloco4.visible}
-          className="reveal-root"
-        >
+        <div ref={bloco4.ref} data-visible={bloco4.visible} className="reveal-root">
           <h3 className="reveal reveal-1 font-display font-semibold text-ink text-2xl mb-2">
             Mídia Estática no Metrô
           </h3>
@@ -287,6 +269,25 @@ export function Media() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* CTA contextual — já viu os formatos, agora monta a campanha */}
+        <div className="mt-20 md:mt-24 rounded-3xl bg-navy px-8 py-12 md:px-14 md:py-14 text-center">
+          <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold mb-4">
+            / PRÓXIMO PASSO
+          </div>
+          <h3 className="font-display font-bold text-off-white text-2xl md:text-3xl leading-tight max-w-xl mx-auto">
+            Já sabe o que quer? Monte sua campanha
+          </h3>
+          <p className="mt-4 text-off-white/70 max-w-lg mx-auto leading-relaxed">
+            Escolha ambiente, mídia e pontos reais da rede, com investimento simulado a partir da
+            tabela comercial vigente.
+          </p>
+          <div className="mt-8">
+            <Link to="/planejador" className="btn-primary px-8 py-4 text-base">
+              Monte sua campanha →
+            </Link>
           </div>
         </div>
       </div>

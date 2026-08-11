@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as RedeRouteImport } from './routes/rede'
+import { Route as PlanejadorRouteImport } from './routes/planejador'
 import { Route as MidiaRouteImport } from './routes/midia'
 import { Route as GaleriaRouteImport } from './routes/galeria'
 import { Route as ContatoRouteImport } from './routes/contato'
@@ -24,6 +25,11 @@ const SobreRoute = SobreRouteImport.update({
 const RedeRoute = RedeRouteImport.update({
   id: '/rede',
   path: '/rede',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanejadorRoute = PlanejadorRouteImport.update({
+  id: '/planejador',
+  path: '/planejador',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MidiaRoute = MidiaRouteImport.update({
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/contato': typeof ContatoRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
+  '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
 }
@@ -60,6 +67,7 @@ export interface FileRoutesByTo {
   '/contato': typeof ContatoRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
+  '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
 }
@@ -69,15 +77,38 @@ export interface FileRoutesById {
   '/contato': typeof ContatoRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
+  '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/contato' | '/galeria' | '/midia' | '/rede' | '/sobre'
+  fullPaths:
+    | '/'
+    | '/contato'
+    | '/galeria'
+    | '/midia'
+    | '/planejador'
+    | '/rede'
+    | '/sobre'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/contato' | '/galeria' | '/midia' | '/rede' | '/sobre'
-  id: '__root__' | '/' | '/contato' | '/galeria' | '/midia' | '/rede' | '/sobre'
+  to:
+    | '/'
+    | '/contato'
+    | '/galeria'
+    | '/midia'
+    | '/planejador'
+    | '/rede'
+    | '/sobre'
+  id:
+    | '__root__'
+    | '/'
+    | '/contato'
+    | '/galeria'
+    | '/midia'
+    | '/planejador'
+    | '/rede'
+    | '/sobre'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -85,6 +116,7 @@ export interface RootRouteChildren {
   ContatoRoute: typeof ContatoRoute
   GaleriaRoute: typeof GaleriaRoute
   MidiaRoute: typeof MidiaRoute
+  PlanejadorRoute: typeof PlanejadorRoute
   RedeRoute: typeof RedeRoute
   SobreRoute: typeof SobreRoute
 }
@@ -103,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/rede'
       fullPath: '/rede'
       preLoaderRoute: typeof RedeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planejador': {
+      id: '/planejador'
+      path: '/planejador'
+      fullPath: '/planejador'
+      preLoaderRoute: typeof PlanejadorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/midia': {
@@ -141,6 +180,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContatoRoute: ContatoRoute,
   GaleriaRoute: GaleriaRoute,
   MidiaRoute: MidiaRoute,
+  PlanejadorRoute: PlanejadorRoute,
   RedeRoute: RedeRoute,
   SobreRoute: SobreRoute,
 }

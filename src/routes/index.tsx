@@ -9,6 +9,7 @@ import { HomeDiferenciais } from "@/components/site/HomeDiferenciais";
 import { OndeEstamos } from "@/components/site/OndeEstamos";
 import { HomeSobre } from "@/components/site/HomeSobre";
 import { HomeRede } from "@/components/site/HomeRede";
+import { HomePlanner } from "@/components/site/HomePlanner";
 import { HomeContato } from "@/components/site/HomeContato";
 
 export const Route = createFileRoute("/")({
@@ -37,6 +38,7 @@ function Index() {
         <OndeEstamos />
         <HomeSobre />
         <HomeRede />
+        <HomePlanner />
         <HomeContato />
       </main>
       <Footer />

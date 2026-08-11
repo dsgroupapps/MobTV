@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import {
   Train,
   Bus,
@@ -23,7 +24,9 @@ import {
 
 const WHATSAPP_NUMBER = "5561992590234";
 
-const categoryIcon: Record<CategoryKey, LucideIcon> = {
+// Exportado para reuso pelo Planejador de Campanha (mesmos ícones/fallback
+// visual por categoria — não duplicar em outro arquivo).
+export const categoryIcon: Record<CategoryKey, LucideIcon> = {
   metro: Train,
   terminais: Bus,
   upas: HeartPulse,
@@ -52,6 +55,15 @@ function formatNumber(value: number) {
   return value.toLocaleString("pt-BR");
 }
 
+// Heurística de correspondência ponto↔cidade por substring — mesma lógica
+// usada pelo filtro de cidade do mapa executivo e reaproveitada pelo
+// Planejador de Campanha na etapa de Região. É deliberadamente simples: só
+// casa quando o nome da cidade aparece literalmente no nome do ponto (ou
+// vice-versa), sem inferência geográfica.
+export function isCityMatch(name: string, city: string) {
+  return name.includes(city) || city.includes(name);
+}
+
 function buildInterestUrl(pointName: string) {
   const text = `Olá! Tenho interesse em anunciar no ponto "${pointName}" da rede MOBTV e gostaria de receber mais informações.`;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
@@ -60,7 +72,7 @@ function buildInterestUrl(pointName: string) {
 // True quando o ponto tem QUALQUER dado comercial granular associado —
 // controla se mostramos o indicador discreto no card e a seção de
 // "informações comerciais" no detalhe.
-function hasCommercialData(point: NetworkPoint) {
+export function hasCommercialData(point: NetworkPoint) {
   return Boolean(
     (point.produtos && point.produtos.length > 0) ||
     point.valorPorCpe ||
@@ -69,7 +81,7 @@ function hasCommercialData(point: NetworkPoint) {
   );
 }
 
-function ConnectivityDots({ connectivity }: { connectivity: Category["connectivity"] }) {
+export function ConnectivityDots({ connectivity }: { connectivity: Category["connectivity"] }) {
   return (
     <div className="flex items-center gap-2">
       {connectivity === "dual" && (
@@ -89,7 +101,13 @@ function ConnectivityDots({ connectivity }: { connectivity: Category["connectivi
 // Fallback visual quando o ponto ainda não tem fotografia própria — nunca
 // reaproveita foto de outro local. Ícone da categoria sobre um gradiente
 // navy/gold/teal com os arcos de sinal, coerente com a identidade MOBTV.
-function PhotoFallback({ Icon, size = "card" }: { Icon: LucideIcon; size?: "card" | "detail" }) {
+export function PhotoFallback({
+  Icon,
+  size = "card",
+}: {
+  Icon: LucideIcon;
+  size?: "card" | "detail";
+}) {
   const iconSize = size === "detail" ? "h-9 w-9" : "h-6 w-6";
   return (
     <div
@@ -284,7 +302,7 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
         )}
       </div>
 
-      <div className="mt-auto pt-8">
+      <div className="mt-auto pt-8 flex flex-col gap-3">
         <a
           href={buildInterestUrl(point.nome)}
           target="_blank"
@@ -293,6 +311,13 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
         >
           Tenho interesse neste ponto
         </a>
+        <Link
+          to="/planejador"
+          search={{ ponto: point.nome, categoria: category.key }}
+          className="cursor-pointer w-full text-center font-mono text-xs uppercase tracking-wider text-off-white/55 hover:text-gold transition-colors py-2"
+        >
+          + Adicionar ao planejador de campanha
+        </Link>
       </div>
     </div>
   );
@@ -309,8 +334,6 @@ export function AssetExplorer() {
   const mapReveal = useReveal<HTMLDivElement>({ threshold: 0.15 });
   const tabsReveal = useReveal<HTMLDivElement>({ threshold: 0.2 });
   const gridReveal = useReveal<HTMLDivElement>({ threshold: 0.1 });
-
-  const isCityMatch = (name: string, city: string) => name.includes(city) || city.includes(name);
 
   const visiblePoints = useMemo(() => {
     const cats = active === "todos" ? networkPoints : networkPoints.filter((c) => c.key === active);
