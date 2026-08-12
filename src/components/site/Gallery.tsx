@@ -1,187 +1,58 @@
 import { useState, useMemo } from "react";
 import { useReveal } from "@/hooks/useReveal";
-import { Wifi, Monitor } from "lucide-react";
 import transportesImg from "@/assets/network-transportes.jpg";
 import saudeImg from "@/assets/network-saude.jpg";
 import feirasImg from "@/assets/network-feiras.jpg";
 import servicosImg from "@/assets/network-servicos.jpg";
-import { networkPoints } from "@/data/network-points";
+import {
+  networkPoints,
+  pointMediaTypes,
+  type Category,
+  type CategoryKey,
+  type MediaTypeKey,
+  type NetworkPoint,
+} from "@/data/network-points";
+import { MediaTypeChips, mediaTabs } from "./AssetExplorer";
 
-// Mesma fonte de fotos por ponto do Explorador de Ativos (network-points.ts)
-// — evita duplicar o mapeamento de arquivos de public/. Alguns nomes aqui na
-// Galeria usam redação um pouco diferente da do dataset; o alias cobre só
-// essas divergências pontuais de texto, sem duplicar a lista inteira.
-const nameAlias: Record<string, string> = {
-  "Estação Central": "Estação Central (Plano Piloto)",
-  "Feira Central da Ceilândia": "Feira da Ceilândia",
-  "Shopping Popular de Ceilândia": "Shopping Popular Ceilândia",
-  "Restaurante Comunitário de Brazlândia": "Brazlândia",
-  "Restaurante Comunitário do Recanto": "Recanto",
-  "Restaurante Comunitário do Gama": "Gama",
-};
-
-const pointImageByName = new Map<string, string>();
-for (const cat of networkPoints) {
-  for (const p of cat.points) {
-    if (p.images?.[0]) pointImageByName.set(p.nome, p.images[0]);
-  }
-}
-
-function resolveImage(name: string, fallback: string): string {
-  const real = pointImageByName.get(name) ?? pointImageByName.get(nameAlias[name] ?? "");
-  return real ?? fallback;
-}
-
-type CategoryKey = "metro" | "terminais" | "saude" | "feiras" | "restaurantes" | "servicos";
-
-// dual = DOOH (telas/painéis) + WiFi; wifi = só rede WiFi Social (sem DOOH no Media Kit)
-type Connectivity = "dual" | "wifi";
-
-const categoryConnectivity: Record<CategoryKey, Connectivity> = {
-  metro: "dual",
-  terminais: "dual",
-  saude: "dual",
-  feiras: "dual",
-  restaurantes: "wifi",
-  servicos: "wifi",
-};
-
-type GalleryItem = {
-  name: string;
-  category: CategoryKey;
-  categoryLabel: string;
-  badge?: string;
-  image: string;
-};
-
-const tabs: { key: CategoryKey | "todos"; label: string }[] = [
-  { key: "todos", label: "Todos" },
-  { key: "metro", label: "Estações de Metrô" },
-  { key: "terminais", label: "Terminais Rodoviários" },
-  { key: "saude", label: "Saúde" },
-  { key: "feiras", label: "Feiras" },
-  { key: "restaurantes", label: "Restaurantes Comunitários" },
-  { key: "servicos", label: "Serviços" },
-];
-
-const categoryImages: Record<CategoryKey, string> = {
+// Fallback fotográfico por categoria — usado só quando o ponto ainda não tem
+// foto própria em network-points.ts (fonte única de local→imagem).
+const categoryFallbackImage: Record<CategoryKey, string> = {
   metro: transportesImg,
   terminais: transportesImg,
-  saude: saudeImg,
+  upas: saudeImg,
+  hospitais: saudeImg,
   feiras: feirasImg,
   restaurantes: servicosImg,
   servicos: servicosImg,
 };
 
-const rawItems: Omit<GalleryItem, "image">[] = [
-  // Metro
-  {
-    name: "Estação Central",
-    category: "metro",
-    categoryLabel: "Estações de Metrô",
-    badge: "1M+ impactos/mês",
-  },
-  {
-    name: "Estação Shopping",
-    category: "metro",
-    categoryLabel: "Estações de Metrô",
-    badge: "730 mil+ impactos/mês",
-  },
-  { name: "Estação Guará", category: "metro", categoryLabel: "Estações de Metrô" },
-  {
-    name: "Estação Praça do Relógio",
-    category: "metro",
-    categoryLabel: "Estações de Metrô",
-    badge: "1M+ impactos/mês",
-  },
-  {
-    name: "Estação Arniqueiras",
-    category: "metro",
-    categoryLabel: "Estações de Metrô",
-    badge: "1,1M+ impactos/mês",
-  },
-  {
-    name: "Estação Águas Claras",
-    category: "metro",
-    categoryLabel: "Estações de Metrô",
-    badge: "1M+ impactos/mês",
-  },
-  { name: "Estação Ceilândia Centro", category: "metro", categoryLabel: "Estações de Metrô" },
-  // Terminais
-  {
-    name: "Rodoviária do Plano Piloto",
-    category: "terminais",
-    categoryLabel: "Terminais Rodoviários",
-  },
-  {
-    name: "Terminal Interestadual de Brasília",
-    category: "terminais",
-    categoryLabel: "Terminais Rodoviários",
-  },
-  {
-    name: "Terminal BRT Santa Maria",
-    category: "terminais",
-    categoryLabel: "Terminais Rodoviários",
-    badge: "3M+ impactos/mês",
-  },
-  {
-    name: "Terminal BRT Gama",
-    category: "terminais",
-    categoryLabel: "Terminais Rodoviários",
-    badge: "1,5M+ impactos/mês",
-  },
-  { name: 'Terminal Setor "O"', category: "terminais", categoryLabel: "Terminais Rodoviários" },
-  // Saúde
-  { name: "UPA Brazlândia", category: "saude", categoryLabel: "Saúde" },
-  { name: "UPA Samambaia", category: "saude", categoryLabel: "Saúde" },
-  { name: "UPA São Sebastião", category: "saude", categoryLabel: "Saúde" },
-  { name: "Hospital Regional de Ceilândia", category: "saude", categoryLabel: "Saúde" },
-  { name: "Hospital Regional de Taguatinga", category: "saude", categoryLabel: "Saúde" },
-  { name: "Hospital Regional do Gama", category: "saude", categoryLabel: "Saúde" },
-  // Feiras
-  { name: "Feira do Guará", category: "feiras", categoryLabel: "Feiras" },
-  { name: "Feira Central da Ceilândia", category: "feiras", categoryLabel: "Feiras" },
-  { name: "Feira Azul do Gama", category: "feiras", categoryLabel: "Feiras" },
-  { name: "Feira dos Goianos", category: "feiras", categoryLabel: "Feiras" },
-  { name: "Shopping Popular de Ceilândia", category: "feiras", categoryLabel: "Feiras" },
-  // Restaurantes
-  {
-    name: "Restaurante Comunitário de Brazlândia",
-    category: "restaurantes",
-    categoryLabel: "Restaurantes Comunitários",
-  },
-  {
-    name: "Restaurante Comunitário do Recanto",
-    category: "restaurantes",
-    categoryLabel: "Restaurantes Comunitários",
-  },
-  {
-    name: "Restaurante Comunitário do Gama",
-    category: "restaurantes",
-    categoryLabel: "Restaurantes Comunitários",
-  },
-  // Serviços
-  { name: "Na Hora Ceilândia", category: "servicos", categoryLabel: "Serviços" },
-  { name: "Na Hora Taguatinga", category: "servicos", categoryLabel: "Serviços" },
-  { name: "Na Hora Rodoviária Plano Piloto", category: "servicos", categoryLabel: "Serviços" },
-  { name: "SESI LAB", category: "servicos", categoryLabel: "Serviços" },
-  { name: "Biblioteca da Ceilândia", category: "servicos", categoryLabel: "Serviços" },
+const categoryTabs: { key: CategoryKey | "todos"; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  ...networkPoints.map((c) => ({ key: c.key, label: c.label })),
 ];
 
-const items: GalleryItem[] = rawItems.map((it) => ({
-  ...it,
-  image: resolveImage(it.name, categoryImages[it.category]),
-}));
+function formatNumber(value: number) {
+  return value.toLocaleString("pt-BR");
+}
 
 export function Gallery() {
-  const [active, setActive] = useState<CategoryKey | "todos">("todos");
+  const [activeCategory, setActiveCategory] = useState<CategoryKey | "todos">("todos");
+  const [activeMedia, setActiveMedia] = useState<MediaTypeKey | "todos">("todos");
   const header = useReveal<HTMLDivElement>({ threshold: 0.2 });
   const grid = useReveal<HTMLDivElement>({ threshold: 0.1 });
 
-  const filtered = useMemo(
-    () => (active === "todos" ? items : items.filter((i) => i.category === active)),
-    [active],
-  );
+  const filtered = useMemo(() => {
+    const cats =
+      activeCategory === "todos" ? networkPoints : networkPoints.filter((c) => c.key === activeCategory);
+    const out: { point: NetworkPoint; category: Category }[] = [];
+    for (const cat of cats) {
+      for (const point of cat.points) {
+        if (activeMedia !== "todos" && !pointMediaTypes(point).includes(activeMedia)) continue;
+        out.push({ point, category: cat });
+      }
+    }
+    return out;
+  }, [activeCategory, activeMedia]);
 
   return (
     <section id="galeria" className="bg-off-white text-ink py-24 md:py-32 px-6">
@@ -199,14 +70,14 @@ export function Gallery() {
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 md:gap-3 mb-10">
-          {tabs.map((t) => {
-            const isActive = active === t.key;
+        {/* Tabs — ambiente */}
+        <div className="flex flex-wrap gap-2 md:gap-3 mb-4">
+          {categoryTabs.map((t) => {
+            const isActive = activeCategory === t.key;
             return (
               <button
                 key={t.key}
-                onClick={() => setActive(t.key)}
+                onClick={() => setActiveCategory(t.key)}
                 className={`rounded-full px-4 py-2 text-sm font-medium transition-all cursor-pointer ${
                   isActive
                     ? "bg-gold text-navy shadow-[0_6px_20px_-6px_rgba(242,183,5,0.5)]"
@@ -219,73 +90,83 @@ export function Gallery() {
           })}
         </div>
 
+        {/* Tabs — tipo de mídia */}
+        <div className="flex flex-wrap items-center gap-2 mb-10">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink/40 mr-1">
+            Tipo de mídia:
+          </span>
+          {mediaTabs.map((t) => {
+            const isActive = activeMedia === t.key;
+            return (
+              <button
+                key={t.key}
+                onClick={() => setActiveMedia(t.key)}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
+                  isActive
+                    ? "bg-teal text-navy shadow-[0_6px_20px_-6px_rgba(45,212,191,0.5)]"
+                    : "bg-navy/5 text-ink/70 ring-1 ring-ink/10 hover:bg-navy/10 hover:text-ink"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Grid */}
         <div
-          key={active}
+          key={`${activeCategory}-${activeMedia}`}
           ref={grid.ref}
           data-visible={grid.visible}
           className="reveal-root grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6"
         >
-          {filtered.map((item, i) => (
-            <article
-              key={item.name}
-              className="gallery-card group relative overflow-hidden rounded-2xl shadow-[0_8px_28px_-12px_rgba(11,18,32,0.25)] h-[280px] sm:h-[300px] lg:h-[320px]"
-              style={{ animationDelay: `${i * 60}ms` }}
-            >
-              {/* Background image */}
-              <img
-                src={item.image}
-                alt={item.name}
-                loading="lazy"
-                width={800}
-                height={600}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-              />
-              {/* Gradient overlay */}
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20"
-              />
+          {filtered.map(({ point, category }, i) => {
+            const mediaTypes = pointMediaTypes(point);
+            const image = point.images?.[0] ?? categoryFallbackImage[category.key];
+            return (
+              <article
+                key={`${category.key}-${point.nome}`}
+                className="gallery-card group relative overflow-hidden rounded-2xl shadow-[0_8px_28px_-12px_rgba(11,18,32,0.25)] h-[280px] sm:h-[300px] lg:h-[320px]"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
+                {/* Background image */}
+                <img
+                  src={image}
+                  alt={point.nome}
+                  loading="lazy"
+                  width={800}
+                  height={600}
+                  className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                />
+                {/* Gradient overlay */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-t from-navy via-navy/70 to-navy/20"
+                />
 
-              {/* Category tag + DOOH/WiFi connectivity badge */}
-              <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5">
-                <span className="inline-block rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-white/90 ring-1 ring-white/20">
-                  {item.categoryLabel}
-                </span>
-                {categoryConnectivity[item.category] === "dual" ? (
-                  <span
-                    title="WiFi + DOOH"
-                    className="inline-flex h-6 w-6 items-center justify-center rounded-full text-navy ring-1 ring-white/20 [background:linear-gradient(135deg,var(--gold)_50%,var(--teal)_50%)]"
-                  >
-                    <Monitor className="h-3 w-3" strokeWidth={2} />
-                  </span>
-                ) : (
-                  <span
-                    title="WiFi"
-                    className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-teal/80 text-navy ring-1 ring-white/20"
-                  >
-                    <Wifi className="h-3 w-3" strokeWidth={2} />
-                  </span>
-                )}
-              </div>
-
-              {/* Audit badge */}
-              {item.badge && (
-                <div className="absolute top-4 right-4 z-10">
-                  <span className="inline-block rounded-md bg-gold px-2.5 py-1 text-[11px] font-mono font-medium text-navy shadow-md">
-                    {item.badge}
+                {/* Category tag — canto superior esquerdo, sozinho (sem badge concorrente) */}
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="inline-block rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 text-[11px] font-mono uppercase tracking-wider text-white/90 ring-1 ring-white/20">
+                    {category.label}
                   </span>
                 </div>
-              )}
 
-              {/* Bottom content */}
-              <div className="relative z-10 flex h-full flex-col justify-end p-5">
-                <h3 className="font-display font-semibold text-white text-lg leading-tight">
-                  {item.name}
-                </h3>
-              </div>
-            </article>
-          ))}
+                {/* Bottom content — nome, chips de mídia e impacto num único bloco
+                    empilhado, sem sobreposição com nada mais no card */}
+                <div className="relative z-10 flex h-full flex-col justify-end gap-2 p-5">
+                  <MediaTypeChips types={mediaTypes} />
+                  <h3 className="font-display font-semibold text-white text-lg leading-tight">
+                    {point.nome}
+                  </h3>
+                  {point.impactosAuditadosMes != null && (
+                    <span className="font-mono text-xs text-white/70">
+                      {formatNumber(point.impactosAuditadosMes)} impactos/mês
+                    </span>
+                  )}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

@@ -66,6 +66,23 @@ export type Category = {
   points: NetworkPoint[];
 };
 
+/**
+ * Taxonomia de mídia exibida ao anunciante — mais específica que o rótulo
+ * comercial amplo "DOOH". Derivada diretamente do `tipo` de cada produto
+ * (que já vem do rate card: strings como 'Monitor 49"' vs "LED 2x1m") e da
+ * presença de `valorPorCpe` — não é um campo novo armazenado, é calculada a
+ * partir do mesmo dado já sourced do Media Kit, então não há como divergir.
+ */
+export type MediaTypeKey = "screen" | "led" | "wifi";
+
+export function pointMediaTypes(point: NetworkPoint): MediaTypeKey[] {
+  const types: MediaTypeKey[] = [];
+  if (point.produtos?.some((p) => p.tipo.includes("Monitor"))) types.push("screen");
+  if (point.produtos?.some((p) => p.tipo.includes("LED"))) types.push("led");
+  if (point.valorPorCpe != null) types.push("wifi");
+  return types;
+}
+
 const WIFI_CPE = 8.0; // valor único do rate card (Media Kit p.62) — mesmo para todos os pontos WiFi Ads
 
 export const networkPoints: Category[] = [
@@ -374,7 +391,6 @@ export const networkPoints: Category[] = [
       { nome: "Na Hora Gama", valorPorCpe: WIFI_CPE },
       { nome: "Na Hora Brazlândia" },
       { nome: "Na Hora Sobradinho", valorPorCpe: WIFI_CPE },
-      { nome: "SESI LAB", images: ["/sesi_lab.jpg"] },
       { nome: "Biblioteca da Ceilândia", images: ["/biblioteca_ceilandia.webp"] },
     ],
   },

@@ -12,7 +12,8 @@ import {
   midiaOptions,
   type MidiaOption,
 } from "@/data/planner-options";
-import { categoryIcon, PhotoFallback, ConnectivityDots, isCityMatch } from "./AssetExplorer";
+import { categoryIcon, PhotoFallback, MediaTypeChips, isCityMatch } from "./AssetExplorer";
+import { pointMediaTypes } from "@/data/network-points";
 
 const WHATSAPP_NUMBER = "5561992590234";
 
@@ -547,7 +548,7 @@ export function CampaignPlanner({
                               {entry.point.nome}
                             </div>
                             <div className="mt-2">
-                              <ConnectivityDots connectivity={entry.category.connectivity} />
+                              <MediaTypeChips types={pointMediaTypes(entry.point)} />
                             </div>
                           </div>
                         </button>

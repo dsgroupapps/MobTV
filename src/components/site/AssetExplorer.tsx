@@ -10,6 +10,9 @@ import {
   Building2,
   X,
   ImageOff,
+  Monitor,
+  Grid3x3,
+  Wifi,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
@@ -17,8 +20,10 @@ import { CoverageMap } from "./CoverageMap";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import {
   networkPoints,
+  pointMediaTypes,
   type Category,
   type CategoryKey,
+  type MediaTypeKey,
   type NetworkPoint,
 } from "@/data/network-points";
 
@@ -46,6 +51,62 @@ const tabs: { key: CategoryKey | "todos"; label: string }[] = [
   { key: "restaurantes", label: "Restaurantes Comunitários" },
   { key: "servicos", label: "Serviços" },
 ];
+
+export const mediaTabs: { key: MediaTypeKey | "todos"; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "screen", label: "Telas" },
+  { key: "led", label: "Painéis de LED" },
+  { key: "wifi", label: "WiFi Ads" },
+];
+
+// Identidade visual por tipo de mídia — reaproveitada pela Galeria e pelo
+// Planejador de Campanha (não duplicar). TELA = preenchimento sólido gold;
+// PAINEL LED = contorno gold-deep sobre fundo escuro (tratamento mais intenso,
+// visualmente distinto do preenchimento sólido da Tela, mesma família de cor);
+// WIFI ADS = preenchimento sólido teal.
+const mediaTypeMeta: Record<
+  MediaTypeKey,
+  { label: string; Icon: LucideIcon; className: string }
+> = {
+  screen: {
+    label: "Tela",
+    Icon: Monitor,
+    className: "bg-gold text-navy",
+  },
+  led: {
+    label: "Painel LED",
+    Icon: Grid3x3,
+    className: "bg-navy/70 backdrop-blur-sm text-gold-deep ring-2 ring-gold-deep",
+  },
+  wifi: {
+    label: "WiFi Ads",
+    Icon: Wifi,
+    className: "bg-teal text-navy",
+  },
+};
+
+// Chips legíveis por tipo de mídia — usados no card, no painel de detalhe,
+// na Galeria e no Planejador (não duplicar em outro arquivo).
+export function MediaTypeChips({ types }: { types: MediaTypeKey[] }) {
+  if (types.length === 0) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {types.map((t) => {
+        const meta = mediaTypeMeta[t];
+        const Icon = meta.Icon;
+        return (
+          <span
+            key={t}
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap ${meta.className}`}
+          >
+            <Icon className="h-3 w-3" strokeWidth={2.4} />
+            {meta.label}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -78,23 +139,6 @@ export function hasCommercialData(point: NetworkPoint) {
     point.valorPorCpe ||
     point.fluxoMensal ||
     point.impactosAuditadosMes,
-  );
-}
-
-export function ConnectivityDots({ connectivity }: { connectivity: Category["connectivity"] }) {
-  return (
-    <div className="flex items-center gap-2">
-      {connectivity === "dual" && (
-        <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-gold">
-          <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-          DOOH
-        </span>
-      )}
-      <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-teal">
-        <span className="h-1.5 w-1.5 rounded-full bg-teal" />
-        WiFi
-      </span>
-    </div>
   );
 }
 
@@ -171,6 +215,7 @@ function AssetCard({
   revealClass: string;
 }) {
   const Icon = categoryIcon[category.key];
+  const mediaTypes = pointMediaTypes(point);
   return (
     <button
       type="button"
@@ -198,11 +243,16 @@ function AssetCard({
         <div className="font-display text-base md:text-lg font-semibold leading-snug text-white">
           {point.nome}
         </div>
-        <div className="mt-auto flex items-center justify-between pt-1">
-          <ConnectivityDots connectivity={category.connectivity} />
+        <MediaTypeChips types={mediaTypes} />
+        {point.impactosAuditadosMes != null && (
+          <div className="font-mono text-xs text-off-white/60">
+            {formatNumber(point.impactosAuditadosMes)} impactos/mês
+          </div>
+        )}
+        <div className="mt-auto flex items-center justify-end pt-1">
           {hasCommercialData(point) && (
             <span className="font-mono text-[10px] uppercase tracking-wider text-off-white/40 group-hover:text-off-white/70 transition-colors">
-              ver dados →
+              Ver detalhes →
             </span>
           )}
         </div>
@@ -223,6 +273,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 function PointDetail({ point, category }: { point: NetworkPoint; category: Category }) {
   const Icon = categoryIcon[category.key];
   const hasData = hasCommercialData(point);
+  const mediaTypes = pointMediaTypes(point);
 
   return (
     <div className="flex h-full flex-col">
@@ -244,8 +295,17 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
         <SheetDescription className="sr-only">
           Detalhes comerciais do ponto {point.nome}, rede MOBTV.
         </SheetDescription>
-        <div className="mt-4">
-          <ConnectivityDots connectivity={category.connectivity} />
+        <div className="mt-5">
+          <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-off-white/45 mb-2.5">
+            Mídia disponível
+          </div>
+          {mediaTypes.length > 0 ? (
+            <MediaTypeChips types={mediaTypes} />
+          ) : (
+            <p className="text-sm text-off-white/50">
+              Modalidade ainda não publicada individualmente no rate card.
+            </p>
+          )}
         </div>
       </div>
 
@@ -325,6 +385,7 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
 
 export function AssetExplorer() {
   const [active, setActive] = useState<CategoryKey | "todos">("todos");
+  const [mediaFilter, setMediaFilter] = useState<MediaTypeKey | "todos">("todos");
   const [cityFilter, setCityFilter] = useState<string | null>(null);
   const [openPoint, setOpenPoint] = useState<{ point: NetworkPoint; category: Category } | null>(
     null,
@@ -341,11 +402,12 @@ export function AssetExplorer() {
     for (const cat of cats) {
       for (const point of cat.points) {
         if (cityFilter && !isCityMatch(point.nome, cityFilter)) continue;
+        if (mediaFilter !== "todos" && !pointMediaTypes(point).includes(mediaFilter)) continue;
         out.push({ point, category: cat });
       }
     }
     return out;
-  }, [active, cityFilter]);
+  }, [active, cityFilter, mediaFilter]);
 
   const handleCitySelect = (cityName: string) => {
     setActive("todos");
@@ -461,6 +523,28 @@ export function AssetExplorer() {
               </button>
             </div>
           )}
+
+          <div className="reveal reveal-3 mt-5 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-off-white/40 mr-1">
+              Tipo de mídia:
+            </span>
+            {mediaTabs.map((t) => {
+              const isActive = mediaFilter === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setMediaFilter(t.key)}
+                  className={`cursor-pointer rounded-full px-3.5 py-1.5 text-xs font-medium transition-all ${
+                    isActive
+                      ? "bg-teal text-navy shadow-[0_6px_20px_-6px_rgba(45,212,191,0.5)]"
+                      : "bg-white/5 text-white/70 ring-1 ring-white/10 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Block 3 — Grid */}
