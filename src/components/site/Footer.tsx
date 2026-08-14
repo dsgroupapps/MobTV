@@ -1,3 +1,5 @@
+import { Logo } from "@/components/site/Logo";
+
 function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -14,9 +16,7 @@ export function Footer() {
     <footer className="bg-navy border-t border-gold/20">
       <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
         {/* Logo */}
-        <div className="font-display text-xl font-bold text-off-white">
-          MOB<span className="text-gold">TV</span>
-        </div>
+        <Logo variant="light" className="h-7" />
 
         {/* Contato direto */}
         <div className="flex items-center gap-3">

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Logo } from "@/components/site/Logo";
 import { Link, useLocation } from "@tanstack/react-router";
 import { Menu } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -41,9 +42,7 @@ export function Header() {
     >
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <span className="font-display text-2xl font-bold text-navy tracking-tight">
-            MOB<span className="text-gold-deep">TV</span>
-          </span>
+          <Logo variant="dark" className="h-9" />
         </Link>
 
         <nav className="hidden lg:flex items-center gap-1">
