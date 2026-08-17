@@ -116,9 +116,17 @@ export const networkPoints: Category[] = [
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_ceilandia_centro.png"],
       },
-      { nome: "Estação Ceilândia Sul", valorPorCpe: WIFI_CPE },
-      { nome: "Estação Ceilândia Norte", valorPorCpe: WIFI_CPE },
-      { nome: "Estação Guariroba", valorPorCpe: WIFI_CPE },
+      {
+        nome: "Estação Ceilândia Sul",
+        valorPorCpe: WIFI_CPE,
+        images: ["/estacao_ceilandia_sul.png"],
+      },
+      {
+        nome: "Estação Ceilândia Norte",
+        valorPorCpe: WIFI_CPE,
+        images: ["/estacao_ceilandia_norte.webp"],
+      },
+      { nome: "Estação Guariroba", valorPorCpe: WIFI_CPE, images: ["/estacao_guariroba.jpg"] },
       {
         nome: "Estação Águas Claras",
         produtos: [{ tipo: "LED 3x1m", telas: 1, custoInsercao15s: 3.2 }],
@@ -153,8 +161,8 @@ export const networkPoints: Category[] = [
     label: "Terminais Rodoviários",
     connectivity: "dual",
     points: [
-      { nome: "Rodoviária do Plano Piloto" },
-      { nome: "Rodoviária de Sobradinho" },
+      { nome: "Rodoviária do Plano Piloto", images: ["/rodoviaria_plano_piloto.webp"] },
+      { nome: "Rodoviária de Sobradinho", images: ["/rodoviaria_sobradinho.webp"] },
       {
         nome: "Terminal BRT Santa Maria",
         // Tabela DOOH (p.60) tem 2 linhas para este terminal: painéis de LED e
@@ -188,7 +196,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Terminal Interestadual de Brasília",
-        images: ["/terminal_interestadual_bsb"],
+        images: ["/terminal_interestadual_brasilia.jpg"],
       },
     ],
   },
@@ -203,6 +211,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_ceilandia.jpeg"],
       },
       {
         nome: "UPA Samambaia",
@@ -226,6 +235,7 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/upa_sobradinho_2.jpg"],
       },
       {
         nome: "UPA Gama",
@@ -319,13 +329,17 @@ export const networkPoints: Category[] = [
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_gama.png"],
       },
-      { nome: "Hospital Regional de Sobradinho" },
+      {
+        nome: "Hospital Regional de Sobradinho",
+        images: ["/hospital_regional_sobradinho.jpg"],
+      },
       {
         nome: "Hospital Regional de Santa Maria",
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        images: ["/hospital_regional_santa_maria.jpg"],
       },
     ],
   },
@@ -357,8 +371,9 @@ export const networkPoints: Category[] = [
       { nome: "Shopping Popular Ceilândia", images: ["/shopping_popular_ceilandia.jpeg"] },
       // "Feira de Samambaia": a tabela de WiFi Ads lista DUAS feiras de
       // Samambaia ("Feira Samambaia" e "Feira Samambaia 2") — sem forma segura
-      // de saber qual das duas é esta, o CPE não foi associado.
-      { nome: "Feira de Samambaia" },
+      // de saber qual das duas é esta, o CPE não foi associado. A foto é segura
+      // porque só existe UM ponto "Feira de Samambaia" no dataset.
+      { nome: "Feira de Samambaia", images: ["/feira_samambaia.webp"] },
     ],
   },
   {
@@ -369,9 +384,9 @@ export const networkPoints: Category[] = [
     // — nenhum destes 6 pontos tem preço/CPE individual documentado.
     points: [
       { nome: "Brazlândia", images: ["/restaurante_comunitario_braslandia.webp"] },
-      { nome: "Sobradinho II" },
-      { nome: "Ceilândia" },
-      { nome: "São Sebastião" },
+      { nome: "Sobradinho II", images: ["/restaurante_comunitario_sobradinho2.jpg"] },
+      { nome: "Ceilândia", images: ["/restaurante_comunitario_ceilandia.webp"] },
+      { nome: "São Sebastião", images: ["/restautante_comunitario_sao_sebastiao.jpeg"] },
       { nome: "Gama", images: ["/restaurante_comunitario_gama.jpg"] },
       { nome: "Recanto", images: ["/restaurante_comunitario_recanto.jpg"] },
     ],
@@ -388,9 +403,13 @@ export const networkPoints: Category[] = [
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_rodoviaria_plano.png"],
       },
-      { nome: "Na Hora Gama", valorPorCpe: WIFI_CPE },
-      { nome: "Na Hora Brazlândia" },
-      { nome: "Na Hora Sobradinho", valorPorCpe: WIFI_CPE },
+      { nome: "Na Hora Gama", valorPorCpe: WIFI_CPE, images: ["/nahora_gama.jpeg"] },
+      { nome: "Na Hora Brazlândia", images: ["/nahora_brazlandia.jpg"] },
+      {
+        nome: "Na Hora Sobradinho",
+        valorPorCpe: WIFI_CPE,
+        images: ["/nahora_sobradinho.jpeg"],
+      },
       { nome: "Biblioteca da Ceilândia", images: ["/biblioteca_ceilandia.webp"] },
     ],
   },
