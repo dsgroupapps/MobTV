@@ -25,7 +25,6 @@ const categoryTabs: { key: CategoryKey; label: string }[] = [
   { key: "upas", label: "UPAs" },
   { key: "hospitais", label: "Hospitais" },
   { key: "feiras", label: "Feiras" },
-  { key: "restaurantes", label: "Restaurantes Comunitários" },
   { key: "servicos", label: "Serviços" },
 ];
 

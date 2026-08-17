@@ -6,7 +6,6 @@ import {
   HeartPulse,
   Stethoscope,
   Store,
-  Utensils,
   Building2,
   X,
   ImageOff,
@@ -21,6 +20,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/
 import {
   networkPoints,
   pointMediaTypes,
+  totalPointsCount,
   type Category,
   type CategoryKey,
   type MediaTypeKey,
@@ -37,7 +37,6 @@ export const categoryIcon: Record<CategoryKey, LucideIcon> = {
   upas: HeartPulse,
   hospitais: Stethoscope,
   feiras: Store,
-  restaurantes: Utensils,
   servicos: Building2,
 };
 
@@ -48,7 +47,6 @@ const tabs: { key: CategoryKey | "todos"; label: string }[] = [
   { key: "upas", label: "UPAs" },
   { key: "hospitais", label: "Hospitais" },
   { key: "feiras", label: "Feiras" },
-  { key: "restaurantes", label: "Restaurantes Comunitários" },
   { key: "servicos", label: "Serviços" },
 ];
 
@@ -456,7 +454,7 @@ export function AssetExplorer() {
             / VISÃO EXECUTIVA
           </div>
           <h2 className="reveal reveal-2 font-display font-bold text-white text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">
-            53 pontos. 16 cidades. Um só mapa.
+            {totalPointsCount} pontos. 16 cidades. Um só mapa.
           </h2>
           <p className="reveal reveal-3 mt-5 text-white/70 text-base md:text-lg leading-relaxed">
             Cobertura por cidade, num único olhar. Clique numa cidade do mapa ou explore os ativos

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import { CoverageMap } from "./CoverageMap";
+import { totalPointsCount } from "@/data/network-points";
 
 export function HomeRede() {
   const header = useReveal<HTMLDivElement>({ threshold: 0.2 });
@@ -23,7 +24,7 @@ export function HomeRede() {
             / COBERTURA
           </div>
           <h2 className="reveal reveal-2 font-display font-bold text-white text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">
-            53 pontos. 16 cidades. Um só mapa.
+            {totalPointsCount} pontos. 16 cidades. Um só mapa.
           </h2>
           <p className="reveal reveal-3 mt-5 text-white/70 text-base md:text-lg leading-relaxed">
             A MOBTV possui a maior cobertura WiFi e o maior impacto em DOOH do Distrito Federal —

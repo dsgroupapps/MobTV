@@ -10,7 +10,6 @@ const VALID_CATEGORIES: CategoryKey[] = [
   "upas",
   "hospitais",
   "feiras",
-  "restaurantes",
   "servicos",
 ];
 

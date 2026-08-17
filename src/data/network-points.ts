@@ -2,35 +2,47 @@
  * Locais da rede MOBTV, enriquecidos com o rate card 2026 (`rate-card-2026.ts`)
  * onde foi possível associar o nome do local com segurança.
  *
- * A lista de locais em si (nomes e categorias) vem do que já existia no
- * projeto (antigo `Points.tsx`). O que este arquivo adiciona é a camada
- * comercial — telas, formato, preço por inserção, CPE do WiFi Ads, fluxo
- * mensal e impactos auditados — associada ponto a ponto, manualmente, com
- * a mesma tabela de preços 2026 usada pelo Explorador de Ativos.
+ * REGRA DEFINITIVA DE ACERVO (reauditoria completa, substitui critérios
+ * anteriores): a existência de um ponto e o tipo de mídia que ele exibe
+ * (Tela / Painel LED / WiFi Ads) são determinados EXCLUSIVAMENTE por dois
+ * inventários nominais do Media Kit:
  *
- * REGRA seguida na associação: só recebeu dado comercial o local cujo nome
- * bate com uma entrada do rate card, no máximo normalizando acento/maiúscula
- * e removendo um artigo (da/de/do) ou parêntese — nunca inferindo por
- * proximidade geográfica ou "provavelmente é o mesmo lugar". Onde o Media
- * Kit nomeia o mesmo tipo de local de forma diferente em tabelas diferentes
- * (ex.: "Terminal BRT Gama" na tabela de preços DOOH vs. "BRT do Gama" na
- * tabela de WiFi Ads) e não há ambiguidade possível dentro da categoria
- * (só existe um terminal de Gama), o comentário ao lado do ponto documenta
- * essa reconciliação explicitamente. Onde havia mais de um candidato
- * possível (ex. duas feiras de Samambaia) ou nomes genuinamente diferentes,
- * o campo comercial foi deixado de fora — cada ponto sem dado comercial
- * simplesmente não tem `produtos`/`valorPorCpe`/etc., sem comentário
- * adicional quando o motivo é só "não está em nenhuma tabela do rate card".
+ *   - p.28 "Monitores e Painéis LED"  → confirma Tela (monitor) e/ou Painel LED
+ *   - p.52 "Wifi ADS — Locais com Wifi da MOBTV" → confirma WiFi Ads
+ *
+ * Um ponto só existe no catálogo se aparecer nominalmente em pelo menos uma
+ * das duas páginas. Categoria genérica, ícone de mapa, foto em public/ ou
+ * presença no site antigo NUNCA justificam manter um ponto — só a
+ * página 28 e/ou 52. Preço, fluxo e impacto auditado continuam vindo de
+ * outras tabelas do Media Kit (p.39, p.60-62), associados apenas quando há
+ * correspondência inequívoca com um ponto já confirmado por p.28/p.52.
+ *
+ * Normalização permitida ao cruzar as duas listas: acento/maiúscula, artigo
+ * (da/de/do), parêntese, e variações óbvias de escrita da mesma entidade
+ * (ex.: "UPA da Ceilândia" = "UPA Ceilândia"; "Metrô Estação Central" =
+ * "Estação Central"; "Terminal Rodoviário de Sobradinho I" = "Rodoviária de
+ * Sobradinho"). Nomes genuinamente diferentes (ex.: "Feira de Samambaia" vs.
+ * "Feira Samambaia 2") são tratados como pontos distintos, nunca fundidos.
+ *
+ * Nesta reauditoria, comparado ao levantamento anterior (que usava a tabela
+ * de preços p.60-62 e páginas de fluxo como fonte de existência):
+ *   - REMOVIDOS por não constarem em p.28 nem p.52: Terminal Interestadual de
+ *     Brasília; os 6 Restaurantes Comunitários; Biblioteca da Ceilândia.
+ *   - ADICIONADO: Feira Samambaia 2 (p.52, item 14 — distinta de "Feira de
+ *     Samambaia", item 13; ver investigação no comentário do ponto).
+ *   - CORRIGIDOS (existiam, badge errada): Estação Águas Claras e Estação
+ *     Arniqueiras perdem WiFi Ads (não estão nas 8 estações de metrô da p.52);
+ *     Rodoviária do Plano Piloto, Hospital Regional de Sobradinho, Feira de
+ *     Samambaia e Na Hora Brazlândia ganham WiFi Ads (estão na p.52 e não
+ *     tinham sido associados antes).
  *
  * `connectivity` (dual = DOOH+WiFi, wifi = só WiFi Social) é a mesma
- * classificação por categoria já usada no projeto, sourced na "Atuação
- * Diversificada" do Media Kit (p.28/33) — não foi alterada por este arquivo.
+ * classificação por categoria já usada no projeto — não alterada aqui.
  */
 
 export type Connectivity = "dual" | "wifi";
 
-export type CategoryKey =
-  "metro" | "terminais" | "upas" | "hospitais" | "feiras" | "restaurantes" | "servicos";
+export type CategoryKey = "metro" | "terminais" | "upas" | "hospitais" | "feiras" | "servicos";
 
 /** Um formato de mídia DOOH disponível no ponto (pode haver mais de um por local). */
 export type DoohProduct = {
@@ -45,7 +57,7 @@ export type NetworkPoint = {
   nome: string;
   /** Formatos DOOH com preço — ausente quando o rate card não lista o ponto. */
   produtos?: DoohProduct[];
-  /** WiFi Ads — custo por engajamento (CPE), quando o ponto está na lista de WiFi Ads. */
+  /** WiFi Ads — custo por engajamento (CPE), quando o ponto está na lista de WiFi Ads (p.52). */
   valorPorCpe?: number;
   /** Fluxo mensal de passageiros — só existe para as 5 estações de Metrô com painel de LED. */
   fluxoMensal?: number;
@@ -93,15 +105,22 @@ export const networkPoints: Category[] = [
     points: [
       {
         nome: "Estação Central (Plano Piloto)",
+        // p.28: "Metrô Estação Central — 2 Painéis de LED". p.52 item 1: WiFi.
         // rate-card-2026 tem 2 painéis para "Estação Central" (entrada+saída),
         // mesmo fluxo mensal reportado nos dois — não somado.
         produtos: [{ tipo: "LED 4x1,2m / 3x1,2m", telas: 2, custoInsercao15s: 4.9 }],
         valorPorCpe: WIFI_CPE,
         fluxoMensal: 478_000,
+        // Auditoria (p.39) tem 2 linhas para Central (Entrada 1.025.704 + Escada
+        // 1.141.956) — painéis distintos, cada um gera impacto próprio, por isso
+        // somados aqui (diferente do fluxoMensal acima, que é o mesmo fluxo de
+        // passageiros relatado nos dois painéis, não duas contagens aditivas).
+        impactosAuditadosMes: 2_167_660,
         images: ["/central_rodoviaria.jpg", "/central_rodoviaria2.jpg"],
       },
       {
         nome: "Estação Shopping",
+        // p.28: "Metrô Estação Shopping — 1 Painel de LED". p.52 item 2: WiFi.
         produtos: [{ tipo: "LED 3x2m", telas: 1, custoInsercao15s: 3.2 }],
         valorPorCpe: WIFI_CPE,
         fluxoMensal: 263_000,
@@ -109,28 +128,46 @@ export const networkPoints: Category[] = [
         impactosAuditadosMes: 732_239,
         images: ["/estacao_shopping.jpg"],
       },
-      { nome: "Estação Feira", valorPorCpe: WIFI_CPE, images: ["/estacao_metro_feira_guara.jpg"] },
-      { nome: "Estação Guará", valorPorCpe: WIFI_CPE, images: ["/estacao_metro_guara.png"] },
+      {
+        // p.52 item 4: "Estação Feira do Guará Metrô/DF" — estação de metrô,
+        // não confundir com o ponto "Feira do Guará" (categoria Feiras).
+        // Não aparece em p.28 (sem LED/monitor confirmado).
+        nome: "Estação Feira",
+        valorPorCpe: WIFI_CPE,
+        images: ["/estacao_metro_feira_guara.jpg"],
+      },
+      {
+        nome: "Estação Guará",
+        valorPorCpe: WIFI_CPE,
+        images: ["/estacao_metro_guara.png"],
+      }, // p.52 item 3.
       {
         nome: "Estação Ceilândia Centro",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_ceilandia_centro.png"],
-      },
+      }, // p.52 item 5.
       {
         nome: "Estação Ceilândia Sul",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_sul.png"],
-      },
+      }, // p.52 item 6.
       {
         nome: "Estação Ceilândia Norte",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_norte.webp"],
-      },
-      { nome: "Estação Guariroba", valorPorCpe: WIFI_CPE, images: ["/estacao_guariroba.jpg"] },
+      }, // p.52 item 7.
+      {
+        nome: "Estação Guariroba",
+        valorPorCpe: WIFI_CPE,
+        images: ["/estacao_guariroba.jpg"],
+      }, // p.52 item 8.
       {
         nome: "Estação Águas Claras",
+        // p.28: "Metrô Estação Águas Claras — 1 Painel de LED". NÃO está entre
+        // as 8 estações de metrô da p.52 — sem valorPorCpe (removido nesta
+        // reauditoria; a versão anterior herdava WiFi de uma tabela de preços
+        // que não é mais a fonte de existência/mídia).
         produtos: [{ tipo: "LED 3x1m", telas: 1, custoInsercao15s: 3.2 }],
-        valorPorCpe: WIFI_CPE,
         fluxoMensal: 269_000,
         // Auditoria (p.39): "Metrô Águas Claras".
         impactosAuditadosMes: 1_000_000,
@@ -138,8 +175,9 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Estação Arniqueiras",
+        // p.28: "Metrô Estação Arniqueiras — 1 Painel de LED". Mesma situação
+        // de Águas Claras: não está na p.52, sem valorPorCpe.
         produtos: [{ tipo: "LED 3x1m", telas: 1, custoInsercao15s: 3.2 }],
-        valorPorCpe: WIFI_CPE,
         fluxoMensal: 275_000,
         // Auditoria (p.39): "Metrô Arniqueiras".
         impactosAuditadosMes: 1_128_365,
@@ -147,8 +185,9 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Estação Praça do Relógio",
+        // p.28: "Metrô Praça do Relógio — 1 Painel de LED". Não está na p.52
+        // (que lista só 8 das 11 estações de metrô) — sem valorPorCpe.
         produtos: [{ tipo: "LED 2,2x3m", telas: 1, custoInsercao15s: 3.2 }],
-        valorPorCpe: WIFI_CPE,
         fluxoMensal: 204_000,
         // Auditoria (p.39): "Metrô Praça do Relógio".
         impactosAuditadosMes: 1_063_504,
@@ -161,32 +200,60 @@ export const networkPoints: Category[] = [
     label: "Terminais Rodoviários",
     connectivity: "dual",
     points: [
-      { nome: "Rodoviária do Plano Piloto", images: ["/rodoviaria_plano_piloto.webp"] },
-      { nome: "Rodoviária de Sobradinho", images: ["/rodoviaria_sobradinho.webp"] },
+      {
+        // p.52 item 26: "Rodoviária do Plano Piloto" — nome idêntico, sem
+        // ambiguidade. Não está em p.28 (sem Tela/LED confirmado).
+        nome: "Rodoviária do Plano Piloto",
+        valorPorCpe: WIFI_CPE,
+        images: ["/rodoviaria_plano_piloto.webp"],
+      },
+      {
+        nome: "Rodoviária de Sobradinho",
+        // p.28 item 9 e p.52 item 27 usam o mesmo nome, "Terminal Rodoviário
+        // de Sobradinho I" — único terminal de Sobradinho no Media Kit, sem
+        // ambiguidade. p.28: 2 monitores (sem preço de inserção publicado,
+        // mesmo padrão da UPA Ceilândia Setor O). p.52: WiFi Ads.
+        produtos: [{ tipo: 'Monitor 49"', telas: 2 }],
+        valorPorCpe: WIFI_CPE,
+        images: ["/rodoviaria_sobradinho.webp"],
+      },
       {
         nome: "Terminal BRT Santa Maria",
-        // Tabela DOOH (p.60) tem 2 linhas para este terminal: painéis de LED e
-        // monitores. Tabela WiFi Ads (p.62) chama o mesmo terminal de "Terminal
-        // de Santa Maria" — único terminal de Santa Maria no Media Kit, sem
-        // ambiguidade dentro da categoria.
+        // p.28 itens 6+26 ("Terminal do BRT de Santa Maria"): 2 monitores + 2
+        // painéis de LED. p.52 item 28 ("Terminal BRT Santa Maria"): WiFi.
+        // Tabela de preços (p.60) diz 3 painéis de LED aqui — diverge do
+        // inventário nominal (p.28) e das fotos numeradas dos painéis (p.31),
+        // que mostram só 2. Mantido 3 por seguir a tabela de preços para o
+        // valor comercial; divergência entre páginas do próprio Media Kit,
+        // não resolvida pela MOBTV.
         produtos: [
           { tipo: "LED 2x1m", telas: 3, custoInsercao15s: 3.2, custoInsercao30s: 5.81 },
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        // Auditoria (p.39): "BRT Santa Maria 1" 2.985.180 + "BRT Santa Maria 2"
+        // 760.420 — 2 painéis distintos, somados (mesmo critério do impacto de
+        // Estação Central).
+        impactosAuditadosMes: 3_745_600,
         images: ["/brt_santamaria.jpg"],
       },
       {
         nome: "Terminal BRT Gama",
-        // Mesma reconciliação: WiFi Ads (p.62) chama de "BRT do Gama".
+        // p.28 itens 7+27 ("Terminal do BRT do Gama"): 2 monitores + 2 painéis
+        // de LED. p.52 item 30 ("Terminal BRT Gama"): WiFi. Mesma nota de
+        // divergência 2 vs 3 painéis de LED entre p.28/31 e p.60 — mantido 3.
         produtos: [
           { tipo: "LED 2x1m", telas: 3, custoInsercao15s: 3.2, custoInsercao30s: 5.81 },
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         valorPorCpe: WIFI_CPE,
+        // Auditoria (p.39): "BRT Gama 1" 789.953 + "BRT Gama 2" 1.359.220.
+        impactosAuditadosMes: 2_149_173,
         images: ["/brt_gama.jpg"],
       },
       {
+        // p.28 item 8 e p.52 item 29 usam o mesmo nome, 'Terminal do "Setor
+        // O"' — 3 monitores (p.28) + WiFi (p.52).
         nome: 'Terminal Setor "O"',
         produtos: [
           { tipo: 'Monitor 49"', telas: 3, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
@@ -194,10 +261,13 @@ export const networkPoints: Category[] = [
         valorPorCpe: WIFI_CPE,
         images: ["/terminal_setor_o.jpg"],
       },
-      {
-        nome: "Terminal Interestadual de Brasília",
-        images: ["/terminal_interestadual_brasilia.jpg"],
-      },
+      // REMOVIDO nesta reauditoria: "Terminal Interestadual de Brasília" não
+      // aparece em p.28 nem em p.52. A versão anterior do dataset associava
+      // WiFi Ads a este ponto via "Rodoviária Interestadual" (tabela de
+      // preços p.62), mas essa tabela deixou de ser a fonte de existência —
+      // sem suporte nominal nas duas páginas de referência, o ponto foi
+      // removido do catálogo. Imagem /terminal_interestadual_brasilia.jpg
+      // removida de public/ junto com a entrada.
     ],
   },
   {
@@ -206,6 +276,7 @@ export const networkPoints: Category[] = [
     connectivity: "dual",
     points: [
       {
+        // p.28 item 11: "UPA da Ceilândia". p.52 item 39: "UPA Ceilândia".
         nome: "UPA Ceilândia",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
@@ -223,7 +294,8 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA São Sebastião",
-        // Só na tabela DOOH — não aparece na lista de WiFi Ads (p.62).
+        // p.28 item 13: "UPA de São Sebastião". Não está na p.52 (40 itens) —
+        // sem valorPorCpe.
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -255,8 +327,9 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Riacho Fundo II",
-        // Rate card diz só "UPA Riacho Fundo" (sem "II") nas duas tabelas —
-        // única UPA de Riacho Fundo no Media Kit.
+        // p.28 item 17: "UPA do Riacho Fundo II". p.52 item 40: "UPA Riacho
+        // Fundo" (sem "II") — única UPA de Riacho Fundo no Media Kit, sem
+        // ambiguidade.
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -265,8 +338,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Planaltina",
-        // Tabela DOOH diz "UPA Rajadinha Planaltina" (bairro dentro de
-        // Planaltina); WiFi Ads e inventário de LED dizem só "UPA Planaltina".
+        // p.28 item 18: "UPA de Planaltina". p.52 item 36: "UPA Planaltina".
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -291,9 +363,9 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Ceilândia Setor O",
-        // Inventário de LED (p.28) confirma 1 monitor em 'UPA "Setor O"', mas
-        // a tabela de preços DOOH (p.60) não tem linha própria para ela — por
-        // isso aparece a tela, mas não o preço por inserção.
+        // p.28 item 10: 'UPA Setor "O"' — 1 monitor, sem preço de inserção
+        // publicado em nenhuma tabela. p.52 item 31: 'UPA Ceilândia II "Setor
+        // O"' — WiFi.
         produtos: [{ tipo: 'Monitor 49"', telas: 1 }],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_ceilandia_ii_setor_o.png"],
@@ -331,6 +403,12 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Hospital Regional de Sobradinho",
+        // Não está em p.28 (sem Tela confirmada). p.52 item 18: "Hospital
+        // Regional Sobradinho" — WiFi Ads adicionado nesta reauditoria (a
+        // versão anterior deixava sem preço por seguir só a tabela de preços
+        // p.62, que não lista Sobradinho entre os 4 hospitais — mas a p.52 é
+        // agora a fonte de existência/mídia, e ela confirma).
+        valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_sobradinho.jpg"],
       },
       {
@@ -357,38 +435,41 @@ export const networkPoints: Category[] = [
         images: ["/feira_guara.png"],
       },
       { nome: "Feira dos Goianos", valorPorCpe: WIFI_CPE, images: ["/feira_goianos.jpg"] },
-      { nome: "Feira Azul do Gama", images: ["/feira_azul_gama.png"] },
       {
         nome: "Feira Modelo de Sobradinho I",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_modelo.jpeg", "/feira_sobradinho1.jpg"],
       },
       {
+        // p.52 item 9: "Feira Central da Ceilândia".
         nome: "Feira da Ceilândia",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_central_ceilandia.jpeg"],
       },
-      { nome: "Shopping Popular Ceilândia", images: ["/shopping_popular_ceilandia.jpeg"] },
-      // "Feira de Samambaia": a tabela de WiFi Ads lista DUAS feiras de
-      // Samambaia ("Feira Samambaia" e "Feira Samambaia 2") — sem forma segura
-      // de saber qual das duas é esta, o CPE não foi associado. A foto é segura
-      // porque só existe UM ponto "Feira de Samambaia" no dataset.
-      { nome: "Feira de Samambaia", images: ["/feira_samambaia.webp"] },
-    ],
-  },
-  {
-    key: "restaurantes",
-    label: "Restaurantes Comunitários",
-    connectivity: "wifi",
-    // O rate card não tem uma categoria própria para Restaurantes Comunitários
-    // — nenhum destes 6 pontos tem preço/CPE individual documentado.
-    points: [
-      { nome: "Brazlândia", images: ["/restaurante_comunitario_braslandia.webp"] },
-      { nome: "Sobradinho II", images: ["/restaurante_comunitario_sobradinho2.jpg"] },
-      { nome: "Ceilândia", images: ["/restaurante_comunitario_ceilandia.webp"] },
-      { nome: "São Sebastião", images: ["/restautante_comunitario_sao_sebastiao.jpeg"] },
-      { nome: "Gama", images: ["/restaurante_comunitario_gama.jpg"] },
-      { nome: "Recanto", images: ["/restaurante_comunitario_recanto.jpg"] },
+      {
+        // INVESTIGAÇÃO "Feira de Samambaia" vs "Feira Samambaia 2" (pedida
+        // explicitamente): a p.52 lista as duas como itens numerados
+        // distintos (13 e 14), no mesmo padrão usado para todo par de locais
+        // genuinamente diferentes na página (ex.: "UPA Ceilândia II Setor O"
+        // vs "UPA Ceilândia", itens 31 e 39). Não há nenhuma nota, asterisco
+        // ou referência cruzada em nenhuma das 63 páginas do Media Kit
+        // sugerindo que sejam o mesmo local com nomes diferentes — e
+        // Samambaia é uma RA grande, plausível ter 2 feiras distintas. Tratado
+        // como 2 pontos separados (ver "Feira Samambaia 2" abaixo). WiFi Ads
+        // adicionado a este ponto (não tinha nenhuma mídia antes).
+        nome: "Feira de Samambaia",
+        valorPorCpe: WIFI_CPE,
+        images: ["/feira_samambaia.webp"],
+      },
+      {
+        // NOVO ponto (não existia no dataset). p.52 item 14: "Feira Samambaia
+        // 2" — ver investigação no comentário de "Feira de Samambaia" acima.
+        // Sem foto própria: nenhuma imagem em public/ identifica este local
+        // especificamente, e reutilizar a foto de "Feira de Samambaia" seria
+        // apresentar um local errado como se fosse este.
+        nome: "Feira Samambaia 2",
+        valorPorCpe: WIFI_CPE,
+      },
     ],
   },
   {
@@ -399,18 +480,44 @@ export const networkPoints: Category[] = [
       { nome: "Na Hora Ceilândia", valorPorCpe: WIFI_CPE, images: ["/na_hora_ceilandia.jpg"] },
       { nome: "Na Hora Taguatinga", valorPorCpe: WIFI_CPE, images: ["/na_hora_taguatinga.jpg"] },
       {
+        // p.52 item 21: "Na Hora - Rodoviária Plano Piloto".
         nome: "Na Hora Rodoviária Plano Piloto",
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_rodoviaria_plano.png"],
       },
       { nome: "Na Hora Gama", valorPorCpe: WIFI_CPE, images: ["/nahora_gama.jpeg"] },
-      { nome: "Na Hora Brazlândia", images: ["/nahora_brazlandia.jpg"] },
+      {
+        // p.52 item 24: "Na Hora - Brazlândia" — WiFi Ads adicionado nesta
+        // reauditoria (a versão anterior deixava sem preço por seguir só a
+        // tabela de preços p.62, que não lista Brazlândia entre as 5 unidades
+        // de Na Hora — mas a p.52 confirma).
+        nome: "Na Hora Brazlândia",
+        valorPorCpe: WIFI_CPE,
+        images: ["/nahora_brazlandia.jpg"],
+      },
       {
         nome: "Na Hora Sobradinho",
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_sobradinho.jpeg"],
       },
-      { nome: "Biblioteca da Ceilândia", images: ["/biblioteca_ceilandia.webp"] },
+      // REMOVIDOS nesta reauditoria por não constarem em p.28 nem p.52:
+      // categoria "Restaurantes Comunitários" inteira (6 pontos: Brazlândia,
+      // Sobradinho II, Ceilândia, São Sebastião, Gama, Recanto) e "Biblioteca
+      // da Ceilândia". Ambos só apareciam como ícone genérico no mapa de
+      // cobertura, nunca nomeados individualmente em nenhuma das 63 páginas
+      // do Media Kit — não atendem mais à regra de acervo. Imagens
+      // correspondentes removidas de public/ junto com as entradas.
     ],
   },
 ];
+
+/**
+ * Total de pontos nomeados neste dataset — única fonte para qualquer texto do
+ * tipo "X pontos" que descreva literalmente o catálogo abaixo (ex.: o
+ * cabeçalho do Explorador de Ativos). Não confundir com `networkFootprint`
+ * (mobtv-data.ts), que cita o número "53 pontos" impresso no mapa de
+ * cobertura do Media Kit (p.33/47) — uma métrica agregada da MOBTV, não a
+ * contagem de itens individualmente nomeados/detalhados aqui. Os dois números
+ * podem divergir sem que isso seja um bug.
+ */
+export const totalPointsCount = networkPoints.reduce((sum, cat) => sum + cat.points.length, 0);

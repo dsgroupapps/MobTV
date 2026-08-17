@@ -25,7 +25,15 @@ export const auditedImpacts = {
     'Media Kit p.39, tabela "Auditoria" — Total de Impactos Auditáveis. Fonte: Datavisiooh, dados de 2024.',
 };
 
-/** Pegada física da rede: pontos e cidades cobertos (WiFi + DOOH combinados). */
+/**
+ * Pegada física da rede: pontos e cidades cobertos (WiFi + DOOH combinados).
+ * Citação direta do número impresso no mapa de cobertura do Media Kit — não
+ * é derivado de `networkPoints` (network-points.ts) e pode divergir do total
+ * de itens individualmente nomeados/detalhados lá (ver `totalPointsCount`).
+ * Reauditoria completa do Media Kit (63 páginas) não encontrou suporte
+ * nominal para todos os 53 nas tabelas granulares — o número aqui reflete o
+ * que o próprio Media Kit imprime, não uma contagem re-derivada.
+ */
 export const networkFootprint = {
   points: 53,
   cities: 16,

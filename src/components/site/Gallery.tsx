@@ -22,7 +22,6 @@ const categoryFallbackImage: Record<CategoryKey, string> = {
   upas: saudeImg,
   hospitais: saudeImg,
   feiras: feirasImg,
-  restaurantes: servicosImg,
   servicos: servicosImg,
 };
 
