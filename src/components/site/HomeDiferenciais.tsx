@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import { Camera, Eye, MessageCircle, MapPin } from "lucide-react";
-import painelImg from "@/assets/media-painel.jpg";
+import { mediaFormatExample } from "@/data/media-format-examples";
+
+const painel = mediaFormatExample("painel-estatico");
 
 const diferenciais = [
   {
@@ -50,11 +52,12 @@ export function HomeDiferenciais() {
             {/* Image */}
             <div className="reveal reveal-2 relative overflow-hidden rounded-2xl shadow-[0_20px_50px_-20px_rgba(11,18,32,0.3)]">
               <img
-                src={painelImg}
-                alt="Painel de LED da MOBTV em estação de metrô"
+                src={painel.image}
+                alt="Exemplo ilustrativo — Painel Estático da MOBTV em estação de metrô"
                 loading="lazy"
-                width={1024}
-                height={768}
+                width={1672}
+                height={941}
+                style={{ objectPosition: painel.objectPosition }}
                 className="block w-full h-[360px] md:h-[440px] object-cover"
               />
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent" />

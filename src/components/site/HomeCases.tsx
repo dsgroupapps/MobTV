@@ -1,15 +1,13 @@
 import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
-import caseEvolve from "@/assets/case-evolve.jpg";
-import caseBluefit from "@/assets/case-bluefit.jpg";
-import caseVivo from "@/assets/case-vivo.jpg";
+import { mediaFormatExample } from "@/data/media-format-examples";
 
-// Teaser da seção completa de Cases, que vive em /sobre. Mesmas 3 execuções
-// reais (Media Kit p.55-59) — aqui só como prova rápida de escala na Home.
-const logos = [
-  { cliente: "Evolve", imagem: caseEvolve },
-  { cliente: "Bluefit", imagem: caseBluefit },
-  { cliente: "Vivo Total", imagem: caseVivo },
+// Teaser da seção de exemplos de mídia, que vive em /sobre. Mesmos mockups
+// de aplicação (Media Kit p.55-59) — são simulações, não campanhas reais.
+const exemplos = [
+  mediaFormatExample("envelopamento"),
+  mediaFormatExample("midia-interna"),
+  mediaFormatExample("painel-estatico"),
 ];
 
 export function HomeCases() {
@@ -21,10 +19,10 @@ export function HomeCases() {
         <div className="reveal reveal-1 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
             <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold-deep mb-3">
-              / CASES
+              / POSSIBILIDADES DE MÍDIA
             </div>
             <h2 className="font-display font-bold text-ink text-2xl sm:text-3xl">
-              Marcas que já ocuparam a rede
+              Imagine sua marca ocupando a rede
             </h2>
           </div>
           <Link
@@ -32,20 +30,21 @@ export function HomeCases() {
             hash="cases"
             className="font-mono text-sm text-gold-deep hover:text-gold transition-colors shrink-0"
           >
-            Ver todos os cases →
+            Conheça os formatos →
           </Link>
         </div>
 
         <div className="reveal reveal-2 mt-8 grid grid-cols-3 gap-3 md:gap-5">
-          {logos.map((item) => (
+          {exemplos.map((item) => (
             <div
-              key={item.cliente}
+              key={item.key}
               className="group relative aspect-[4/3] overflow-hidden rounded-xl md:rounded-2xl"
             >
               <img
-                src={item.imagem}
-                alt={item.cliente}
+                src={item.image}
+                alt={`Exemplo ilustrativo — ${item.title}`}
                 loading="lazy"
+                style={{ objectPosition: item.objectPosition }}
                 className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
               />
               <div
@@ -54,7 +53,7 @@ export function HomeCases() {
               />
               <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
                 <span className="font-mono text-[11px] md:text-xs uppercase tracking-wider text-off-white">
-                  {item.cliente}
+                  {item.title}
                 </span>
               </div>
             </div>

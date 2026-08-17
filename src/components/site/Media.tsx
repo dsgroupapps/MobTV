@@ -12,10 +12,7 @@ import {
   Users,
   ShoppingBag,
 } from "lucide-react";
-import envelopamentoImg from "@/assets/media-envelopamento.jpg";
-import imersivaImg from "@/assets/media-imersiva.jpg";
-import catracasImg from "@/assets/media-catracas.jpg";
-import painelImg from "@/assets/media-painel.jpg";
+import { mediaFormatExample } from "@/data/media-format-examples";
 
 const possibilidades = [
   "Nome da empresa no SSID da rede (ex: WiFi Free Minha Empresa)",
@@ -50,24 +47,24 @@ const jornada = [
 
 const metroCards = [
   {
+    ...mediaFormatExample("envelopamento"),
     title: "Envelopamento de Vagão",
     body: "O envelopamento externo do vagão traz o efeito 'uau' que chama a atenção de todos os usuários do Metrô.",
-    image: envelopamentoImg,
   },
   {
+    ...mediaFormatExample("midia-interna"),
     title: "Experiência Imersiva",
     body: "Adesivação interna que cria uma experiência imersiva, gerando ainda mais reforço de marca.",
-    image: imersivaImg,
   },
   {
+    ...mediaFormatExample("adesivacao-catracas"),
     title: "Adesivação de Catracas",
     body: "Mídia off que conversa com a mídia on. Alto impacto em qualquer estação de Brasília.",
-    image: catracasImg,
   },
   {
+    ...mediaFormatExample("painel-estatico"),
     title: "Painel Estático",
     body: "Maior visibilidade, pontos estratégicos, grande fluxo de pessoas e excelente número de impactos.",
-    image: painelImg,
   },
 ];
 
@@ -257,9 +254,10 @@ export function Media() {
                 <img
                   src={card.image}
                   alt={card.title}
-                  width={1024}
-                  height={768}
+                  width={1672}
+                  height={941}
                   loading="lazy"
+                  style={{ objectPosition: card.objectPosition }}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/60 to-transparent" />
