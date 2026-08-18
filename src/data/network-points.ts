@@ -464,11 +464,15 @@ export const networkPoints: Category[] = [
       {
         // NOVO ponto (não existia no dataset). p.52 item 14: "Feira Samambaia
         // 2" — ver investigação no comentário de "Feira de Samambaia" acima.
-        // Sem foto própria: nenhuma imagem em public/ identifica este local
-        // especificamente, e reutilizar a foto de "Feira de Samambaia" seria
-        // apresentar um local errado como se fosse este.
+        // Sem foto própria do local: usa a mesma foto genérica de feira
+        // (senhora segurando celular com o WiFi Social DF) já usada no card
+        // grande da categoria "Feiras" em Network.tsx (src/assets/network-
+        // feiras.jpg, copiada para public/feira_samambaia_2.jpg) — não é uma
+        // foto específica deste ponto, só reaproveita a mesma imagem genérica
+        // já usada em outro lugar do site para a categoria.
         nome: "Feira Samambaia 2",
         valorPorCpe: WIFI_CPE,
+        images: ["/feira_samambaia_2.jpg"],
       },
     ],
   },
