@@ -222,6 +222,36 @@
   animation-delay: 360ms;
 }
 
+/* Hero — carrossel de fotografias: entrada da legenda/kicker ao trocar de
+   slide (remontada via key no React, então a animação replica sozinha). */
+@keyframes hero-caption-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hero-caption-enter {
+  animation: hero-caption-enter 0.6s ease-out both;
+}
+
+/* Hero — zoom cinematográfico leve e contínuo, independente do crossfade
+   (roda em todas as camadas empilhadas; só a ativa fica visível). */
+@keyframes hero-slide-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.06);
+  }
+}
+.hero-slide-zoom {
+  animation: hero-slide-zoom 16s ease-in-out infinite alternate;
+}
+
 /* Scroll-reveal (stagger fade+slide) */
 .reveal {
   opacity: 0;

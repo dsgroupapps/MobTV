@@ -53,6 +53,20 @@ export type DoohProduct = {
   custoInsercao30s?: number;
 };
 
+/**
+ * Localização real do ponto no Google Maps. `lat`/`lng` vêm do marcador
+ * exato (par `!3d..!4d..` do link resolvido), não do centro de viewport
+ * (`@lat,lng` pode ser um enquadramento mais largo/deslocado). `mapsUrl` é o
+ * link de compartilhamento original (maps.app.goo.gl) fornecido pela MOBTV —
+ * mantido como está para o CTA "Ver no Google Maps", nunca substituído pela
+ * URL longa resolvida.
+ */
+export type PointLocation = {
+  lat: number;
+  lng: number;
+  mapsUrl: string;
+};
+
 export type NetworkPoint = {
   nome: string;
   /** Formatos DOOH com preço — ausente quando o rate card não lista o ponto. */
@@ -69,6 +83,13 @@ export type NetworkPoint = {
    * reconstruído, ex.: images: ["/estacao_aguas.jpg"].
    */
   images?: string[];
+  /**
+   * Localização no Google Maps. Ausente = ainda não recebeu link da MOBTV
+   * (não inferir por nome — pontos sem este campo simplesmente não mostram
+   * bloco de mapa). Primeiro lote associado em 2026-08; demais pontos
+   * recebem em lotes futuros.
+   */
+  location?: PointLocation;
 };
 
 export type Category = {
@@ -117,6 +138,11 @@ export const networkPoints: Category[] = [
         // passageiros relatado nos dois painéis, não duas contagens aditivas).
         impactosAuditadosMes: 2_167_660,
         images: ["/central_rodoviaria.jpg", "/central_rodoviaria2.jpg"],
+        location: {
+          lat: -15.7936771,
+          lng: -47.8834736,
+          mapsUrl: "https://maps.app.goo.gl/WFqFmBbCcHb6SeYU8",
+        },
       },
       {
         nome: "Estação Shopping",
@@ -127,6 +153,11 @@ export const networkPoints: Category[] = [
         // Auditoria (p.39) lista "Metrô Shopping" — mesmo painel, nome abreviado.
         impactosAuditadosMes: 732_239,
         images: ["/estacao_shopping.jpg"],
+        location: {
+          lat: -15.83242,
+          lng: -47.95069,
+          mapsUrl: "https://maps.app.goo.gl/PVgnTy35Ei33LPo58",
+        },
       },
       {
         // p.52 item 4: "Estação Feira do Guará Metrô/DF" — estação de metrô,
@@ -135,31 +166,61 @@ export const networkPoints: Category[] = [
         nome: "Estação Feira",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_feira_guara.jpg"],
+        location: {
+          lat: -15.8230865,
+          lng: -47.9750484,
+          mapsUrl: "https://maps.app.goo.gl/EBV61F5C7ckzmkuGA",
+        },
       },
       {
         nome: "Estação Guará",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_guara.png"],
+        location: {
+          lat: -15.8262757,
+          lng: -47.9828693,
+          mapsUrl: "https://maps.app.goo.gl/2Cizd26467QBvVp18",
+        },
       }, // p.52 item 3.
       {
         nome: "Estação Ceilândia Centro",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_ceilandia_centro.png"],
+        location: {
+          lat: -15.82217,
+          lng: -48.11211,
+          mapsUrl: "https://maps.app.goo.gl/udKXViCx71mfbhAQ9",
+        },
       }, // p.52 item 5.
       {
         nome: "Estação Ceilândia Sul",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_sul.png"],
+        location: {
+          lat: -15.83778,
+          lng: -48.10329,
+          mapsUrl: "https://maps.app.goo.gl/bPkx1GNoYWothZuF7",
+        },
       }, // p.52 item 6.
       {
         nome: "Estação Ceilândia Norte",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_norte.webp"],
+        location: {
+          lat: -15.81486,
+          lng: -48.11612,
+          mapsUrl: "https://maps.app.goo.gl/FeSs3qABp5vDxVZ46",
+        },
       }, // p.52 item 7.
       {
         nome: "Estação Guariroba",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_guariroba.jpg"],
+        location: {
+          lat: -15.83049,
+          lng: -48.10736,
+          mapsUrl: "https://maps.app.goo.gl/2SceAgEizChQSbUe7",
+        },
       }, // p.52 item 8.
       {
         nome: "Estação Águas Claras",
@@ -172,6 +233,11 @@ export const networkPoints: Category[] = [
         // Auditoria (p.39): "Metrô Águas Claras".
         impactosAuditadosMes: 1_000_000,
         images: ["/estacao_aguas.jpg"],
+        location: {
+          lat: -15.84004,
+          lng: -48.02847,
+          mapsUrl: "https://maps.app.goo.gl/SSeDuBENcj8yYjnZ7",
+        },
       },
       {
         nome: "Estação Arniqueiras",
@@ -182,6 +248,11 @@ export const networkPoints: Category[] = [
         // Auditoria (p.39): "Metrô Arniqueiras".
         impactosAuditadosMes: 1_128_365,
         images: ["/estacao_arniqueiras.jpg"],
+        location: {
+          lat: -15.8367377,
+          lng: -48.0170554,
+          mapsUrl: "https://maps.app.goo.gl/GjkTQf7YQ3gUN5Kw9",
+        },
       },
       {
         nome: "Estação Praça do Relógio",
@@ -192,6 +263,11 @@ export const networkPoints: Category[] = [
         // Auditoria (p.39): "Metrô Praça do Relógio".
         impactosAuditadosMes: 1_063_504,
         images: ["/estacao_praca.jpg"],
+        location: {
+          lat: -15.83323,
+          lng: -48.05658,
+          mapsUrl: "https://maps.app.goo.gl/UoDHhAnPFMJyKyBw8",
+        },
       },
     ],
   },
@@ -206,6 +282,11 @@ export const networkPoints: Category[] = [
         nome: "Rodoviária do Plano Piloto",
         valorPorCpe: WIFI_CPE,
         images: ["/rodoviaria_plano_piloto.webp"],
+        location: {
+          lat: -15.79332,
+          lng: -47.88285,
+          mapsUrl: "https://maps.app.goo.gl/JgdQAqjqM7pktFA87",
+        },
       },
       {
         nome: "Rodoviária de Sobradinho",
@@ -216,6 +297,11 @@ export const networkPoints: Category[] = [
         produtos: [{ tipo: 'Monitor 49"', telas: 2 }],
         valorPorCpe: WIFI_CPE,
         images: ["/rodoviaria_sobradinho.webp"],
+        location: {
+          lat: -15.6495275,
+          lng: -47.7858407,
+          mapsUrl: "https://maps.app.goo.gl/npuaJqJG5FPU8UWK8",
+        },
       },
       {
         nome: "Terminal BRT Santa Maria",
@@ -236,6 +322,11 @@ export const networkPoints: Category[] = [
         // Estação Central).
         impactosAuditadosMes: 3_745_600,
         images: ["/brt_santamaria.jpg"],
+        location: {
+          lat: -16.0024084,
+          lng: -47.9863856,
+          mapsUrl: "https://maps.app.goo.gl/JdjyZFg6w6ZuNp888",
+        },
       },
       {
         nome: "Terminal BRT Gama",
@@ -250,6 +341,11 @@ export const networkPoints: Category[] = [
         // Auditoria (p.39): "BRT Gama 1" 789.953 + "BRT Gama 2" 1.359.220.
         impactosAuditadosMes: 2_149_173,
         images: ["/brt_gama.jpg"],
+        location: {
+          lat: -15.9911124,
+          lng: -48.0486122,
+          mapsUrl: "https://maps.app.goo.gl/eQHdTTR4QZVSvAiB6",
+        },
       },
       {
         // p.28 item 8 e p.52 item 29 usam o mesmo nome, 'Terminal do "Setor
@@ -260,6 +356,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/terminal_setor_o.jpg"],
+        location: {
+          lat: -15.788155,
+          lng: -48.1343624,
+          mapsUrl: "https://maps.app.goo.gl/amHD6CKYhvpdG7veA",
+        },
       },
       // REMOVIDO nesta reauditoria: "Terminal Interestadual de Brasília" não
       // aparece em p.28 nem em p.52. A versão anterior do dataset associava
@@ -283,6 +384,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_ceilandia.jpeg"],
+        location: {
+          lat: -15.8252198,
+          lng: -48.1211193,
+          mapsUrl: "https://maps.app.goo.gl/XL1x5tf8Y8KR7Nc1A",
+        },
       },
       {
         nome: "UPA Samambaia",
@@ -291,6 +397,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_samambaia.png"],
+        location: {
+          lat: -15.8831403,
+          lng: -48.1001431,
+          mapsUrl: "https://maps.app.goo.gl/Vzd4WYxnjBWnGgkr7",
+        },
       },
       {
         nome: "UPA São Sebastião",
@@ -300,6 +411,11 @@ export const networkPoints: Category[] = [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
         images: ["/upa_sao_sebatiao.png"],
+        location: {
+          lat: -15.900964,
+          lng: -47.7775948,
+          mapsUrl: "https://maps.app.goo.gl/R15yXaUmg6oGK3HV7",
+        },
       },
       {
         nome: "UPA Sobradinho II",
@@ -308,6 +424,14 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_sobradinho_2.jpg"],
+        // O link fornecido para "UPA Sobradinho II" resolve para "UBS 1 -
+        // Sobradinho II" no Google Maps (não "UPA"). Mantido conforme
+        // fornecido — sinalizado para confirmação da MOBTV no relatório.
+        location: {
+          lat: -15.6444224,
+          lng: -47.8245796,
+          mapsUrl: "https://maps.app.goo.gl/yA4fPe9t8ZjTDNGL7",
+        },
       },
       {
         nome: "UPA Gama",
@@ -316,6 +440,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_gama.jpg"],
+        location: {
+          lat: -16.014989,
+          lng: -48.054164,
+          mapsUrl: "https://maps.app.goo.gl/EpkpPh9aeZXbFurk6",
+        },
       },
       {
         nome: "UPA Recanto das Emas",
@@ -324,6 +453,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_recanto_emas.webp"],
+        location: {
+          lat: -15.9117906,
+          lng: -48.0574363,
+          mapsUrl: "https://maps.app.goo.gl/SGu8PPZHtFZpAZvf7",
+        },
       },
       {
         nome: "UPA Riacho Fundo II",
@@ -335,6 +469,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_riachofundo.jpg", "/upa_riacho_2.jpg"],
+        location: {
+          lat: -15.8999409,
+          lng: -48.04013,
+          mapsUrl: "https://maps.app.goo.gl/LyxxhLkPzcoxUhru8",
+        },
       },
       {
         nome: "UPA Planaltina",
@@ -344,6 +483,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_planaltina.jpg"],
+        location: {
+          lat: -15.4511472,
+          lng: -47.6163573,
+          mapsUrl: "https://maps.app.goo.gl/BbxieqCq1wwbXXvi9",
+        },
       },
       {
         nome: "UPA Vicente Pires",
@@ -352,6 +496,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_vicentepires.jpg"],
+        location: {
+          lat: -15.7964967,
+          lng: -48.0245302,
+          mapsUrl: "https://maps.app.goo.gl/hNWk3PxFW3CpKJ1YA",
+        },
       },
       {
         nome: "UPA Brazlândia",
