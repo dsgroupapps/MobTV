@@ -509,6 +509,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_brazlandia.jpeg"],
+        location: {
+          lat: -15.6652419,
+          lng: -48.1981769,
+          mapsUrl: "https://maps.app.goo.gl/wqCsB472aF89iDTZ9",
+        },
       },
       {
         nome: "UPA Ceilândia Setor O",
@@ -518,6 +523,11 @@ export const networkPoints: Category[] = [
         produtos: [{ tipo: 'Monitor 49"', telas: 1 }],
         valorPorCpe: WIFI_CPE,
         images: ["/upa_ceilandia_ii_setor_o.png"],
+        location: {
+          lat: -15.7909562,
+          lng: -48.1351149,
+          mapsUrl: "https://maps.app.goo.gl/wQCfZQ8wwRLrVBmM6",
+        },
       },
     ],
   },
@@ -533,6 +543,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_taguatinga.png"],
+        location: {
+          lat: -15.8225343,
+          lng: -48.0690973,
+          mapsUrl: "https://maps.app.goo.gl/1B4Luiv3fXSJcxhy9",
+        },
       },
       {
         nome: "Hospital Regional de Ceilândia",
@@ -541,6 +556,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_ceilandia.jpeg"],
+        location: {
+          lat: -15.8153295,
+          lng: -48.0963745,
+          mapsUrl: "https://maps.app.goo.gl/gP62zScKAjCZoyen9",
+        },
       },
       {
         nome: "Hospital Regional do Gama",
@@ -549,6 +569,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_gama.png"],
+        location: {
+          lat: -16.023286,
+          lng: -48.0688246,
+          mapsUrl: "https://maps.app.goo.gl/jtxKhRwX5xH7b1239",
+        },
       },
       {
         nome: "Hospital Regional de Sobradinho",
@@ -559,6 +584,11 @@ export const networkPoints: Category[] = [
         // agora a fonte de existência/mídia, e ela confirma).
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_sobradinho.jpg"],
+        location: {
+          lat: -15.648267,
+          lng: -47.7926143,
+          mapsUrl: "https://maps.app.goo.gl/R6y9k51pTcLpcJLA6",
+        },
       },
       {
         nome: "Hospital Regional de Santa Maria",
@@ -567,6 +597,11 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_santa_maria.jpg"],
+        location: {
+          lat: -16.0401964,
+          lng: -48.0362123,
+          mapsUrl: "https://maps.app.goo.gl/FHQXYRg9z3DiS1Co7",
+        },
       },
     ],
   },
@@ -582,18 +617,42 @@ export const networkPoints: Category[] = [
         ],
         valorPorCpe: WIFI_CPE,
         images: ["/feira_guara.png"],
+        location: {
+          lat: -15.8240771,
+          lng: -47.9756972,
+          mapsUrl: "https://maps.app.goo.gl/FfCqzGmxN626GPKp9",
+        },
       },
-      { nome: "Feira dos Goianos", valorPorCpe: WIFI_CPE, images: ["/feira_goianos.jpg"] },
+      {
+        nome: "Feira dos Goianos",
+        valorPorCpe: WIFI_CPE,
+        images: ["/feira_goianos.jpg"],
+        location: {
+          lat: -15.8066369,
+          lng: -48.078106,
+          mapsUrl: "https://maps.app.goo.gl/fF7UQNtTRG7iMYzS8",
+        },
+      },
       {
         nome: "Feira Modelo de Sobradinho I",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_modelo.jpeg", "/feira_sobradinho1.jpg"],
+        location: {
+          lat: -15.6510687,
+          lng: -47.7887969,
+          mapsUrl: "https://maps.app.goo.gl/DNz7QrkWiWAXTfC9A",
+        },
       },
       {
         // p.52 item 9: "Feira Central da Ceilândia".
         nome: "Feira da Ceilândia",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_central_ceilandia.jpeg"],
+        location: {
+          lat: -15.8166702,
+          lng: -48.1046504,
+          mapsUrl: "https://maps.app.goo.gl/1WT2nELHhoU45rS8A",
+        },
       },
       {
         // INVESTIGAÇÃO "Feira de Samambaia" vs "Feira Samambaia 2" (pedida
@@ -609,6 +668,11 @@ export const networkPoints: Category[] = [
         nome: "Feira de Samambaia",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_samambaia.webp"],
+        location: {
+          lat: -15.8798665,
+          lng: -48.0729532,
+          mapsUrl: "https://maps.app.goo.gl/j6e2nZUXngHYF4c59",
+        },
       },
       {
         // NOVO ponto (não existia no dataset). p.52 item 14: "Feira Samambaia
@@ -622,6 +686,11 @@ export const networkPoints: Category[] = [
         nome: "Feira Samambaia 2",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_samambaia_2.jpg"],
+        location: {
+          lat: -15.8704361,
+          lng: -48.0891699,
+          mapsUrl: "https://maps.app.goo.gl/DU8wenmmRAN9DXSZA",
+        },
       },
     ],
   },
@@ -630,15 +699,47 @@ export const networkPoints: Category[] = [
     label: "Serviços",
     connectivity: "wifi",
     points: [
-      { nome: "Na Hora Ceilândia", valorPorCpe: WIFI_CPE, images: ["/na_hora_ceilandia.jpg"] },
-      { nome: "Na Hora Taguatinga", valorPorCpe: WIFI_CPE, images: ["/na_hora_taguatinga.jpg"] },
+      {
+        nome: "Na Hora Ceilândia",
+        valorPorCpe: WIFI_CPE,
+        images: ["/na_hora_ceilandia.jpg"],
+        location: {
+          lat: -15.8198006,
+          lng: -48.1021554,
+          mapsUrl: "https://maps.app.goo.gl/bDTf4ogc3UVb8q67A",
+        },
+      },
+      {
+        nome: "Na Hora Taguatinga",
+        valorPorCpe: WIFI_CPE,
+        images: ["/na_hora_taguatinga.jpg"],
+        location: {
+          lat: -15.8456971,
+          lng: -48.0435502,
+          mapsUrl: "https://maps.app.goo.gl/UzUsypRSzkJBF7uT6",
+        },
+      },
       {
         // p.52 item 21: "Na Hora - Rodoviária Plano Piloto".
         nome: "Na Hora Rodoviária Plano Piloto",
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_rodoviaria_plano.png"],
+        location: {
+          lat: -15.7936695,
+          lng: -47.8835018,
+          mapsUrl: "https://maps.app.goo.gl/EFtVHrJ9feoh1FkZ8",
+        },
       },
-      { nome: "Na Hora Gama", valorPorCpe: WIFI_CPE, images: ["/nahora_gama.jpeg"] },
+      {
+        nome: "Na Hora Gama",
+        valorPorCpe: WIFI_CPE,
+        images: ["/nahora_gama.jpeg"],
+        location: {
+          lat: -16.0130085,
+          lng: -48.0625928,
+          mapsUrl: "https://maps.app.goo.gl/vV2roQBJUR4ZMaGC9",
+        },
+      },
       {
         // p.52 item 24: "Na Hora - Brazlândia" — WiFi Ads adicionado nesta
         // reauditoria (a versão anterior deixava sem preço por seguir só a
@@ -647,6 +748,11 @@ export const networkPoints: Category[] = [
         nome: "Na Hora Brazlândia",
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_brazlandia.jpg"],
+        location: {
+          lat: -15.6806195,
+          lng: -48.2044904,
+          mapsUrl: "https://maps.app.goo.gl/zoUWbEqhaRZE35Cc6",
+        },
       },
       {
         nome: "Na Hora Sobradinho",
@@ -667,10 +773,8 @@ export const networkPoints: Category[] = [
 /**
  * Total de pontos nomeados neste dataset — única fonte para qualquer texto do
  * tipo "X pontos" que descreva literalmente o catálogo abaixo (ex.: o
- * cabeçalho do Explorador de Ativos). Não confundir com `networkFootprint`
- * (mobtv-data.ts), que cita o número "53 pontos" impresso no mapa de
- * cobertura do Media Kit (p.33/47) — uma métrica agregada da MOBTV, não a
- * contagem de itens individualmente nomeados/detalhados aqui. Os dois números
- * podem divergir sem que isso seja um bug.
+ * cabeçalho do Explorador de Ativos). O número histórico "53 pontos" impresso
+ * no mapa de cobertura do Media Kit (p.33/47) é uma métrica agregada da MOBTV,
+ * não a contagem de itens individualmente nomeados/detalhados aqui.
  */
 export const totalPointsCount = networkPoints.reduce((sum, cat) => sum + cat.points.length, 0);

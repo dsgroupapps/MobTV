@@ -1,23 +1,10 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  Train,
-  Bus,
-  HeartPulse,
-  Stethoscope,
-  Store,
-  Building2,
-  X,
-  ImageOff,
-  Monitor,
-  Grid3x3,
-  Wifi,
-  MapPin,
-  ExternalLink,
-} from "lucide-react";
+import { X, ImageOff, MapPin, ExternalLink } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 import { CoverageMap } from "./CoverageMap";
+import { categoryIcon, MediaTypeChips } from "./MediaBadges";
 import { Sheet, SheetContent, SheetClose, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import {
   networkPoints,
@@ -29,19 +16,21 @@ import {
   type NetworkPoint,
   type PointLocation,
 } from "@/data/network-points";
+import { activeRegionCount, regionSummaries } from "@/data/df-regions";
 
 const WHATSAPP_NUMBER = "5561992590234";
 
-// Exportado para reuso pelo Planejador de Campanha (mesmos ícones/fallback
-// visual por categoria — não duplicar em outro arquivo).
-export const categoryIcon: Record<CategoryKey, LucideIcon> = {
-  metro: Train,
-  terminais: Bus,
-  upas: HeartPulse,
-  hospitais: Stethoscope,
-  feiras: Store,
-  servicos: Building2,
-};
+// Nome de ponto → conjunto de nomes de ponto da mesma região — mesma fonte
+// (df-regions.ts) usada pelos pins do CoverageMap, então o filtro por região
+// aqui embaixo sempre bate exatamente com o que o pin mostrou (sem usar
+// isCityMatch, que é um heurístico de substring mais solto — mantido
+// intocado só porque o Planejador ainda depende dele para o próprio filtro
+// de região).
+const regionPointNames = new Map(regionSummaries.map((r) => [r.region, new Set(r.pointNames)]));
+
+// Reexportados para os consumidores existentes (Gallery.tsx, CampaignPlanner.tsx)
+// — a fonte real agora é MediaBadges.tsx, compartilhada com CoverageMap.tsx.
+export { categoryIcon, MediaTypeChips };
 
 const tabs: { key: CategoryKey | "todos"; label: string }[] = [
   { key: "todos", label: "Todos" },
@@ -59,55 +48,6 @@ export const mediaTabs: { key: MediaTypeKey | "todos"; label: string }[] = [
   { key: "led", label: "Painéis de LED" },
   { key: "wifi", label: "WiFi Ads" },
 ];
-
-// Identidade visual por tipo de mídia — reaproveitada pela Galeria e pelo
-// Planejador de Campanha (não duplicar). TELA = preenchimento sólido gold;
-// PAINEL LED = contorno gold-deep sobre fundo escuro (tratamento mais intenso,
-// visualmente distinto do preenchimento sólido da Tela, mesma família de cor);
-// WIFI ADS = preenchimento sólido teal.
-const mediaTypeMeta: Record<
-  MediaTypeKey,
-  { label: string; Icon: LucideIcon; className: string }
-> = {
-  screen: {
-    label: "Tela",
-    Icon: Monitor,
-    className: "bg-gold text-navy",
-  },
-  led: {
-    label: "Painel LED",
-    Icon: Grid3x3,
-    className: "bg-navy/70 backdrop-blur-sm text-gold-deep ring-2 ring-gold-deep",
-  },
-  wifi: {
-    label: "WiFi Ads",
-    Icon: Wifi,
-    className: "bg-teal text-navy",
-  },
-};
-
-// Chips legíveis por tipo de mídia — usados no card, no painel de detalhe,
-// na Galeria e no Planejador (não duplicar em outro arquivo).
-export function MediaTypeChips({ types }: { types: MediaTypeKey[] }) {
-  if (types.length === 0) return null;
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {types.map((t) => {
-        const meta = mediaTypeMeta[t];
-        const Icon = meta.Icon;
-        return (
-          <span
-            key={t}
-            className={`inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap ${meta.className}`}
-          >
-            <Icon className="h-3 w-3" strokeWidth={2.4} />
-            {meta.label}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 function formatBRL(value: number) {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -483,10 +423,11 @@ export function AssetExplorer() {
 
   const visiblePoints = useMemo(() => {
     const cats = active === "todos" ? networkPoints : networkPoints.filter((c) => c.key === active);
+    const regionSet = cityFilter ? regionPointNames.get(cityFilter) : null;
     const out: { point: NetworkPoint; category: Category }[] = [];
     for (const cat of cats) {
       for (const point of cat.points) {
-        if (cityFilter && !isCityMatch(point.nome, cityFilter)) continue;
+        if (regionSet && !regionSet.has(point.nome)) continue;
         if (mediaFilter !== "todos" && !pointMediaTypes(point).includes(mediaFilter)) continue;
         out.push({ point, category: cat });
       }
@@ -494,9 +435,9 @@ export function AssetExplorer() {
     return out;
   }, [active, cityFilter, mediaFilter]);
 
-  const handleCitySelect = (cityName: string) => {
+  const handleRegionSelect = (regionName: string) => {
     setActive("todos");
-    setCityFilter(cityName);
+    setCityFilter(regionName);
     gridReveal.ref.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -541,7 +482,7 @@ export function AssetExplorer() {
             / VISÃO EXECUTIVA
           </div>
           <h2 className="reveal reveal-2 font-display font-bold text-white text-3xl sm:text-4xl lg:text-5xl leading-tight tracking-tight">
-            {totalPointsCount} pontos. 16 cidades. Um só mapa.
+            {totalPointsCount} pontos. {activeRegionCount} regiões. Um só mapa.
           </h2>
           <p className="reveal reveal-3 mt-5 text-white/70 text-base md:text-lg leading-relaxed">
             Cobertura por cidade, num único olhar. Clique numa cidade do mapa ou explore os ativos
@@ -556,7 +497,7 @@ export function AssetExplorer() {
           className="reveal-root mt-14 md:mt-16"
         >
           <div className="reveal reveal-1 relative rounded-2xl border border-white/10 bg-[color-mix(in_oklab,var(--navy-soft)_60%,transparent)] p-6 md:p-10 backdrop-blur-sm">
-            <CoverageMap onCitySelect={handleCitySelect} />
+            <CoverageMap onRegionSelect={handleRegionSelect} />
           </div>
         </div>
 

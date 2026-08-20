@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import { useCountUp } from "@/hooks/useCountUp";
 import { auditedImpacts, networkFootprint, approxReach } from "@/data/mobtv-data";
+import { totalPointsCount } from "@/data/network-points";
 
 function formatBR(n: number) {
   return n.toLocaleString("pt-BR");
@@ -78,7 +79,7 @@ export function HomeNumeros() {
 
           <div className="reveal reveal-2 mt-12 md:mt-14 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-white/10 pt-8 font-mono text-sm text-off-white/60">
             <span>
-              <span className="text-gold font-medium">{networkFootprint.points}</span> pontos
+              <span className="text-gold font-medium">{totalPointsCount}</span> pontos
             </span>
             <span className="hidden sm:block h-3 w-px bg-off-white/25" />
             <span>

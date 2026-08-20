@@ -9,6 +9,7 @@ import {
   audienceProfile,
   consumerResearch,
 } from "@/data/mobtv-data";
+import { totalPointsCount } from "@/data/network-points";
 
 function formatBR(n: number) {
   return n.toLocaleString("pt-BR");
@@ -71,7 +72,7 @@ function StatsGrid() {
   return (
     <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
       <StatCard
-        value={networkFootprint.points}
+        value={totalPointsCount}
         label="pontos de cobertura"
         delay={0}
         visible={visible}

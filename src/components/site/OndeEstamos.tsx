@@ -1,17 +1,6 @@
-const locations = [
-  "Estação Central",
-  "UPA Ceilândia",
-  "Terminal BRT Gama",
-  "Feira do Guará",
-  "Hospital Regional de Taguatinga",
-  "Rodoviária do Plano Piloto",
-  "Estação Águas Claras",
-  "UPA Samambaia",
-  "Terminal BRT Santa Maria",
-  "Feira dos Goianos",
-  "Hospital Regional do Gama",
-  "Na Hora Ceilândia",
-];
+import { networkPoints } from "@/data/network-points";
+
+const locations = networkPoints.flatMap((category) => category.points.map((point) => point.nome));
 
 export function OndeEstamos() {
   return (

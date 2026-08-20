@@ -1,3 +1,5 @@
+import { totalPointsCount } from "./network-points";
+
 /**
  * Dados institucionais da MOBTV — fonte única de verdade.
  *
@@ -26,18 +28,15 @@ export const auditedImpacts = {
 };
 
 /**
- * Pegada física da rede: pontos e cidades cobertos (WiFi + DOOH combinados).
- * Citação direta do número impresso no mapa de cobertura do Media Kit — não
- * é derivado de `networkPoints` (network-points.ts) e pode divergir do total
- * de itens individualmente nomeados/detalhados lá (ver `totalPointsCount`).
- * Reauditoria completa do Media Kit (63 páginas) não encontrou suporte
- * nominal para todos os 53 nas tabelas granulares — o número aqui reflete o
- * que o próprio Media Kit imprime, não uma contagem re-derivada.
+ * Pegada física exibida nas seções institucionais atuais. A contagem de
+ * pontos vem do catálogo nominal usado por /rede (`network-points.ts`), para
+ * não divergir do acervo atual. A quantidade de cidades permanece o número
+ * institucional do Media Kit.
  */
 export const networkFootprint = {
-  points: 53,
+  points: totalPointsCount,
   cities: 16,
-  source: 'Media Kit p.33 e p.47 — "53 pontos" / "16 das Principais Cidades do DF".',
+  source: 'Pontos: catálogo nominal atual (`network-points.ts`). Cidades: Media Kit p.33 e p.47.',
 };
 
 /**

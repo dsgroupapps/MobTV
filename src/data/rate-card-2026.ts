@@ -302,9 +302,8 @@ export const wifiAdsRateCard2026: WifiAdsGrupo[] = [
 ];
 // Fonte: Media Kit p.62 — "Tabela de Preços — WiFi Ads Mídia Online". Tabela válida para 2026.
 // Esta lista é a do rate card comercial especificamente — não é necessariamente a enumeração
-// completa dos "53 pontos" citados em networkFootprint (mobtv-data.ts), que é um número
-// agregado de cobertura (WiFi + DOOH). Os dois números não devem ser somados nem tratados
-// como o mesmo universo.
+// completa do acervo nominal atual (`network-points.ts`). Métricas agregadas do Media Kit
+// e listas comerciais não devem ser somadas nem tratadas como o mesmo universo.
 
 /**
  * Auditoria de impactos por ponto — únicos 10 painéis com contagem individual
