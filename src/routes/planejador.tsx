@@ -33,7 +33,7 @@ export const Route = createFileRoute("/planejador")({
       {
         name: "description",
         content:
-          "Planeje sua campanha na rede MOBTV: escolha objetivo, região, ambiente, mídia e pontos, com investimento simulado a partir da tabela comercial vigente.",
+          "Planeje sua campanha na rede MOBTV: escolha mídia, filtre o catálogo de pontos e solicite uma proposta comercial.",
       },
     ],
   }),

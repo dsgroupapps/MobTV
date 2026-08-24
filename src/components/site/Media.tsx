@@ -20,7 +20,6 @@ const possibilidades = [
   "Banner de boas-vindas (Banner 1)",
   'Vídeo de até 30" da campanha',
   "Banner de liberação de acesso ao WiFi (Banner 2)",
-  "Menu personalizado no Canal de Conteúdos, com vídeos e textos",
   "Enquete/pesquisa para coleta de dados que ajudam na jornada de vendas",
 ];
 
@@ -279,8 +278,7 @@ export function Media() {
             Já sabe o que quer? Monte sua campanha
           </h3>
           <p className="mt-4 text-off-white/70 max-w-lg mx-auto leading-relaxed">
-            Escolha ambiente, mídia e pontos reais da rede, com investimento simulado a partir da
-            tabela comercial vigente.
+            Escolha a mídia, navegue pelos pontos reais da rede e solicite uma proposta comercial.
           </p>
           <div className="mt-8">
             <Link to="/planejador" className="btn-primary px-8 py-4 text-base">

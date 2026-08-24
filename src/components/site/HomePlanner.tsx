@@ -22,8 +22,8 @@ export function HomePlanner() {
             Monte sua campanha
           </h2>
           <p className="mt-4 text-white/70 text-base md:text-lg leading-relaxed">
-            Escolha objetivo, região, ambiente e mídia — veja os pontos reais disponíveis e simule o
-            investimento com base na tabela comercial vigente.
+            Escolha a mídia, veja os pontos reais disponíveis e filtre por região ou ambiente antes
+            de solicitar uma proposta.
           </p>
         </div>
         <div className="reveal reveal-2 shrink-0">

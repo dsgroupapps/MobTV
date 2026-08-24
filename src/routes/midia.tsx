@@ -11,8 +11,7 @@ export const Route = createFileRoute("/midia")({
       { title: "Benefícios e Mídia — MOBTV" },
       {
         name: "description",
-        content:
-          "Conheça os benefícios do WiFi Ads e todos os formatos de mídia DOOH e Menu de Conteúdos da MOBTV.",
+        content: "Conheça os benefícios do WiFi Ads e os formatos de mídia DOOH da MOBTV.",
       },
     ],
   }),
