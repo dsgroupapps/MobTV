@@ -1,19 +1,36 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, ExternalLink, Sparkles, Users, TrendingUp } from "lucide-react";
+import {
+  CheckCircle2,
+  ExternalLink,
+  MapPin,
+  Send,
+  Sparkles,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Logo } from "./Logo";
 import { MediaTypeChips } from "./MediaBadges";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { pointMediaTypes, type Category, type NetworkPoint } from "@/data/network-points";
 import { regionSummaries } from "@/data/df-regions";
 import type { PointInsights } from "@/data/point-insights";
 import { createPointTracker, type PointTracker } from "@/lib/analytics/client";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
 import type { PointContext } from "@/lib/analytics/types";
-
-// Mesmos contatos oficiais usados em Header.tsx / Contact.tsx / Footer.tsx —
-// não duplicar/inventar outro número ou e-mail aqui.
-const WHATSAPP_NUMBER = "5561992590234";
-const COMMERCIAL_EMAIL = "comercial@mobtv.tv.br";
+import { submitPointLead } from "@/lib/leads/point-lead";
 
 function formatNumber(value: number) {
   return value.toLocaleString("pt-BR");
@@ -23,16 +40,17 @@ function regionForPoint(pointName: string): string | undefined {
   return regionSummaries.find((r) => r.pointNames.includes(pointName))?.region;
 }
 
-function buildWhatsAppUrl(pointName: string) {
-  const text = `Olá! Vi o perfil da ${pointName} pelo QR Code da MOBTV e gostaria de saber mais sobre anunciar neste ponto.`;
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
-}
+const pointLeadSchema = z.object({
+  nome: z.string().trim().min(2, "Informe seu nome."),
+  empresa: z.string().trim().optional(),
+  contato: z.string().trim().min(5, "Informe um WhatsApp ou e-mail para retorno."),
+  campanha: z.string().trim().optional(),
+});
 
-function buildMailtoUrl(pointName: string) {
-  const subject = `Interesse em anunciar — ${pointName} (MOBTV)`;
-  const body = `Olá! Vi o perfil da ${pointName} pelo QR Code da MOBTV e gostaria de saber mais sobre anunciar neste ponto.`;
-  return `mailto:${COMMERCIAL_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
+type PointLeadFormValues = z.infer<typeof pointLeadSchema>;
+
+const fieldClass =
+  "bg-white/5 border-white/15 text-off-white placeholder:text-off-white/40 focus-visible:ring-gold";
 
 /** Aviso "dados demonstrativos" — reutilizado nos pontos onde números fictícios aparecem. */
 function DemoBadge({ className = "" }: { className?: string }) {
@@ -69,7 +87,9 @@ function AgeBar({ label, percent }: { label: string; percent: number }) {
           style={{ width: `${percent}%` }}
         />
       </div>
-      <span className="w-10 shrink-0 text-right font-mono text-xs text-off-white/70">{percent}%</span>
+      <span className="w-10 shrink-0 text-right font-mono text-xs text-off-white/70">
+        {percent}%
+      </span>
     </div>
   );
 }
@@ -134,6 +154,161 @@ function MapPreview({ point, tracker }: { point: NetworkPoint; tracker: PointTra
         <ExternalLink className="h-3.5 w-3.5" strokeWidth={2} />
       </a>
     </div>
+  );
+}
+
+function PointLeadForm({
+  slug,
+  pointName,
+  utm,
+}: {
+  slug: string;
+  pointName: string;
+  utm?: PointContext["utm"];
+}) {
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const form = useForm<PointLeadFormValues>({
+    resolver: zodResolver(pointLeadSchema),
+    defaultValues: { nome: "", empresa: "", contato: "", campanha: "" },
+  });
+
+  const isSubmitting = form.formState.isSubmitting;
+
+  async function onSubmit(values: PointLeadFormValues) {
+    setStatus("idle");
+    setErrorMessage(null);
+
+    try {
+      await submitPointLead({
+        data: {
+          ...values,
+          pointName,
+          pointSlug: slug,
+          pageUrl: typeof window !== "undefined" ? window.location.href : `/ponto/${slug}`,
+          submittedAt: new Date().toISOString(),
+          utm_source: utm?.utm_source,
+          utm_medium: utm?.utm_medium,
+          utm_campaign: utm?.utm_campaign,
+          utm_content: utm?.utm_content,
+        },
+      });
+      setStatus("success");
+      form.reset();
+    } catch {
+      setStatus("error");
+      setErrorMessage(
+        "Não conseguimos enviar agora. Seus dados foram mantidos; tente novamente em instantes.",
+      );
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="mt-7 grid gap-4 text-left">
+        <FormField
+          control={form.control}
+          name="nome"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-mono text-[11px] uppercase tracking-wider text-off-white/80">
+                Nome *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Seu nome"
+                  className={fieldClass}
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-red" />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="empresa"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-mono text-[11px] uppercase tracking-wider text-off-white/80">
+                Empresa
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Nome da empresa"
+                  className={fieldClass}
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-red" />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="contato"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-mono text-[11px] uppercase tracking-wider text-off-white/80">
+                WhatsApp ou e-mail para retorno *
+              </FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="(61) 90000-0000 ou voce@empresa.com"
+                  className={fieldClass}
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-red" />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="campanha"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-mono text-[11px] uppercase tracking-wider text-off-white/80">
+                Sobre a campanha <span className="normal-case text-off-white/40">(opcional)</span>
+              </FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Período, objetivo ou formato de interesse"
+                  className={`${fieldClass} min-h-[96px]`}
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage className="text-red" />
+            </FormItem>
+          )}
+        />
+
+        {status === "success" && (
+          <div className="flex items-start gap-2 rounded-xl border border-teal/30 bg-teal/10 px-4 py-3 text-sm text-off-white/80">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-teal" strokeWidth={2} />
+            Interesse enviado. A equipe MOBTV entrará em contato pelo canal informado.
+          </div>
+        )}
+        {status === "error" && errorMessage && (
+          <div className="rounded-xl border border-red/30 bg-red/10 px-4 py-3 text-sm text-off-white/80">
+            {errorMessage}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="btn-primary inline-flex w-full items-center justify-center gap-2 text-center disabled:pointer-events-none disabled:opacity-60"
+        >
+          <Send className="h-4 w-4" strokeWidth={2} />
+          {isSubmitting ? "Enviando..." : "Enviar interesse"}
+        </button>
+      </form>
+    </Form>
   );
 }
 
@@ -255,7 +430,10 @@ export function PointProfile({
               <SectionLabel>Principais indicadores</SectionLabel>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {metrics?.monthlyFlow != null && (
-                  <StatCard value={`${Math.round(metrics.monthlyFlow / 1000)} mil`} label="pessoas/mês" />
+                  <StatCard
+                    value={`${Math.round(metrics.monthlyFlow / 1000)} mil`}
+                    label="pessoas/mês"
+                  />
                 )}
                 {audience?.dominantAgeRange != null && (
                   <StatCard value={audience.dominantAgeRange} label="faixa etária predominante" />
@@ -269,7 +447,8 @@ export function PointProfile({
               </div>
               {isDemo && (
                 <p className="mt-4 text-xs leading-relaxed text-off-white/40">
-                  Protótipo — indicadores acima são ilustrativos, para visualização do formato final.
+                  Protótipo — indicadores acima são ilustrativos, para visualização do formato
+                  final.
                 </p>
               )}
             </div>
@@ -289,7 +468,9 @@ export function PointProfile({
 
               {hasAgeBrackets && (
                 <div className="flex flex-col gap-3">
-                  <div className="font-display text-sm font-semibold text-white/90">Faixa etária</div>
+                  <div className="font-display text-sm font-semibold text-white/90">
+                    Faixa etária
+                  </div>
                   {audience!.ageBrackets!.map((b) => (
                     <AgeBar key={b.label} label={b.label} percent={b.percent} />
                   ))}
@@ -298,8 +479,13 @@ export function PointProfile({
 
               {hasGender && (
                 <div className={hasAgeBrackets ? "mt-7" : ""}>
-                  <div className="mb-3 font-display text-sm font-semibold text-white/90">Gênero</div>
-                  <GenderBar femalePercent={audience!.femalePercent!} malePercent={audience!.malePercent!} />
+                  <div className="mb-3 font-display text-sm font-semibold text-white/90">
+                    Gênero
+                  </div>
+                  <GenderBar
+                    femalePercent={audience!.femalePercent!}
+                    malePercent={audience!.malePercent!}
+                  />
                 </div>
               )}
             </div>
@@ -318,13 +504,19 @@ export function PointProfile({
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {metrics?.monthlyFlow != null && (
-                  <StatCard value={`${formatNumber(metrics.monthlyFlow)} pessoas`} label="Fluxo mensal" />
+                  <StatCard
+                    value={`${formatNumber(metrics.monthlyFlow)} pessoas`}
+                    label="Fluxo mensal"
+                  />
                 )}
                 {metrics?.monthlyImpacts != null && (
                   <StatCard value={formatNumber(metrics.monthlyImpacts)} label="Impactos mensais" />
                 )}
                 {metrics?.avgDwellMinutes != null && (
-                  <StatCard value={`${metrics.avgDwellMinutes} min`} label="Tempo médio de permanência" />
+                  <StatCard
+                    value={`${metrics.avgDwellMinutes} min`}
+                    label="Tempo médio de permanência"
+                  />
                 )}
                 {metrics?.peakHours != null && (
                   <StatCard value={metrics.peakHours} label="Horário de maior movimento" />
@@ -360,34 +552,21 @@ export function PointProfile({
         {/* CTA COMERCIAL — sem preço, sem orçamento, sem R$. */}
         <section className="px-6 py-14">
           <div className="mx-auto max-w-3xl rounded-3xl bg-gradient-to-br from-navy-soft to-navy p-8 text-center ring-1 ring-gold/20 sm:p-12">
-            <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold">/ Anuncie aqui</div>
+            <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold">
+              / Anuncie aqui
+            </div>
             <h2 className="mt-3 font-display text-2xl font-bold leading-tight sm:text-3xl">
               Sua marca pode estar aqui.
             </h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-off-white/70 sm:text-base">
               Fale com a MOBTV e receba uma proposta personalizada para este ponto.
             </p>
-            <div className="mt-8 flex flex-col gap-3">
-              <a
-                href={buildWhatsAppUrl(point.nome)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => tracker.track("point_whatsapp_click")}
-                className="btn-primary w-full text-center"
-              >
-                Solicitar proposta pelo WhatsApp
-              </a>
-              <a
-                href={buildMailtoUrl(point.nome)}
-                onClick={() => tracker.track("point_email_click")}
-                className="w-full cursor-pointer rounded-lg border border-gold px-6 py-3 text-center font-semibold text-gold transition-colors hover:bg-gold hover:text-navy"
-              >
-                Enviar e-mail
-              </a>
+            <div className="mx-auto max-w-md">
+              <PointLeadForm slug={slug} pointName={point.nome} utm={utm} />
               <Link
                 to="/"
                 onClick={() => tracker.track("point_site_click")}
-                className="w-full cursor-pointer py-2 text-center font-mono text-sm text-off-white/55 transition-colors hover:text-gold"
+                className="mt-3 inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-gold/40 px-6 py-3 text-center font-semibold text-gold transition-colors hover:border-gold hover:bg-gold/10"
               >
                 Conhecer a MOBTV →
               </Link>
@@ -397,7 +576,9 @@ export function PointProfile({
       </main>
 
       <footer className="border-t border-white/10 px-6 py-6 text-center">
-        <p className="font-mono text-[11px] text-off-white/35">© 2026 MOBTV. Todos os direitos reservados.</p>
+        <p className="font-mono text-[11px] text-off-white/35">
+          © 2026 MOBTV. Todos os direitos reservados.
+        </p>
       </footer>
     </div>
   );
