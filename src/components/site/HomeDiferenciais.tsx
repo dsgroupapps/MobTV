@@ -50,14 +50,17 @@ export function HomeDiferenciais() {
             <div className="reveal reveal-2 relative overflow-hidden rounded-2xl shadow-[0_20px_50px_-20px_rgba(11,18,32,0.3)]">
               <img
                 src="/painel_led_home.png"
-                alt="Exemplo ilustrativo — Painel Estático da MOBTV em estação de metrô"
+                alt="Exemplo ilustrativo — Painel da MOBTV em estação de metrô"
                 loading="lazy"
                 width={1535}
                 height={1025}
                 style={{ objectPosition: "60% 40%" }}
                 className="block w-full h-[360px] md:h-[440px] object-cover"
               />
-              <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent" />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent"
+              />
             </div>
 
             {/* Diferenciais list */}
@@ -74,9 +77,7 @@ export function HomeDiferenciais() {
                         <Icon className="w-5 h-5 text-gold-deep" />
                       </span>
                       <div>
-                        <div className="font-display text-lg font-semibold text-ink">
-                          {d.title}
-                        </div>
+                        <div className="font-display text-lg font-semibold text-ink">{d.title}</div>
                         <p className="mt-1 text-sm text-ink-soft leading-relaxed">{d.desc}</p>
                       </div>
                     </li>

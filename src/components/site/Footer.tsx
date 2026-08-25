@@ -1,4 +1,6 @@
 import { Logo } from "@/components/site/Logo";
+import { officialSocialLinks } from "@/data/social-links";
+import { Instagram, Linkedin } from "lucide-react";
 
 function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return (
@@ -8,9 +10,6 @@ function WhatsAppIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-// Instagram, Facebook, LinkedIn e Google Maps foram removidos daqui: o Media
-// Kit oficial não lista os perfis/handles reais da MOBTV, e um link "#" é
-// pior do que nenhum link. Reintroduzir assim que a MOBTV informar as URLs.
 export function Footer() {
   return (
     <footer className="bg-navy border-t border-gold/20">
@@ -28,6 +27,26 @@ export function Footer() {
             aria-label="WhatsApp"
           >
             <WhatsAppIcon size={18} />
+          </a>
+          <a
+            href={officialSocialLinks.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-navy hover:border-gold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            aria-label="Instagram da MOBTV"
+            title="Instagram da MOBTV"
+          >
+            <Instagram size={18} strokeWidth={2} />
+          </a>
+          <a
+            href={officialSocialLinks.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-10 h-10 rounded-full border border-gold/40 flex items-center justify-center text-gold hover:bg-gold hover:text-navy hover:border-gold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            aria-label="LinkedIn da MOBTV"
+            title="LinkedIn da MOBTV"
+          >
+            <Linkedin size={18} strokeWidth={2} />
           </a>
         </div>
 

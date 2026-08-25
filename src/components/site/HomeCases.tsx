@@ -1,14 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
-import { mediaFormatExample } from "@/data/media-format-examples";
+import { mediaFormatExamples } from "@/data/media-format-examples";
 
-// Teaser da seção de exemplos de mídia, que vive em /sobre. Mesmos mockups
-// de aplicação (Media Kit p.55-59) — são simulações, não campanhas reais.
-const exemplos = [
-  mediaFormatExample("envelopamento"),
-  mediaFormatExample("midia-interna"),
-  mediaFormatExample("painel-estatico"),
-];
+const exemplos = mediaFormatExamples.slice(0, 3);
 
 export function HomeCases() {
   const reveal = useReveal<HTMLDivElement>({ threshold: 0.2 });
@@ -26,15 +20,14 @@ export function HomeCases() {
             </h2>
           </div>
           <Link
-            to="/sobre"
-            hash="cases"
+            to="/midia"
             className="font-mono text-sm text-gold-deep hover:text-gold transition-colors shrink-0"
           >
             Conheça os formatos →
           </Link>
         </div>
 
-        <div className="reveal reveal-2 mt-8 grid grid-cols-3 gap-3 md:gap-5">
+        <div className="reveal reveal-2 mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3 md:gap-5">
           {exemplos.map((item) => (
             <div
               key={item.key}

@@ -12,7 +12,7 @@ import {
   Users,
   ShoppingBag,
 } from "lucide-react";
-import { mediaFormatExample } from "@/data/media-format-examples";
+import { mediaFormatExamples } from "@/data/media-format-examples";
 
 const possibilidades = [
   "Nome da empresa no SSID da rede (ex: WiFi Free Minha Empresa)",
@@ -44,26 +44,36 @@ const jornada = [
   },
 ];
 
-const metroCards = [
+const mediaProducts = [
   {
-    ...mediaFormatExample("envelopamento"),
-    title: "Envelopamento de Vagão",
-    body: "O envelopamento externo do vagão traz o efeito 'uau' que chama a atenção de todos os usuários do Metrô.",
+    ...mediaFormatExamples[0],
+    eyebrow: "Produto prioritário",
+    body: "Grande formato em pontos estratégicos, pensado para impacto imediato, alto fluxo e presença de marca.",
   },
   {
-    ...mediaFormatExample("midia-interna"),
-    title: "Experiência Imersiva",
-    body: "Adesivação interna que cria uma experiência imersiva, gerando ainda mais reforço de marca.",
+    ...mediaFormatExamples[1],
+    eyebrow: "Alcance e performance",
+    body: "Publicidade integrada à conexão gratuita, com banners, vídeo, captação de leads e mensuração por engajamento.",
   },
   {
-    ...mediaFormatExample("adesivacao-catracas"),
-    title: "Adesivação de Catracas",
-    body: "Mídia off que conversa com a mídia on. Alto impacto em qualquer estação de Brasília.",
+    ...mediaFormatExamples[2],
+    eyebrow: "DOOH na jornada",
+    body: "Monitores em locais de espera, circulação e atendimento para reforçar frequência e presença da campanha.",
   },
   {
-    ...mediaFormatExample("painel-estatico"),
-    title: "Painel Estático",
-    body: "Maior visibilidade, pontos estratégicos, grande fluxo de pessoas e excelente número de impactos.",
+    ...mediaFormatExamples[3],
+    eyebrow: "Experiência embarcada",
+    body: "Aplicações internas que acompanham o deslocamento e criam uma camada adicional de lembrança de marca.",
+  },
+  {
+    ...mediaFormatExamples[4],
+    eyebrow: "Ponto de passagem",
+    body: "Formato de alto contato visual nos acessos, ideal para ativar presença em rotas de entrada e saída.",
+  },
+  {
+    ...mediaFormatExamples[5],
+    eyebrow: "Impacto especial",
+    body: "Aplicação externa de grande escala para campanhas que precisam ocupar o ambiente com forte presença visual.",
   },
 ];
 
@@ -99,6 +109,57 @@ function PhoneScreen({
   );
 }
 
+type MediaProduct = (typeof mediaProducts)[number];
+
+function MediaProductCard({
+  product,
+  rank,
+  variant,
+}: {
+  product: MediaProduct;
+  rank: number;
+  variant: "hero" | "primary" | "compact";
+}) {
+  const sizeClass =
+    variant === "hero"
+      ? "h-[420px] md:h-[520px]"
+      : variant === "primary"
+        ? "h-[340px] md:h-[420px]"
+        : "h-[300px] md:h-[340px]";
+  const titleClass =
+    variant === "hero"
+      ? "text-3xl md:text-5xl"
+      : variant === "primary"
+        ? "text-2xl md:text-4xl"
+        : "text-xl md:text-2xl";
+
+  return (
+    <article
+      className={`group relative overflow-hidden rounded-2xl bg-navy text-off-white shadow-[0_16px_48px_-18px_rgba(11,18,32,0.42)] ${sizeClass}`}
+    >
+      <img
+        src={product.image}
+        alt={`Formato de mídia MOBTV — ${product.title}`}
+        loading="lazy"
+        style={{ objectPosition: product.objectPosition }}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/45 to-navy/5" />
+      <div className="relative flex h-full flex-col justify-end p-6 md:p-8">
+        <div className="mb-3 flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.24em] text-gold">
+          <span>0{rank}</span>
+          <span className="text-off-white/35">/</span>
+          <span>{product.eyebrow}</span>
+        </div>
+        <h4 className={`font-display font-bold leading-tight ${titleClass}`}>{product.title}</h4>
+        <p className="mt-3 max-w-xl text-sm md:text-base text-off-white/82 leading-relaxed">
+          {product.body}
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export function Media() {
   const header = useReveal<HTMLDivElement>({ threshold: 0.2 });
   const bloco1 = useReveal<HTMLDivElement>({ threshold: 0.15 });
@@ -118,16 +179,52 @@ export function Media() {
             Sua marca, do WiFi ao vagão do Metrô
           </h2>
           <p className="reveal reveal-3 mt-6 text-ink-soft text-lg leading-relaxed">
-            A rede WiFi Ads da MOBTV possui um exclusivo conjunto de possibilidades de mídia — e vai
-            muito além da tela do celular.
+            A MOBTV combina painéis, Wi-Fi Ads, telas e formatos especiais para colocar marcas nos
+            principais fluxos de circulação do Distrito Federal.
           </p>
         </div>
 
-        {/* BLOCO 1 — Possibilidades */}
+        {/* BLOCO 1 — Possibilidades de mídia */}
         <div ref={bloco1.ref} data-visible={bloco1.visible} className="reveal-root mb-24">
           <h3 className="reveal reveal-1 font-display font-semibold text-ink text-2xl mb-8">
-            Possibilidades de Anúncio
+            Possibilidades de mídia
           </h3>
+          <div className="reveal reveal-2 flex flex-col gap-6 md:gap-8">
+            <MediaProductCard product={mediaProducts[0]} rank={1} variant="hero" />
+
+            <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+              {mediaProducts.slice(1, 3).map((product, index) => (
+                <MediaProductCard
+                  key={product.key}
+                  product={product}
+                  rank={index + 2}
+                  variant="primary"
+                />
+              ))}
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-3">
+              {mediaProducts.slice(3).map((product, index) => (
+                <MediaProductCard
+                  key={product.key}
+                  product={product}
+                  rank={index + 4}
+                  variant="compact"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* BLOCO 2 — Ativações em Wi-Fi Ads */}
+        <div ref={bloco2.ref} data-visible={bloco2.visible} className="reveal-root mb-24">
+          <h3 className="reveal reveal-1 font-display font-semibold text-ink text-2xl mb-4">
+            Ativações em Wi-Fi Ads
+          </h3>
+          <p className="reveal reveal-2 text-ink-soft mb-8 max-w-2xl">
+            Além da presença visual nos pontos, o Wi-Fi Ads permite campanhas com etapas digitais,
+            coleta de dados e chamada direta para conversão.
+          </p>
           <ul className="grid md:grid-cols-2 gap-x-10 gap-y-4">
             {possibilidades.map((p, i) => (
               <li key={p} className={`reveal reveal-${Math.min(i + 2, 5)} flex items-start gap-3`}>
@@ -140,8 +237,8 @@ export function Media() {
           </ul>
         </div>
 
-        {/* BLOCO 2 — Como funciona a conexão */}
-        <div ref={bloco2.ref} data-visible={bloco2.visible} className="reveal-root mb-24">
+        {/* BLOCO 3 — Como funciona a conexão */}
+        <div ref={bloco3.ref} data-visible={bloco3.visible} className="reveal-root mb-24">
           <h3 className="font-display font-semibold text-ink text-2xl mb-10 text-center">
             Como funciona a conexão
           </h3>
@@ -151,8 +248,8 @@ export function Media() {
                 <div
                   className="media-phone-stagger"
                   style={{
-                    animationDelay: bloco2.visible ? `${i * 150}ms` : "0ms",
-                    animationPlayState: bloco2.visible ? "running" : "paused",
+                    animationDelay: bloco3.visible ? `${i * 150}ms` : "0ms",
+                    animationPlayState: bloco3.visible ? "running" : "paused",
                   }}
                 >
                   <PhoneScreen index={i + 1} title={f.title} Icon={f.icon} body={f.body} />
@@ -172,8 +269,8 @@ export function Media() {
           </p>
         </div>
 
-        {/* BLOCO 3 — Captação de Leads via WhatsApp */}
-        <div ref={bloco3.ref} data-visible={bloco3.visible} className="reveal-root mb-24">
+        {/* BLOCO 4 — Captação de Leads via WhatsApp */}
+        <div ref={bloco4.ref} data-visible={bloco4.visible} className="reveal-root">
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-navy to-navy-soft text-off-white p-8 md:p-14">
             <div className="max-w-3xl">
               <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold mb-4">
@@ -199,7 +296,7 @@ export function Media() {
                 <div
                   className="h-full bg-gold origin-left transition-transform duration-[1400ms] ease-out"
                   style={{
-                    transform: bloco3.visible ? "scaleX(1)" : "scaleX(0)",
+                    transform: bloco4.visible ? "scaleX(1)" : "scaleX(0)",
                   }}
                 />
               </div>
@@ -211,8 +308,8 @@ export function Media() {
                     key={i}
                     className="relative flex flex-col items-center text-center transition-all duration-700"
                     style={{
-                      opacity: bloco3.visible ? 1 : 0,
-                      transform: bloco3.visible ? "translateY(0)" : "translateY(20px)",
+                      opacity: bloco4.visible ? 1 : 0,
+                      transform: bloco4.visible ? "translateY(0)" : "translateY(20px)",
                       transitionDelay: `${300 + i * 250}ms`,
                     }}
                   >
@@ -227,45 +324,6 @@ export function Media() {
                 );
               })}
             </div>
-          </div>
-        </div>
-
-        {/* BLOCO 4 — Mídia Estática no Metrô */}
-        <div ref={bloco4.ref} data-visible={bloco4.visible} className="reveal-root">
-          <h3 className="reveal reveal-1 font-display font-semibold text-ink text-2xl mb-2">
-            Mídia Estática no Metrô
-          </h3>
-          <p className="reveal reveal-2 text-ink-soft mb-10 max-w-2xl">
-            Ative sua marca no metrô do DF com formatos de alto impacto.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {metroCards.map((card, i) => (
-              <div
-                key={card.title}
-                className="group relative rounded-2xl overflow-hidden h-[340px] shadow-md hover:shadow-xl transition-shadow"
-                style={{
-                  opacity: bloco4.visible ? 1 : 0,
-                  transform: bloco4.visible ? "translateY(0)" : "translateY(24px)",
-                  transition: "opacity 0.7s ease-out, transform 0.7s ease-out",
-                  transitionDelay: `${i * 100}ms`,
-                }}
-              >
-                <img
-                  src={card.image}
-                  alt={card.title}
-                  width={1672}
-                  height={941}
-                  loading="lazy"
-                  style={{ objectPosition: card.objectPosition }}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/60 to-transparent" />
-                <div className="relative h-full flex flex-col justify-end p-6 text-off-white">
-                  <h4 className="font-display font-semibold text-xl mb-2">{card.title}</h4>
-                  <p className="text-sm text-off-white/85 leading-snug">{card.body}</p>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
 

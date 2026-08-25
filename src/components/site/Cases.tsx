@@ -36,9 +36,9 @@ const exemplos = [
     aspect: "aspect-[4/5]",
   },
   {
-    ...mediaFormatExample("painel-estatico"),
-    label: "Exemplo de painel estático",
-    midia: "Painel estático",
+    ...mediaFormatExample("painel"),
+    label: "Exemplo de painel",
+    midia: "Painel",
     ambiente: "Corredor de estação de Metrô",
     descricao:
       "Painel de grande formato em ponto estratégico de alto fluxo — o formato mais tradicional da rede, em corredor de passagem obrigatória. Simulação de aplicação, não uma campanha executada.",
@@ -60,8 +60,8 @@ export function Cases() {
             Imagine sua marca ocupando a rede
           </h2>
           <p className="reveal reveal-3 mt-5 text-ink-soft text-base md:text-lg leading-relaxed">
-            Exemplos visuais de como diferentes formatos podem ganhar presença nos ativos da MOBTV
-            — simulações de aplicação, não campanhas executadas.
+            Exemplos visuais de como diferentes formatos podem ganhar presença nos ativos da MOBTV —
+            simulações de aplicação, não campanhas executadas.
           </p>
         </div>
 

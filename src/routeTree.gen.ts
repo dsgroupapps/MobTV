@@ -16,6 +16,7 @@ import { Route as MidiaRouteImport } from './routes/midia'
 import { Route as GaleriaRouteImport } from './routes/galeria'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PontoSlugRouteImport } from './routes/ponto.$slug'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -52,6 +53,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PontoSlugRoute = PontoSlugRouteImport.update({
+  id: '/ponto/$slug',
+  path: '/ponto/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/ponto/$slug': typeof PontoSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/ponto/$slug': typeof PontoSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/ponto/$slug': typeof PontoSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/ponto/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/ponto/$slug'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/ponto/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   PlanejadorRoute: typeof PlanejadorRoute
   RedeRoute: typeof RedeRoute
   SobreRoute: typeof SobreRoute
+  PontoSlugRoute: typeof PontoSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ponto/$slug': {
+      id: '/ponto/$slug'
+      path: '/ponto/$slug'
+      fullPath: '/ponto/$slug'
+      preLoaderRoute: typeof PontoSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlanejadorRoute: PlanejadorRoute,
   RedeRoute: RedeRoute,
   SobreRoute: SobreRoute,
+  PontoSlugRoute: PontoSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

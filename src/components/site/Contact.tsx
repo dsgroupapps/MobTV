@@ -1,5 +1,6 @@
 import { useReveal } from "@/hooks/useReveal";
-import { MapPin, Mail, Send } from "lucide-react";
+import { officialSocialLinks } from "@/data/social-links";
+import { Instagram, Linkedin, Mail, MapPin, Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -44,6 +45,21 @@ function buildWhatsAppUrl(values: ContactFormValues) {
 
 const fieldClass =
   "bg-white/5 border-white/15 text-off-white placeholder:text-off-white/40 focus-visible:ring-gold";
+
+const socialLinks = [
+  {
+    href: officialSocialLinks.instagram,
+    label: "Instagram",
+    ariaLabel: "Instagram da MOBTV",
+    Icon: Instagram,
+  },
+  {
+    href: officialSocialLinks.linkedin,
+    label: "LinkedIn",
+    ariaLabel: "LinkedIn da MOBTV",
+    Icon: Linkedin,
+  },
+] as const;
 
 function ContactForm() {
   const form = useForm<ContactFormValues>({
@@ -211,6 +227,33 @@ export function Contact() {
             >
               comercial@mobtv.tv.br
             </a>
+          </div>
+        </div>
+
+        <div className="reveal reveal-4 mx-auto mb-12 flex max-w-3xl flex-col items-center gap-4 rounded-2xl border border-gold/20 bg-white/[0.03] px-6 py-6 text-center backdrop-blur-sm sm:flex-row sm:justify-between sm:text-left">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.24em] text-gold">
+              Acompanhe a MOBTV
+            </p>
+            <p className="mt-1 text-sm text-off-white/55">
+              Novidades da rede, formatos e ativações.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {socialLinks.map(({ href, label, ariaLabel, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-gold/30 px-4 py-2 text-sm font-semibold text-off-white/80 transition-colors hover:border-gold hover:bg-gold/10 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                aria-label={ariaLabel}
+                title={ariaLabel}
+              >
+                <Icon size={17} strokeWidth={2} />
+                {label}
+              </a>
+            ))}
           </div>
         </div>
 
