@@ -6,7 +6,6 @@ import {
   MapPin,
   Send,
   Sparkles,
-  TrendingUp,
   Users,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -32,8 +31,17 @@ import { useScrollDepth } from "@/hooks/useScrollDepth";
 import type { PointContext } from "@/lib/analytics/types";
 import { submitPointLead } from "@/lib/leads/point-lead";
 
-function formatNumber(value: number) {
-  return value.toLocaleString("pt-BR");
+/** "85000" → "85 mil"; valores abaixo de 1000 aparecem por extenso. */
+function formatAudience(value: number) {
+  return value >= 1000 ? `${Math.round(value / 1000)} mil` : value.toLocaleString("pt-BR");
+}
+
+function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
 }
 
 function regionForPoint(pointName: string): string | undefined {
@@ -64,13 +72,14 @@ function DemoBadge({ className = "" }: { className?: string }) {
   );
 }
 
+/** Card de indicador principal — fundo navy sólido, borda sutil, sem glow/gradiente/ícone. */
 function StatCard({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-2xl bg-white/[0.04] p-5 ring-1 ring-white/10">
-      <div className="font-display text-3xl font-bold leading-none text-white sm:text-4xl">
+    <div className="h-full rounded-2xl border border-white/10 bg-navy-soft px-6 py-7 sm:px-7 sm:py-8">
+      <div className="font-display text-4xl font-bold leading-none tracking-tight text-white sm:text-5xl">
         {value}
       </div>
-      <div className="mt-2 font-mono text-[11px] uppercase tracking-wider text-off-white/55">
+      <div className="mt-3 font-mono text-[11px] font-medium uppercase tracking-[0.15em] text-off-white/50">
         {label}
       </div>
     </div>
@@ -81,11 +90,8 @@ function AgeBar({ label, percent }: { label: string; percent: number }) {
   return (
     <div className="flex items-center gap-3">
       <span className="w-14 shrink-0 font-mono text-xs text-off-white/60">{label}</span>
-      <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-teal to-gold"
-          style={{ width: `${percent}%` }}
-        />
+      <div className="h-2 flex-1 overflow-hidden rounded-full bg-navy-soft/70">
+        <div className="h-full rounded-full bg-gold" style={{ width: `${percent}%` }} />
       </div>
       <span className="w-10 shrink-0 text-right font-mono text-xs text-off-white/70">
         {percent}%
@@ -98,15 +104,15 @@ function GenderBar({ femalePercent, malePercent }: { femalePercent: number; male
   return (
     <div>
       <div className="flex h-3 overflow-hidden rounded-full ring-1 ring-white/10">
-        <div className="bg-gold" style={{ width: `${femalePercent}%` }} />
-        <div className="bg-teal" style={{ width: `${malePercent}%` }} />
+        <div className="bg-pink-400" style={{ width: `${femalePercent}%` }} />
+        <div className="bg-blue-400" style={{ width: `${malePercent}%` }} />
       </div>
       <div className="mt-2.5 flex items-center justify-between font-mono text-xs">
         <span className="flex items-center gap-1.5 text-off-white/70">
-          <span className="h-2 w-2 rounded-full bg-gold" /> Mulheres {femalePercent}%
+          <span className="h-2 w-2 rounded-full bg-pink-400" /> Mulheres {femalePercent}%
         </span>
         <span className="flex items-center gap-1.5 text-off-white/70">
-          <span className="h-2 w-2 rounded-full bg-teal" /> Homens {malePercent}%
+          <span className="h-2 w-2 rounded-full bg-blue-400" /> Homens {malePercent}%
         </span>
       </div>
     </div>
@@ -355,21 +361,14 @@ export function PointProfile({
   const photo = point.images?.[0];
   const isDemo = insights?.isDemo ?? false;
   const audience = insights?.audience;
-  const metrics = insights?.metrics;
 
-  const hasHeroStats =
-    metrics?.monthlyFlow != null ||
-    audience?.dominantAgeRange != null ||
-    audience?.femalePercent != null ||
-    audience?.malePercent != null;
+  const monthlyAudienceValue =
+    insights?.monthlyAudience != null ? formatAudience(insights.monthlyAudience) : "—";
+  const averageFamilyIncomeValue =
+    insights?.averageFamilyIncome != null ? formatCurrency(insights.averageFamilyIncome) : "R$ —";
   const hasAgeBrackets = audience?.ageBrackets && audience.ageBrackets.length > 0;
   const hasGender = audience?.femalePercent != null && audience?.malePercent != null;
   const hasAudienceSection = hasAgeBrackets || hasGender;
-  const hasFlowSection =
-    metrics?.monthlyFlow != null ||
-    metrics?.monthlyImpacts != null ||
-    metrics?.avgDwellMinutes != null ||
-    metrics?.peakHours != null;
 
   return (
     <div className="flex min-h-screen flex-col bg-navy text-off-white">
@@ -423,41 +422,26 @@ export function PointProfile({
           </div>
         </section>
 
-        {/* PRINCIPAIS INDICADORES */}
-        {hasHeroStats && (
-          <section className="px-6 py-8">
-            <div className="mx-auto max-w-3xl">
-              <SectionLabel>Principais indicadores</SectionLabel>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {metrics?.monthlyFlow != null && (
-                  <StatCard
-                    value={`${Math.round(metrics.monthlyFlow / 1000)} mil`}
-                    label="pessoas/mês"
-                  />
-                )}
-                {audience?.dominantAgeRange != null && (
-                  <StatCard value={audience.dominantAgeRange} label="faixa etária predominante" />
-                )}
-                {audience?.femalePercent != null && (
-                  <StatCard value={`${audience.femalePercent}%`} label="mulheres" />
-                )}
-                {audience?.malePercent != null && (
-                  <StatCard value={`${audience.malePercent}%`} label="homens" />
-                )}
-              </div>
-              {isDemo && (
-                <p className="mt-4 text-xs leading-relaxed text-off-white/40">
-                  Protótipo — indicadores acima são ilustrativos, para visualização do formato
-                  final.
-                </p>
-              )}
+        {/* PRINCIPAIS INDICADORES — sempre 2 cards; card sem dado mostra "—", nunca some. */}
+        <section className="px-6 pb-4 pt-8">
+          <div className="mx-auto max-w-3xl">
+            <SectionLabel>Principais indicadores</SectionLabel>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <StatCard value={monthlyAudienceValue} label="Pessoas/mês" />
+              <StatCard value={averageFamilyIncomeValue} label="Renda média familiar" />
             </div>
-          </section>
-        )}
+            {isDemo && (
+              <p className="mt-4 text-xs leading-relaxed text-off-white/40">
+                Protótipo — indicadores acima são ilustrativos, para visualização do formato
+                final.
+              </p>
+            )}
+          </div>
+        </section>
 
         {/* PERFIL DE AUDIÊNCIA */}
         {hasAudienceSection && (
-          <section className="px-6 py-8">
+          <section className="px-6 pb-8 pt-2">
             <div className="mx-auto max-w-3xl rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10 sm:p-8">
               <div className="mb-6 flex items-center gap-2.5">
                 <Users className="h-4 w-4 text-gold-deep" strokeWidth={1.8} />
@@ -488,40 +472,6 @@ export function PointProfile({
                   />
                 </div>
               )}
-            </div>
-          </section>
-        )}
-
-        {/* FLUXO / IMPACTO */}
-        {hasFlowSection && (
-          <section className="px-6 py-8">
-            <div className="mx-auto max-w-3xl">
-              <div className="mb-4 flex items-center gap-2.5">
-                <TrendingUp className="h-4 w-4 text-gold-deep" strokeWidth={1.8} />
-                <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-off-white/45">
-                  Fluxo e impacto
-                </span>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {metrics?.monthlyFlow != null && (
-                  <StatCard
-                    value={`${formatNumber(metrics.monthlyFlow)} pessoas`}
-                    label="Fluxo mensal"
-                  />
-                )}
-                {metrics?.monthlyImpacts != null && (
-                  <StatCard value={formatNumber(metrics.monthlyImpacts)} label="Impactos mensais" />
-                )}
-                {metrics?.avgDwellMinutes != null && (
-                  <StatCard
-                    value={`${metrics.avgDwellMinutes} min`}
-                    label="Tempo médio de permanência"
-                  />
-                )}
-                {metrics?.peakHours != null && (
-                  <StatCard value={metrics.peakHours} label="Horário de maior movimento" />
-                )}
-              </div>
             </div>
           </section>
         )}
