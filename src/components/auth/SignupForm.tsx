@@ -5,12 +5,35 @@ import { LoaderCircle, UserPlus } from "lucide-react";
 
 import { createAccount } from "@/lib/auth/functions";
 
-export function SignupForm() {
+type SignupFormProps = {
+  enabled: boolean;
+};
+
+export function SignupForm({ enabled }: SignupFormProps) {
   const signup = useServerFn(createAccount);
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!enabled) {
+    return (
+      <div className="space-y-5">
+        <p
+          role="status"
+          className="rounded-md border border-gold/35 bg-gold/10 px-4 py-3 text-sm leading-6 text-off-white"
+        >
+          O cadastro público será liberado assim que a configuração de segurança for concluída.
+        </p>
+        <Link
+          to="/entrar"
+          className="flex h-11 w-full items-center justify-center rounded-md border border-gold px-4 text-sm font-semibold text-gold transition-colors hover:bg-gold hover:text-navy"
+        >
+          Voltar para entrar
+        </Link>
+      </div>
+    );
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

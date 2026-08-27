@@ -14,6 +14,13 @@ export function isAppRole(value: string): value is AppRole {
   return APP_ROLES.some((role) => role === value);
 }
 
+export function hasAllowedRole(
+  userRoles: readonly AppRole[],
+  allowedRoles: readonly AppRole[],
+): boolean {
+  return userRoles.some((role) => allowedRoles.includes(role));
+}
+
 export function getRoleHome(role: AppRole | null): "/dashboard" | "/admin" | "/entrar" {
   if (role === "admin" || role === "operator") return "/admin";
   if (role === "advertiser") return "/dashboard";

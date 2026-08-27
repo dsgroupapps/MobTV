@@ -3,7 +3,7 @@ import "@tanstack/react-start/server-only";
 import { redirect } from "@tanstack/react-router";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getRoleHome, isAppRole, type AppRole, type AuthUser } from "./types";
+import { getRoleHome, hasAllowedRole, isAppRole, type AppRole, type AuthUser } from "./types";
 
 const ROLE_PRIORITY: Record<AppRole, number> = {
   admin: 3,
@@ -52,7 +52,7 @@ export async function requireCurrentUser(): Promise<AuthUser> {
 
 export async function requireCurrentRole(allowedRoles: readonly AppRole[]): Promise<AuthUser> {
   const user = await requireCurrentUser();
-  if (!user.roles.some((role) => allowedRoles.includes(role))) {
+  if (!hasAllowedRole(user.roles, allowedRoles)) {
     throw redirect({ href: getRoleHome(user.role) });
   }
   return user;

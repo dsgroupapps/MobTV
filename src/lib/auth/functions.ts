@@ -38,6 +38,10 @@ export const getUser = createServerFn({ method: "GET" }).handler(async () => {
   return getCurrentUser();
 });
 
+export const getSignupAvailability = createServerFn({ method: "GET" }).handler(
+  () => process.env.PUBLIC_SIGNUP_ENABLED === "true",
+);
+
 export const requireUser = createServerFn({ method: "GET" }).handler(() => requireCurrentUser());
 
 export const requireRole = createServerFn({ method: "GET" })
@@ -69,6 +73,12 @@ export const loginWithPassword = createServerFn({ method: "POST" })
 export const createAccount = createServerFn({ method: "POST" })
   .validator(signupSchema)
   .handler(async ({ data }) => {
+    if (process.env.PUBLIC_SIGNUP_ENABLED !== "true") {
+      throw new Error(
+        "O cadastro público será liberado assim que a configuração de segurança for concluída.",
+      );
+    }
+
     const supabase = createServerSupabaseClient();
     const requestUrl = getRequestUrl({ xForwardedHost: true });
     const emailRedirectTo = new URL("/entrar", requestUrl.origin).toString();
