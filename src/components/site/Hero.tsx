@@ -5,7 +5,7 @@ import { totalPointsCount } from "@/data/network-points";
 import heroEstacaoCentral from "@/assets/hero-estacao-central.jpg";
 
 /**
- * Carrossel de 4 fotografias reais da operação MOBTV — todas já existentes
+ * Carrossel de 5 fotografias reais da operação MOBTV — todas já existentes
  * no projeto (nenhuma imagem nova/estoque). Cada estado tem seu próprio
  * enquadramento (objectPosition) e ponto de origem do zoom (transformOrigin)
  * ajustado individualmente ao elemento principal da foto.
@@ -26,6 +26,14 @@ const slides = [
     transformOrigin: "64% 40%",
     kicker: "/ DOOH — nos principais fluxos do DF",
     caption: "Estação Praça do Relógio · Metrô-DF",
+  },
+  {
+    id: "marca",
+    image: "/foto_hero_mobtv.jpg",
+    objectPosition: "50% 50%",
+    transformOrigin: "50% 50%",
+    kicker: "/ MOBTV — mídia DOOH com presença real",
+    caption: "MOBTV · Mídia DOOH",
   },
   {
     id: "wifi",
