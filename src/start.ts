@@ -1,6 +1,8 @@
 import { createStart, createMiddleware } from "@tanstack/react-start";
 
+import { refreshAuthSession } from "./lib/auth/session.server";
 import { renderErrorPage } from "./lib/error-page";
+import { hasServerSupabaseConfig } from "./lib/supabase/server";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -17,6 +19,14 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
   }
 });
 
+const authSessionMiddleware = createMiddleware().server(async ({ next }) => {
+  if (hasServerSupabaseConfig()) {
+    await refreshAuthSession();
+  }
+
+  return next();
+});
+
 export const startInstance = createStart(() => ({
-  requestMiddleware: [errorMiddleware],
+  requestMiddleware: [errorMiddleware, authSessionMiddleware],
 }));
