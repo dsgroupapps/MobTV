@@ -14,7 +14,11 @@ import { Route as RedeRouteImport } from './routes/rede'
 import { Route as PlanejadorRouteImport } from './routes/planejador'
 import { Route as MidiaRouteImport } from './routes/midia'
 import { Route as GaleriaRouteImport } from './routes/galeria'
+import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CriarContaRouteImport } from './routes/criar-conta'
 import { Route as ContatoRouteImport } from './routes/contato'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PontoSlugRouteImport } from './routes/ponto.$slug'
 
@@ -43,9 +47,29 @@ const GaleriaRoute = GaleriaRouteImport.update({
   path: '/galeria',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CriarContaRoute = CriarContaRouteImport.update({
+  id: '/criar-conta',
+  path: '/criar-conta',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContatoRoute = ContatoRouteImport.update({
   id: '/contato',
   path: '/contato',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -61,7 +85,11 @@ const PontoSlugRoute = PontoSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/dashboard': typeof DashboardRoute
+  '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
@@ -71,7 +99,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/dashboard': typeof DashboardRoute
+  '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
@@ -82,7 +114,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
+  '/criar-conta': typeof CriarContaRoute
+  '/dashboard': typeof DashboardRoute
+  '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
@@ -94,7 +130,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/contato'
+    | '/criar-conta'
+    | '/dashboard'
+    | '/entrar'
     | '/galeria'
     | '/midia'
     | '/planejador'
@@ -104,7 +144,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/contato'
+    | '/criar-conta'
+    | '/dashboard'
+    | '/entrar'
     | '/galeria'
     | '/midia'
     | '/planejador'
@@ -114,7 +158,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/contato'
+    | '/criar-conta'
+    | '/dashboard'
+    | '/entrar'
     | '/galeria'
     | '/midia'
     | '/planejador'
@@ -125,7 +173,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   ContatoRoute: typeof ContatoRoute
+  CriarContaRoute: typeof CriarContaRoute
+  DashboardRoute: typeof DashboardRoute
+  EntrarRoute: typeof EntrarRoute
   GaleriaRoute: typeof GaleriaRoute
   MidiaRoute: typeof MidiaRoute
   PlanejadorRoute: typeof PlanejadorRoute
@@ -171,11 +223,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GaleriaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/criar-conta': {
+      id: '/criar-conta'
+      path: '/criar-conta'
+      fullPath: '/criar-conta'
+      preLoaderRoute: typeof CriarContaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contato': {
       id: '/contato'
       path: '/contato'
       fullPath: '/contato'
       preLoaderRoute: typeof ContatoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -197,7 +277,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   ContatoRoute: ContatoRoute,
+  CriarContaRoute: CriarContaRoute,
+  DashboardRoute: DashboardRoute,
+  EntrarRoute: EntrarRoute,
   GaleriaRoute: GaleriaRoute,
   MidiaRoute: MidiaRoute,
   PlanejadorRoute: PlanejadorRoute,
