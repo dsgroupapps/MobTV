@@ -821,6 +821,14 @@ export type Database = {
         };
         Returns: boolean;
       };
+      reschedule_own_order_item: {
+        Args: {
+          p_date: string;
+          p_order_item_id: string;
+          p_start_time: string;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       app_role: "admin" | "operator" | "advertiser";
