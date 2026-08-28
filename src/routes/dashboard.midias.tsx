@@ -1,25 +1,33 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Film } from "lucide-react";
 
-import { DashboardPlaceholder } from "@/components/dashboard/DashboardPlaceholder";
+import {
+  DashboardLoading,
+  DashboardRouteError,
+} from "@/components/dashboard/post-purchase/DashboardQueryState";
+import { MediaLibraryPage } from "@/components/dashboard/post-purchase/MediaLibraryPage";
+import { advertiserAssetsQueryOptions } from "@/lib/advertiser/media";
 
 export const Route = createFileRoute("/dashboard/midias")({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(advertiserAssetsQueryOptions(context.advertiserUser.id)),
   head: () => ({
     meta: [
       { title: "Mídias — Área do anunciante MOBTV" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: MediaPage,
+  pendingComponent: () => <DashboardLoading label="Carregando mídias..." />,
+  errorComponent: DashboardRouteError,
+  component: MediaRoute,
 });
 
-function MediaPage() {
-  return (
-    <DashboardPlaceholder
-      icon={Film}
-      eyebrow="Mídias"
-      title="Mídias"
-      description="A biblioteca de arquivos e os estados de moderação serão detalhados nesta rota em uma próxima etapa."
-    />
-  );
+function MediaRoute() {
+  const { advertiserUser } = Route.useRouteContext();
+  const initialData = Route.useLoaderData();
+  const { data } = useQuery({
+    ...advertiserAssetsQueryOptions(advertiserUser.id),
+    initialData,
+  });
+  return <MediaLibraryPage assets={data} />;
 }

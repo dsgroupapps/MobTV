@@ -26,7 +26,9 @@ import { Route as DashboardPedidosRouteImport } from './routes/dashboard.pedidos
 import { Route as DashboardMidiasRouteImport } from './routes/dashboard.midias'
 import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campanhas'
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
+import { Route as DashboardPedidosIndexRouteImport } from './routes/dashboard.pedidos.index'
 import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
+import { Route as DashboardPedidosIdRouteImport } from './routes/dashboard.pedidos.$id'
 import { Route as DashboardCampanhasNovaRouteImport } from './routes/dashboard.campanhas.nova'
 import { Route as DashboardCampanhasNovaIndexRouteImport } from './routes/dashboard.campanhas.nova.index'
 import { Route as DashboardCampanhasNovaRevisaoRouteImport } from './routes/dashboard.campanhas.nova.revisao'
@@ -118,10 +120,20 @@ const DashboardCalendarioRoute = DashboardCalendarioRouteImport.update({
   path: '/calendario',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardPedidosIndexRoute = DashboardPedidosIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardPedidosRoute,
+} as any)
 const DashboardCampanhasIndexRoute = DashboardCampanhasIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardCampanhasRoute,
+} as any)
+const DashboardPedidosIdRoute = DashboardPedidosIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => DashboardPedidosRoute,
 } as any)
 const DashboardCampanhasNovaRoute = DashboardCampanhasNovaRouteImport.update({
   id: '/nova',
@@ -168,11 +180,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
   '/dashboard/midias': typeof DashboardMidiasRoute
-  '/dashboard/pedidos': typeof DashboardPedidosRoute
+  '/dashboard/pedidos': typeof DashboardPedidosRouteWithChildren
   '/ponto/$slug': typeof PontoSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
+  '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
+  '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
   '/dashboard/campanhas/nova/pontos': typeof DashboardCampanhasNovaPontosRoute
   '/dashboard/campanhas/nova/revisao': typeof DashboardCampanhasNovaRevisaoRoute
@@ -191,10 +205,11 @@ export interface FileRoutesByTo {
   '/sobre': typeof SobreRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/midias': typeof DashboardMidiasRoute
-  '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/dashboard/campanhas': typeof DashboardCampanhasIndexRoute
+  '/dashboard/pedidos': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
   '/dashboard/campanhas/nova/pontos': typeof DashboardCampanhasNovaPontosRoute
   '/dashboard/campanhas/nova/revisao': typeof DashboardCampanhasNovaRevisaoRoute
@@ -216,11 +231,13 @@ export interface FileRoutesById {
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
   '/dashboard/midias': typeof DashboardMidiasRoute
-  '/dashboard/pedidos': typeof DashboardPedidosRoute
+  '/dashboard/pedidos': typeof DashboardPedidosRouteWithChildren
   '/ponto/$slug': typeof PontoSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
+  '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
+  '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
   '/dashboard/campanhas/nova/pontos': typeof DashboardCampanhasNovaPontosRoute
   '/dashboard/campanhas/nova/revisao': typeof DashboardCampanhasNovaRevisaoRoute
@@ -247,7 +264,9 @@ export interface FileRouteTypes {
     | '/ponto/$slug'
     | '/dashboard/'
     | '/dashboard/campanhas/nova'
+    | '/dashboard/pedidos/$id'
     | '/dashboard/campanhas/'
+    | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
     | '/dashboard/campanhas/nova/pontos'
     | '/dashboard/campanhas/nova/revisao'
@@ -266,10 +285,11 @@ export interface FileRouteTypes {
     | '/sobre'
     | '/dashboard/calendario'
     | '/dashboard/midias'
-    | '/dashboard/pedidos'
     | '/ponto/$slug'
     | '/dashboard'
+    | '/dashboard/pedidos/$id'
     | '/dashboard/campanhas'
+    | '/dashboard/pedidos'
     | '/dashboard/campanhas/nova/horarios'
     | '/dashboard/campanhas/nova/pontos'
     | '/dashboard/campanhas/nova/revisao'
@@ -294,7 +314,9 @@ export interface FileRouteTypes {
     | '/ponto/$slug'
     | '/dashboard/'
     | '/dashboard/campanhas/nova'
+    | '/dashboard/pedidos/$id'
     | '/dashboard/campanhas/'
+    | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
     | '/dashboard/campanhas/nova/pontos'
     | '/dashboard/campanhas/nova/revisao'
@@ -437,12 +459,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCalendarioRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/pedidos/': {
+      id: '/dashboard/pedidos/'
+      path: '/'
+      fullPath: '/dashboard/pedidos/'
+      preLoaderRoute: typeof DashboardPedidosIndexRouteImport
+      parentRoute: typeof DashboardPedidosRoute
+    }
     '/dashboard/campanhas/': {
       id: '/dashboard/campanhas/'
       path: '/'
       fullPath: '/dashboard/campanhas/'
       preLoaderRoute: typeof DashboardCampanhasIndexRouteImport
       parentRoute: typeof DashboardCampanhasRoute
+    }
+    '/dashboard/pedidos/$id': {
+      id: '/dashboard/pedidos/$id'
+      path: '/$id'
+      fullPath: '/dashboard/pedidos/$id'
+      preLoaderRoute: typeof DashboardPedidosIdRouteImport
+      parentRoute: typeof DashboardPedidosRoute
     }
     '/dashboard/campanhas/nova': {
       id: '/dashboard/campanhas/nova'
@@ -515,11 +551,24 @@ const DashboardCampanhasRouteChildren: DashboardCampanhasRouteChildren = {
 const DashboardCampanhasRouteWithChildren =
   DashboardCampanhasRoute._addFileChildren(DashboardCampanhasRouteChildren)
 
+interface DashboardPedidosRouteChildren {
+  DashboardPedidosIdRoute: typeof DashboardPedidosIdRoute
+  DashboardPedidosIndexRoute: typeof DashboardPedidosIndexRoute
+}
+
+const DashboardPedidosRouteChildren: DashboardPedidosRouteChildren = {
+  DashboardPedidosIdRoute: DashboardPedidosIdRoute,
+  DashboardPedidosIndexRoute: DashboardPedidosIndexRoute,
+}
+
+const DashboardPedidosRouteWithChildren =
+  DashboardPedidosRoute._addFileChildren(DashboardPedidosRouteChildren)
+
 interface DashboardRouteChildren {
   DashboardCalendarioRoute: typeof DashboardCalendarioRoute
   DashboardCampanhasRoute: typeof DashboardCampanhasRouteWithChildren
   DashboardMidiasRoute: typeof DashboardMidiasRoute
-  DashboardPedidosRoute: typeof DashboardPedidosRoute
+  DashboardPedidosRoute: typeof DashboardPedidosRouteWithChildren
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -527,7 +576,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardCalendarioRoute: DashboardCalendarioRoute,
   DashboardCampanhasRoute: DashboardCampanhasRouteWithChildren,
   DashboardMidiasRoute: DashboardMidiasRoute,
-  DashboardPedidosRoute: DashboardPedidosRoute,
+  DashboardPedidosRoute: DashboardPedidosRouteWithChildren,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

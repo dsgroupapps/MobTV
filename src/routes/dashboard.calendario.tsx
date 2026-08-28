@@ -1,25 +1,35 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { CalendarDays } from "lucide-react";
 
-import { DashboardPlaceholder } from "@/components/dashboard/DashboardPlaceholder";
+import {
+  DashboardLoading,
+  DashboardRouteError,
+} from "@/components/dashboard/post-purchase/DashboardQueryState";
+import { OrdersCalendarPage } from "@/components/dashboard/post-purchase/OrdersCalendarPage";
+import { advertiserCalendarPanelsQueryOptions } from "@/lib/advertiser/calendar";
 
 export const Route = createFileRoute("/dashboard/calendario")({
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(
+      advertiserCalendarPanelsQueryOptions(context.advertiserUser.id),
+    ),
   head: () => ({
     meta: [
       { title: "Calendário — Área do anunciante MOBTV" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: CalendarPage,
+  pendingComponent: () => <DashboardLoading label="Carregando calendário..." />,
+  errorComponent: DashboardRouteError,
+  component: CalendarRoute,
 });
 
-function CalendarPage() {
-  return (
-    <DashboardPlaceholder
-      icon={CalendarDays}
-      eyebrow="Calendário"
-      title="Calendário"
-      description="A visualização consolidada das veiculações será adicionada nesta área mantendo as reservas atuais."
-    />
-  );
+function CalendarRoute() {
+  const { advertiserUser } = Route.useRouteContext();
+  const initialData = Route.useLoaderData();
+  const { data } = useQuery({
+    ...advertiserCalendarPanelsQueryOptions(advertiserUser.id),
+    initialData,
+  });
+  return <OrdersCalendarPage userId={advertiserUser.id} panels={data} />;
 }
