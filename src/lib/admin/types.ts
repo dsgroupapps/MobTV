@@ -156,3 +156,31 @@ export type AdminPanelBlackout = {
   reason: string | null;
   createdAt: string;
 };
+
+export type AdminModerationAsset = {
+  id: string;
+  orderItemId: string | null;
+  advertiserName: string;
+  panelName: string;
+  panelRegion: string;
+  type: string;
+  width: number;
+  height: number;
+  durationSeconds: number;
+  storagePath: string | null;
+  createdAt: string;
+};
+
+export type AdminModerationLog = {
+  id: string;
+  assetId: string;
+  reviewerName: string;
+  action: "approved" | "rejected" | string;
+  reason: string | null;
+  createdAt: string;
+};
+
+export type AdminModerationData = {
+  pendingAssets: AdminModerationAsset[];
+  recentLogs: AdminModerationLog[];
+};

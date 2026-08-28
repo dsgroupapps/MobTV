@@ -29,6 +29,7 @@ import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campa
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminPrecosRouteImport } from './routes/admin.precos'
+import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminInventarioRouteImport } from './routes/admin.inventario'
 import { Route as AdminHorariosRouteImport } from './routes/admin.horarios'
 import { Route as AdminFormatosRouteImport } from './routes/admin.formatos'
@@ -147,6 +148,11 @@ const AdminPrecosRoute = AdminPrecosRouteImport.update({
   path: '/precos',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminModeracaoRoute = AdminModeracaoRouteImport.update({
+  id: '/moderacao',
+  path: '/moderacao',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInventarioRoute = AdminInventarioRouteImport.update({
   id: '/inventario',
   path: '/inventario',
@@ -254,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/inventario': typeof AdminInventarioRouteWithChildren
+  '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
@@ -289,6 +296,7 @@ export interface FileRoutesByTo {
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
+  '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
@@ -326,6 +334,7 @@ export interface FileRoutesById {
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/inventario': typeof AdminInventarioRouteWithChildren
+  '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
@@ -367,6 +376,7 @@ export interface FileRouteTypes {
     | '/admin/formatos'
     | '/admin/horarios'
     | '/admin/inventario'
+    | '/admin/moderacao'
     | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
@@ -402,6 +412,7 @@ export interface FileRouteTypes {
     | '/admin/bloqueios'
     | '/admin/formatos'
     | '/admin/horarios'
+    | '/admin/moderacao'
     | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/admin/formatos'
     | '/admin/horarios'
     | '/admin/inventario'
+    | '/admin/moderacao'
     | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
@@ -618,6 +630,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPrecosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/moderacao': {
+      id: '/admin/moderacao'
+      path: '/moderacao'
+      fullPath: '/admin/moderacao'
+      preLoaderRoute: typeof AdminModeracaoRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventario': {
       id: '/admin/inventario'
       path: '/inventario'
@@ -774,6 +793,7 @@ interface AdminRouteChildren {
   AdminFormatosRoute: typeof AdminFormatosRoute
   AdminHorariosRoute: typeof AdminHorariosRoute
   AdminInventarioRoute: typeof AdminInventarioRouteWithChildren
+  AdminModeracaoRoute: typeof AdminModeracaoRoute
   AdminPrecosRoute: typeof AdminPrecosRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -785,6 +805,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFormatosRoute: AdminFormatosRoute,
   AdminHorariosRoute: AdminHorariosRoute,
   AdminInventarioRoute: AdminInventarioRouteWithChildren,
+  AdminModeracaoRoute: AdminModeracaoRoute,
   AdminPrecosRoute: AdminPrecosRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,

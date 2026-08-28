@@ -7,6 +7,7 @@ import {
   CalendarDays,
   Clock,
   DollarSign,
+  FileCheck2,
   LayoutDashboard,
   LoaderCircle,
   LogOut,
@@ -37,7 +38,8 @@ type AdminPath =
   | "/admin/formatos"
   | "/admin/horarios"
   | "/admin/precos"
-  | "/admin/bloqueios";
+  | "/admin/bloqueios"
+  | "/admin/moderacao";
 type NavigationItem = {
   label: string;
   to: AdminPath;
@@ -56,6 +58,7 @@ const NAVIGATION: NavigationItem[] = [
   { label: "Horários", to: "/admin/horarios", icon: Clock },
   { label: "Preços", to: "/admin/precos", icon: DollarSign },
   { label: "Bloqueios", to: "/admin/bloqueios", icon: Ban },
+  { label: "Moderação", to: "/admin/moderacao", icon: FileCheck2 },
 ];
 
 function getInitials(name: string): string {
