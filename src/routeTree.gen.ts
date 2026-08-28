@@ -28,6 +28,10 @@ import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campa
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
 import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
 import { Route as DashboardCampanhasNovaRouteImport } from './routes/dashboard.campanhas.nova'
+import { Route as DashboardCampanhasNovaIndexRouteImport } from './routes/dashboard.campanhas.nova.index'
+import { Route as DashboardCampanhasNovaRevisaoRouteImport } from './routes/dashboard.campanhas.nova.revisao'
+import { Route as DashboardCampanhasNovaPontosRouteImport } from './routes/dashboard.campanhas.nova.pontos'
+import { Route as DashboardCampanhasNovaHorariosRouteImport } from './routes/dashboard.campanhas.nova.horarios'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -124,6 +128,30 @@ const DashboardCampanhasNovaRoute = DashboardCampanhasNovaRouteImport.update({
   path: '/nova',
   getParentRoute: () => DashboardCampanhasRoute,
 } as any)
+const DashboardCampanhasNovaIndexRoute =
+  DashboardCampanhasNovaIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardCampanhasNovaRoute,
+  } as any)
+const DashboardCampanhasNovaRevisaoRoute =
+  DashboardCampanhasNovaRevisaoRouteImport.update({
+    id: '/revisao',
+    path: '/revisao',
+    getParentRoute: () => DashboardCampanhasNovaRoute,
+  } as any)
+const DashboardCampanhasNovaPontosRoute =
+  DashboardCampanhasNovaPontosRouteImport.update({
+    id: '/pontos',
+    path: '/pontos',
+    getParentRoute: () => DashboardCampanhasNovaRoute,
+  } as any)
+const DashboardCampanhasNovaHorariosRoute =
+  DashboardCampanhasNovaHorariosRouteImport.update({
+    id: '/horarios',
+    path: '/horarios',
+    getParentRoute: () => DashboardCampanhasNovaRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -143,8 +171,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRoute
+  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
+  '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
+  '/dashboard/campanhas/nova/pontos': typeof DashboardCampanhasNovaPontosRoute
+  '/dashboard/campanhas/nova/revisao': typeof DashboardCampanhasNovaRevisaoRoute
+  '/dashboard/campanhas/nova/': typeof DashboardCampanhasNovaIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -162,8 +194,11 @@ export interface FileRoutesByTo {
   '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRoute
   '/dashboard/campanhas': typeof DashboardCampanhasIndexRoute
+  '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
+  '/dashboard/campanhas/nova/pontos': typeof DashboardCampanhasNovaPontosRoute
+  '/dashboard/campanhas/nova/revisao': typeof DashboardCampanhasNovaRevisaoRoute
+  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -184,8 +219,12 @@ export interface FileRoutesById {
   '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/dashboard/': typeof DashboardIndexRoute
-  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRoute
+  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
+  '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
+  '/dashboard/campanhas/nova/pontos': typeof DashboardCampanhasNovaPontosRoute
+  '/dashboard/campanhas/nova/revisao': typeof DashboardCampanhasNovaRevisaoRoute
+  '/dashboard/campanhas/nova/': typeof DashboardCampanhasNovaIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -209,6 +248,10 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/campanhas/nova'
     | '/dashboard/campanhas/'
+    | '/dashboard/campanhas/nova/horarios'
+    | '/dashboard/campanhas/nova/pontos'
+    | '/dashboard/campanhas/nova/revisao'
+    | '/dashboard/campanhas/nova/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -226,8 +269,11 @@ export interface FileRouteTypes {
     | '/dashboard/pedidos'
     | '/ponto/$slug'
     | '/dashboard'
-    | '/dashboard/campanhas/nova'
     | '/dashboard/campanhas'
+    | '/dashboard/campanhas/nova/horarios'
+    | '/dashboard/campanhas/nova/pontos'
+    | '/dashboard/campanhas/nova/revisao'
+    | '/dashboard/campanhas/nova'
   id:
     | '__root__'
     | '/'
@@ -249,6 +295,10 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/campanhas/nova'
     | '/dashboard/campanhas/'
+    | '/dashboard/campanhas/nova/horarios'
+    | '/dashboard/campanhas/nova/pontos'
+    | '/dashboard/campanhas/nova/revisao'
+    | '/dashboard/campanhas/nova/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -401,16 +451,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCampanhasNovaRouteImport
       parentRoute: typeof DashboardCampanhasRoute
     }
+    '/dashboard/campanhas/nova/': {
+      id: '/dashboard/campanhas/nova/'
+      path: '/'
+      fullPath: '/dashboard/campanhas/nova/'
+      preLoaderRoute: typeof DashboardCampanhasNovaIndexRouteImport
+      parentRoute: typeof DashboardCampanhasNovaRoute
+    }
+    '/dashboard/campanhas/nova/revisao': {
+      id: '/dashboard/campanhas/nova/revisao'
+      path: '/revisao'
+      fullPath: '/dashboard/campanhas/nova/revisao'
+      preLoaderRoute: typeof DashboardCampanhasNovaRevisaoRouteImport
+      parentRoute: typeof DashboardCampanhasNovaRoute
+    }
+    '/dashboard/campanhas/nova/pontos': {
+      id: '/dashboard/campanhas/nova/pontos'
+      path: '/pontos'
+      fullPath: '/dashboard/campanhas/nova/pontos'
+      preLoaderRoute: typeof DashboardCampanhasNovaPontosRouteImport
+      parentRoute: typeof DashboardCampanhasNovaRoute
+    }
+    '/dashboard/campanhas/nova/horarios': {
+      id: '/dashboard/campanhas/nova/horarios'
+      path: '/horarios'
+      fullPath: '/dashboard/campanhas/nova/horarios'
+      preLoaderRoute: typeof DashboardCampanhasNovaHorariosRouteImport
+      parentRoute: typeof DashboardCampanhasNovaRoute
+    }
   }
 }
 
+interface DashboardCampanhasNovaRouteChildren {
+  DashboardCampanhasNovaHorariosRoute: typeof DashboardCampanhasNovaHorariosRoute
+  DashboardCampanhasNovaPontosRoute: typeof DashboardCampanhasNovaPontosRoute
+  DashboardCampanhasNovaRevisaoRoute: typeof DashboardCampanhasNovaRevisaoRoute
+  DashboardCampanhasNovaIndexRoute: typeof DashboardCampanhasNovaIndexRoute
+}
+
+const DashboardCampanhasNovaRouteChildren: DashboardCampanhasNovaRouteChildren =
+  {
+    DashboardCampanhasNovaHorariosRoute: DashboardCampanhasNovaHorariosRoute,
+    DashboardCampanhasNovaPontosRoute: DashboardCampanhasNovaPontosRoute,
+    DashboardCampanhasNovaRevisaoRoute: DashboardCampanhasNovaRevisaoRoute,
+    DashboardCampanhasNovaIndexRoute: DashboardCampanhasNovaIndexRoute,
+  }
+
+const DashboardCampanhasNovaRouteWithChildren =
+  DashboardCampanhasNovaRoute._addFileChildren(
+    DashboardCampanhasNovaRouteChildren,
+  )
+
 interface DashboardCampanhasRouteChildren {
-  DashboardCampanhasNovaRoute: typeof DashboardCampanhasNovaRoute
+  DashboardCampanhasNovaRoute: typeof DashboardCampanhasNovaRouteWithChildren
   DashboardCampanhasIndexRoute: typeof DashboardCampanhasIndexRoute
 }
 
 const DashboardCampanhasRouteChildren: DashboardCampanhasRouteChildren = {
-  DashboardCampanhasNovaRoute: DashboardCampanhasNovaRoute,
+  DashboardCampanhasNovaRoute: DashboardCampanhasNovaRouteWithChildren,
   DashboardCampanhasIndexRoute: DashboardCampanhasIndexRoute,
 }
 

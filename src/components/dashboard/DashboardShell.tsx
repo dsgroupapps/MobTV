@@ -17,6 +17,7 @@ import {
 
 import { Logo } from "@/components/site/Logo";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Toaster } from "@/components/ui/sonner";
 import { logout } from "@/lib/auth/functions";
 import type { AuthUser } from "@/lib/auth/types";
 import { cn } from "@/lib/utils";
@@ -220,6 +221,7 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
           {children}
         </main>
       </div>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }
