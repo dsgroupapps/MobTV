@@ -20,7 +20,14 @@ import { Route as CriarContaRouteImport } from './routes/criar-conta'
 import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as PontoSlugRouteImport } from './routes/ponto.$slug'
+import { Route as DashboardPedidosRouteImport } from './routes/dashboard.pedidos'
+import { Route as DashboardMidiasRouteImport } from './routes/dashboard.midias'
+import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campanhas'
+import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
+import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
+import { Route as DashboardCampanhasNovaRouteImport } from './routes/dashboard.campanhas.nova'
 
 const SobreRoute = SobreRouteImport.update({
   id: '/sobre',
@@ -77,10 +84,45 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const PontoSlugRoute = PontoSlugRouteImport.update({
   id: '/ponto/$slug',
   path: '/ponto/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardPedidosRoute = DashboardPedidosRouteImport.update({
+  id: '/pedidos',
+  path: '/pedidos',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardMidiasRoute = DashboardMidiasRouteImport.update({
+  id: '/midias',
+  path: '/midias',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCampanhasRoute = DashboardCampanhasRouteImport.update({
+  id: '/campanhas',
+  path: '/campanhas',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCalendarioRoute = DashboardCalendarioRouteImport.update({
+  id: '/calendario',
+  path: '/calendario',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardCampanhasIndexRoute = DashboardCampanhasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardCampanhasRoute,
+} as any)
+const DashboardCampanhasNovaRoute = DashboardCampanhasNovaRouteImport.update({
+  id: '/nova',
+  path: '/nova',
+  getParentRoute: () => DashboardCampanhasRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -88,28 +130,40 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
   '/criar-conta': typeof CriarContaRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/dashboard/calendario': typeof DashboardCalendarioRoute
+  '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
+  '/dashboard/midias': typeof DashboardMidiasRoute
+  '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRoute
+  '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
   '/criar-conta': typeof CriarContaRoute
-  '/dashboard': typeof DashboardRoute
   '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/dashboard/calendario': typeof DashboardCalendarioRoute
+  '/dashboard/midias': typeof DashboardMidiasRoute
+  '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRoute
+  '/dashboard/campanhas': typeof DashboardCampanhasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,14 +171,21 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
   '/criar-conta': typeof CriarContaRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/entrar': typeof EntrarRoute
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/dashboard/calendario': typeof DashboardCalendarioRoute
+  '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
+  '/dashboard/midias': typeof DashboardMidiasRoute
+  '/dashboard/pedidos': typeof DashboardPedidosRoute
   '/ponto/$slug': typeof PontoSlugRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRoute
+  '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,21 +201,33 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/dashboard/calendario'
+    | '/dashboard/campanhas'
+    | '/dashboard/midias'
+    | '/dashboard/pedidos'
     | '/ponto/$slug'
+    | '/dashboard/'
+    | '/dashboard/campanhas/nova'
+    | '/dashboard/campanhas/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
     | '/contato'
     | '/criar-conta'
-    | '/dashboard'
     | '/entrar'
     | '/galeria'
     | '/midia'
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/dashboard/calendario'
+    | '/dashboard/midias'
+    | '/dashboard/pedidos'
     | '/ponto/$slug'
+    | '/dashboard'
+    | '/dashboard/campanhas/nova'
+    | '/dashboard/campanhas'
   id:
     | '__root__'
     | '/'
@@ -168,7 +241,14 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/dashboard/calendario'
+    | '/dashboard/campanhas'
+    | '/dashboard/midias'
+    | '/dashboard/pedidos'
     | '/ponto/$slug'
+    | '/dashboard/'
+    | '/dashboard/campanhas/nova'
+    | '/dashboard/campanhas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,7 +256,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   ContatoRoute: typeof ContatoRoute
   CriarContaRoute: typeof CriarContaRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   GaleriaRoute: typeof GaleriaRoute
   MidiaRoute: typeof MidiaRoute
@@ -265,6 +345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/ponto/$slug': {
       id: '/ponto/$slug'
       path: '/ponto/$slug'
@@ -272,15 +359,90 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PontoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/pedidos': {
+      id: '/dashboard/pedidos'
+      path: '/pedidos'
+      fullPath: '/dashboard/pedidos'
+      preLoaderRoute: typeof DashboardPedidosRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/midias': {
+      id: '/dashboard/midias'
+      path: '/midias'
+      fullPath: '/dashboard/midias'
+      preLoaderRoute: typeof DashboardMidiasRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/campanhas': {
+      id: '/dashboard/campanhas'
+      path: '/campanhas'
+      fullPath: '/dashboard/campanhas'
+      preLoaderRoute: typeof DashboardCampanhasRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/calendario': {
+      id: '/dashboard/calendario'
+      path: '/calendario'
+      fullPath: '/dashboard/calendario'
+      preLoaderRoute: typeof DashboardCalendarioRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/campanhas/': {
+      id: '/dashboard/campanhas/'
+      path: '/'
+      fullPath: '/dashboard/campanhas/'
+      preLoaderRoute: typeof DashboardCampanhasIndexRouteImport
+      parentRoute: typeof DashboardCampanhasRoute
+    }
+    '/dashboard/campanhas/nova': {
+      id: '/dashboard/campanhas/nova'
+      path: '/nova'
+      fullPath: '/dashboard/campanhas/nova'
+      preLoaderRoute: typeof DashboardCampanhasNovaRouteImport
+      parentRoute: typeof DashboardCampanhasRoute
+    }
   }
 }
+
+interface DashboardCampanhasRouteChildren {
+  DashboardCampanhasNovaRoute: typeof DashboardCampanhasNovaRoute
+  DashboardCampanhasIndexRoute: typeof DashboardCampanhasIndexRoute
+}
+
+const DashboardCampanhasRouteChildren: DashboardCampanhasRouteChildren = {
+  DashboardCampanhasNovaRoute: DashboardCampanhasNovaRoute,
+  DashboardCampanhasIndexRoute: DashboardCampanhasIndexRoute,
+}
+
+const DashboardCampanhasRouteWithChildren =
+  DashboardCampanhasRoute._addFileChildren(DashboardCampanhasRouteChildren)
+
+interface DashboardRouteChildren {
+  DashboardCalendarioRoute: typeof DashboardCalendarioRoute
+  DashboardCampanhasRoute: typeof DashboardCampanhasRouteWithChildren
+  DashboardMidiasRoute: typeof DashboardMidiasRoute
+  DashboardPedidosRoute: typeof DashboardPedidosRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardCalendarioRoute: DashboardCalendarioRoute,
+  DashboardCampanhasRoute: DashboardCampanhasRouteWithChildren,
+  DashboardMidiasRoute: DashboardMidiasRoute,
+  DashboardPedidosRoute: DashboardPedidosRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   ContatoRoute: ContatoRoute,
   CriarContaRoute: CriarContaRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   EntrarRoute: EntrarRoute,
   GaleriaRoute: GaleriaRoute,
   MidiaRoute: MidiaRoute,

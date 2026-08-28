@@ -1,10 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
-import { AuthenticatedPlaceholder } from "@/components/auth/AuthenticatedPlaceholder";
+import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { requireRole } from "@/lib/auth/functions";
 
 export const Route = createFileRoute("/dashboard")({
-  loader: () => requireRole({ data: { roles: ["advertiser"] } }),
+  beforeLoad: async () => {
+    const advertiserUser = await requireRole({ data: { roles: ["advertiser"] } });
+    if (advertiserUser.role !== "advertiser") throw redirect({ href: "/admin" });
+    return { advertiserUser };
+  },
   head: () => ({
     meta: [
       { title: "Área do anunciante — MOBTV" },
@@ -15,6 +19,10 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardPage() {
-  const user = Route.useLoaderData();
-  return <AuthenticatedPlaceholder user={user} area="anunciante" />;
+  const { advertiserUser } = Route.useRouteContext();
+  return (
+    <DashboardShell user={advertiserUser}>
+      <Outlet />
+    </DashboardShell>
+  );
 }
