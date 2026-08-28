@@ -23,12 +23,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PontoSlugRouteImport } from './routes/ponto.$slug'
+import { Route as PlayerPanelIdRouteImport } from './routes/player.$panelId'
 import { Route as DashboardPedidosRouteImport } from './routes/dashboard.pedidos'
 import { Route as DashboardMidiasRouteImport } from './routes/dashboard.midias'
 import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campanhas'
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminPrecosRouteImport } from './routes/admin.precos'
+import { Route as AdminPlayersRouteImport } from './routes/admin.players'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
 import { Route as AdminInventarioRouteImport } from './routes/admin.inventario'
 import { Route as AdminHorariosRouteImport } from './routes/admin.horarios'
@@ -118,6 +120,11 @@ const PontoSlugRoute = PontoSlugRouteImport.update({
   path: '/ponto/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlayerPanelIdRoute = PlayerPanelIdRouteImport.update({
+  id: '/player/$panelId',
+  path: '/player/$panelId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardPedidosRoute = DashboardPedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
@@ -146,6 +153,11 @@ const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
 const AdminPrecosRoute = AdminPrecosRouteImport.update({
   id: '/precos',
   path: '/precos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPlayersRoute = AdminPlayersRouteImport.update({
+  id: '/players',
+  path: '/players',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminModeracaoRoute = AdminModeracaoRouteImport.update({
@@ -261,12 +273,14 @@ export interface FileRoutesByFullPath {
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/inventario': typeof AdminInventarioRouteWithChildren
   '/admin/moderacao': typeof AdminModeracaoRoute
+  '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
   '/dashboard/midias': typeof DashboardMidiasRoute
   '/dashboard/pedidos': typeof DashboardPedidosRouteWithChildren
+  '/player/$panelId': typeof PlayerPanelIdRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -297,10 +311,12 @@ export interface FileRoutesByTo {
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/moderacao': typeof AdminModeracaoRoute
+  '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/midias': typeof DashboardMidiasRoute
+  '/player/$panelId': typeof PlayerPanelIdRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
@@ -335,12 +351,14 @@ export interface FileRoutesById {
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/inventario': typeof AdminInventarioRouteWithChildren
   '/admin/moderacao': typeof AdminModeracaoRoute
+  '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
   '/dashboard/midias': typeof DashboardMidiasRoute
   '/dashboard/pedidos': typeof DashboardPedidosRouteWithChildren
+  '/player/$panelId': typeof PlayerPanelIdRoute
   '/ponto/$slug': typeof PontoSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
@@ -377,12 +395,14 @@ export interface FileRouteTypes {
     | '/admin/horarios'
     | '/admin/inventario'
     | '/admin/moderacao'
+    | '/admin/players'
     | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
     | '/dashboard/midias'
     | '/dashboard/pedidos'
+    | '/player/$panelId'
     | '/ponto/$slug'
     | '/admin/'
     | '/dashboard/'
@@ -413,10 +433,12 @@ export interface FileRouteTypes {
     | '/admin/formatos'
     | '/admin/horarios'
     | '/admin/moderacao'
+    | '/admin/players'
     | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/midias'
+    | '/player/$panelId'
     | '/ponto/$slug'
     | '/admin'
     | '/dashboard'
@@ -450,12 +472,14 @@ export interface FileRouteTypes {
     | '/admin/horarios'
     | '/admin/inventario'
     | '/admin/moderacao'
+    | '/admin/players'
     | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
     | '/dashboard/midias'
     | '/dashboard/pedidos'
+    | '/player/$panelId'
     | '/ponto/$slug'
     | '/admin/'
     | '/dashboard/'
@@ -485,6 +509,7 @@ export interface RootRouteChildren {
   PlanejadorRoute: typeof PlanejadorRoute
   RedeRoute: typeof RedeRoute
   SobreRoute: typeof SobreRoute
+  PlayerPanelIdRoute: typeof PlayerPanelIdRoute
   PontoSlugRoute: typeof PontoSlugRoute
 }
 
@@ -588,6 +613,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PontoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/player/$panelId': {
+      id: '/player/$panelId'
+      path: '/player/$panelId'
+      fullPath: '/player/$panelId'
+      preLoaderRoute: typeof PlayerPanelIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/pedidos': {
       id: '/dashboard/pedidos'
       path: '/pedidos'
@@ -628,6 +660,13 @@ declare module '@tanstack/react-router' {
       path: '/precos'
       fullPath: '/admin/precos'
       preLoaderRoute: typeof AdminPrecosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/players': {
+      id: '/admin/players'
+      path: '/players'
+      fullPath: '/admin/players'
+      preLoaderRoute: typeof AdminPlayersRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/moderacao': {
@@ -794,6 +833,7 @@ interface AdminRouteChildren {
   AdminHorariosRoute: typeof AdminHorariosRoute
   AdminInventarioRoute: typeof AdminInventarioRouteWithChildren
   AdminModeracaoRoute: typeof AdminModeracaoRoute
+  AdminPlayersRoute: typeof AdminPlayersRoute
   AdminPrecosRoute: typeof AdminPrecosRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -806,6 +846,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHorariosRoute: AdminHorariosRoute,
   AdminInventarioRoute: AdminInventarioRouteWithChildren,
   AdminModeracaoRoute: AdminModeracaoRoute,
+  AdminPlayersRoute: AdminPlayersRoute,
   AdminPrecosRoute: AdminPrecosRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -891,6 +932,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlanejadorRoute: PlanejadorRoute,
   RedeRoute: RedeRoute,
   SobreRoute: SobreRoute,
+  PlayerPanelIdRoute: PlayerPanelIdRoute,
   PontoSlugRoute: PontoSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -14,6 +14,7 @@ import {
   Megaphone,
   Menu,
   Monitor,
+  MonitorPlay,
   Plus,
   Settings,
   Users,
@@ -39,7 +40,8 @@ type AdminPath =
   | "/admin/horarios"
   | "/admin/precos"
   | "/admin/bloqueios"
-  | "/admin/moderacao";
+  | "/admin/moderacao"
+  | "/admin/players";
 type NavigationItem = {
   label: string;
   to: AdminPath;
@@ -59,6 +61,7 @@ const NAVIGATION: NavigationItem[] = [
   { label: "Preços", to: "/admin/precos", icon: DollarSign },
   { label: "Bloqueios", to: "/admin/bloqueios", icon: Ban },
   { label: "Moderação", to: "/admin/moderacao", icon: FileCheck2 },
+  { label: "Players", to: "/admin/players", icon: MonitorPlay },
 ];
 
 function getInitials(name: string): string {

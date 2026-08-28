@@ -184,3 +184,11 @@ export type AdminModerationData = {
   pendingAssets: AdminModerationAsset[];
   recentLogs: AdminModerationLog[];
 };
+
+export type AdminPlayerPanel = {
+  id: string;
+  name: string;
+  region: string;
+  address: string;
+  active: boolean;
+};
