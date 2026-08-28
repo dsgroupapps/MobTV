@@ -67,7 +67,10 @@ function DashboardNavigation({ onNavigate }: { onNavigate?: () => void }) {
       <div className="space-y-1 px-4">
         {PRIMARY_NAVIGATION.map((item) => {
           const Icon = item.icon;
-          const isActive = pathname === item.to || pathname === `${item.to}/`;
+          const isActive =
+            item.to === "/dashboard"
+              ? pathname === item.to || pathname === `${item.to}/`
+              : pathname === item.to || pathname.startsWith(`${item.to}/`);
 
           return (
             <Link

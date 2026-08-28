@@ -66,16 +66,21 @@ function MetricCard({
   label,
   value,
   detail,
+  to,
   accent = "navy",
 }: {
   icon: LucideIcon;
   label: string;
   value: string | number;
   detail: string;
+  to: "/dashboard/pedidos" | "/dashboard/campanhas" | "/dashboard/midias";
   accent?: "navy" | "gold" | "teal";
 }) {
   return (
-    <section className="rounded-lg border border-border bg-white p-5 sm:p-6">
+    <Link
+      to={to}
+      className="rounded-lg border border-border bg-white p-5 transition-colors hover:border-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:p-6"
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-sm font-medium text-ink-soft">{label}</p>
@@ -93,7 +98,7 @@ function MetricCard({
         </div>
       </div>
       <p className="mt-4 text-xs text-ink-soft">{detail}</p>
-    </section>
+    </Link>
   );
 }
 
@@ -138,12 +143,14 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
           label="Pedidos"
           value={metrics.totalOrders}
           detail={`${metrics.pendingOrders} pendente${metrics.pendingOrders === 1 ? "" : "s"}`}
+          to="/dashboard/pedidos"
         />
         <MetricCard
           icon={WalletCards}
           label="Investimento confirmado"
           value={currencyFormatter.format(metrics.totalInvestment)}
           detail={`${metrics.confirmedOrders} pedido${metrics.confirmedOrders === 1 ? "" : "s"} confirmado${metrics.confirmedOrders === 1 ? "" : "s"}`}
+          to="/dashboard/campanhas"
           accent="gold"
         />
         <MetricCard
@@ -151,6 +158,7 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
           label="Mídias"
           value={metrics.totalAssets}
           detail={`${metrics.approvedAssets} aprovada${metrics.approvedAssets === 1 ? "" : "s"} · ${metrics.pendingAssets} em análise`}
+          to="/dashboard/midias"
           accent="teal"
         />
         <MetricCard
@@ -158,6 +166,7 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
           label="Exibições comprovadas"
           value={metrics.totalExhibitions.toLocaleString("pt-BR")}
           detail="Registros de veiculação concluídos"
+          to="/dashboard/campanhas"
           accent="teal"
         />
       </div>
@@ -186,8 +195,10 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
               {recentOrders.map((order) => {
                 const status = orderStatus(order.status);
                 return (
-                  <div
+                  <Link
                     key={order.id}
+                    to="/dashboard/pedidos/$id"
+                    params={{ id: order.id }}
                     className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6"
                   >
                     <div className="flex min-w-0 items-center gap-3">
@@ -209,7 +220,7 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
                       </p>
                       <StatusBadge {...status} />
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -251,8 +262,9 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
               {recentAssets.map((asset) => {
                 const status = assetStatus(asset.status);
                 return (
-                  <div
+                  <Link
                     key={asset.id}
+                    to="/dashboard/midias"
                     className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6"
                   >
                     <div className="flex min-w-0 items-center gap-3">
@@ -270,7 +282,7 @@ export function AdvertiserDashboard({ userName, data }: AdvertiserDashboardProps
                       </div>
                     </div>
                     <StatusBadge {...status} />
-                  </div>
+                  </Link>
                 );
               })}
             </div>

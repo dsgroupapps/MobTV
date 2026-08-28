@@ -53,13 +53,18 @@ export function CampaignReviewPage() {
     },
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: ["advertiser-dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["advertiser-orders"] });
+      void queryClient.invalidateQueries({ queryKey: ["advertiser-campaigns"] });
       clearCompletedCampaignStorage();
       toast.success(
         result.alreadyCreated
           ? `Pedido #${result.orderId.slice(0, 8).toUpperCase()} já estava criado.`
           : `Pagamento confirmado. Pedido #${result.orderId.slice(0, 8).toUpperCase()} criado.`,
       );
-      void navigate({ to: "/dashboard/pedidos" });
+      void navigate({
+        to: "/dashboard/pedidos/$id",
+        params: { id: result.orderId },
+      });
     },
     onError: (mutationError) => {
       const message = mutationError instanceof Error ? mutationError.message : "Erro inesperado.";
