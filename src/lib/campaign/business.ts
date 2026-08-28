@@ -167,5 +167,9 @@ export function calculateSpaceSlotPrice(
   });
 
   if (!applicableRule) return SPACE_DEFAULT_SLOT_PRICE;
-  return applicableRule.basePrice * (1 - (applicableRule.discountPct ?? 0) / 100);
+  return calculateDiscountedPrice(applicableRule.basePrice, applicableRule.discountPct);
+}
+
+export function calculateDiscountedPrice(basePrice: number, discountPct: number | null): number {
+  return basePrice * (1 - (discountPct ?? 0) / 100);
 }

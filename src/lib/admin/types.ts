@@ -75,3 +75,84 @@ export type AdminTargetUserStats = {
   totalInsertions: number;
   panelStats: Array<{ panelName: string; count: number }>;
 };
+
+export type AdminOperationalPanel = {
+  id: string;
+  name: string;
+  region: string;
+  address: string;
+  timezone: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AdminPanelFormat = {
+  id: string;
+  panelId: string;
+  panelName: string;
+  panelActive: boolean;
+  width: number;
+  height: number;
+  orientation: Database["public"]["Enums"]["panel_orientation"];
+  durationsAllowed: number[];
+  createdAt: string;
+};
+
+export type AdminPanelHour = {
+  id: string;
+  panelId: string;
+  panelName: string;
+  panelActive: boolean;
+  weekday: number;
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+};
+
+export type AdminPanelHourException = {
+  id: string;
+  panelId: string;
+  panelName: string;
+  panelActive: boolean;
+  date: string;
+  startTime: string | null;
+  endTime: string | null;
+  createdAt: string;
+};
+
+export type AdminPanelHoursData = {
+  panels: AdminOperationalPanel[];
+  formats: AdminPanelFormat[];
+  hours: AdminPanelHour[];
+  exceptions: AdminPanelHourException[];
+  futureReservations: Array<{ panelId: string; durationSeconds: number }>;
+};
+
+export type AdminPricingRule = {
+  id: string;
+  panelId: string;
+  panelName: string;
+  panelActive: boolean;
+  weekday: number | null;
+  timeStart: string | null;
+  timeEnd: string | null;
+  durationSeconds: number;
+  basePrice: number;
+  discountPct: number | null;
+  dateStart: string | null;
+  dateEnd: string | null;
+  createdAt: string;
+};
+
+export type AdminPanelBlackout = {
+  id: string;
+  panelId: string;
+  panelName: string;
+  panelActive: boolean;
+  date: string;
+  startTime: string;
+  endTime: string;
+  reason: string | null;
+  createdAt: string;
+};
