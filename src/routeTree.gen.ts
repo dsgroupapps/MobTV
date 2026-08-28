@@ -37,6 +37,7 @@ import { Route as AdminHorariosRouteImport } from './routes/admin.horarios'
 import { Route as AdminFormatosRouteImport } from './routes/admin.formatos'
 import { Route as AdminCampanhasRouteImport } from './routes/admin.campanhas'
 import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as DashboardPedidosIndexRouteImport } from './routes/dashboard.pedidos.index'
 import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
 import { Route as AdminInventarioIndexRouteImport } from './routes/admin.inventario.index'
@@ -190,6 +191,11 @@ const AdminBloqueiosRoute = AdminBloqueiosRouteImport.update({
   path: '/bloqueios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
 const DashboardPedidosIndexRoute = DashboardPedidosIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/campanhas': typeof AdminCampanhasRouteWithChildren
   '/admin/formatos': typeof AdminFormatosRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/campanhas': typeof AdminCampanhasRouteWithChildren
   '/admin/formatos': typeof AdminFormatosRoute
@@ -389,6 +398,7 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/analytics'
     | '/admin/bloqueios'
     | '/admin/campanhas'
     | '/admin/formatos'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/analytics'
     | '/admin/bloqueios'
     | '/admin/formatos'
     | '/admin/horarios'
@@ -466,6 +477,7 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/analytics'
     | '/admin/bloqueios'
     | '/admin/campanhas'
     | '/admin/formatos'
@@ -711,6 +723,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBloqueiosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/dashboard/pedidos/': {
       id: '/dashboard/pedidos/'
       path: '/'
@@ -827,6 +846,7 @@ const AdminInventarioRouteWithChildren = AdminInventarioRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBloqueiosRoute: typeof AdminBloqueiosRoute
   AdminCampanhasRoute: typeof AdminCampanhasRouteWithChildren
   AdminFormatosRoute: typeof AdminFormatosRoute
@@ -840,6 +860,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminBloqueiosRoute: AdminBloqueiosRoute,
   AdminCampanhasRoute: AdminCampanhasRouteWithChildren,
   AdminFormatosRoute: AdminFormatosRoute,

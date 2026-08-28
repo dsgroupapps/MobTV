@@ -192,3 +192,42 @@ export type AdminPlayerPanel = {
   address: string;
   active: boolean;
 };
+
+export type AdminAnalyticsOrder = {
+  id: string;
+  userName: string;
+  createdAt: string;
+  itemCount: number;
+  status: Database["public"]["Enums"]["order_status"];
+  totalAmount: number;
+};
+
+export type AdminAnalyticsClient = {
+  userId: string;
+  userName: string;
+  exhibitions: number;
+  panelCount: number;
+};
+
+export type AdminOppLog = {
+  id: string;
+  advertiserName: string;
+  panelName: string;
+  panelRegion: string;
+  playedAt: string;
+  durationSeconds: number;
+  status: Database["public"]["Enums"]["opp_status"];
+};
+
+export type AdminAnalyticsData = {
+  metrics: {
+    totalRevenue: number;
+    paidOrders: number;
+    totalExhibitions: number;
+    uniqueAdvertisers: number;
+  };
+  orders: AdminAnalyticsOrder[];
+  clients: AdminAnalyticsClient[];
+  recentOppLogs: AdminOppLog[];
+  recentLogLimit: number;
+};

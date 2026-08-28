@@ -4,6 +4,7 @@ import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-ro
 import { useServerFn } from "@tanstack/react-start";
 import {
   Ban,
+  BarChart3,
   CalendarDays,
   Clock,
   DollarSign,
@@ -41,7 +42,8 @@ type AdminPath =
   | "/admin/precos"
   | "/admin/bloqueios"
   | "/admin/moderacao"
-  | "/admin/players";
+  | "/admin/players"
+  | "/admin/analytics";
 type NavigationItem = {
   label: string;
   to: AdminPath;
@@ -62,6 +64,7 @@ const NAVIGATION: NavigationItem[] = [
   { label: "Bloqueios", to: "/admin/bloqueios", icon: Ban },
   { label: "Moderação", to: "/admin/moderacao", icon: FileCheck2 },
   { label: "Players", to: "/admin/players", icon: MonitorPlay },
+  { label: "Analytics", to: "/admin/analytics", icon: BarChart3 },
 ];
 
 function getInitials(name: string): string {
