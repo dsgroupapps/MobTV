@@ -28,12 +28,19 @@ import { Route as DashboardMidiasRouteImport } from './routes/dashboard.midias'
 import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campanhas'
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as AdminPrecosRouteImport } from './routes/admin.precos'
+import { Route as AdminInventarioRouteImport } from './routes/admin.inventario'
+import { Route as AdminHorariosRouteImport } from './routes/admin.horarios'
+import { Route as AdminFormatosRouteImport } from './routes/admin.formatos'
 import { Route as AdminCampanhasRouteImport } from './routes/admin.campanhas'
+import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
 import { Route as DashboardPedidosIndexRouteImport } from './routes/dashboard.pedidos.index'
 import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
+import { Route as AdminInventarioIndexRouteImport } from './routes/admin.inventario.index'
 import { Route as AdminCampanhasIndexRouteImport } from './routes/admin.campanhas.index'
 import { Route as DashboardPedidosIdRouteImport } from './routes/dashboard.pedidos.$id'
 import { Route as DashboardCampanhasNovaRouteImport } from './routes/dashboard.campanhas.nova'
+import { Route as AdminInventarioAtivosRouteImport } from './routes/admin.inventario.ativos'
 import { Route as AdminCampanhasNovaRouteImport } from './routes/admin.campanhas.nova'
 import { Route as DashboardCampanhasNovaIndexRouteImport } from './routes/dashboard.campanhas.nova.index'
 import { Route as DashboardCampanhasNovaRevisaoRouteImport } from './routes/dashboard.campanhas.nova.revisao'
@@ -135,9 +142,34 @@ const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPrecosRoute = AdminPrecosRouteImport.update({
+  id: '/precos',
+  path: '/precos',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInventarioRoute = AdminInventarioRouteImport.update({
+  id: '/inventario',
+  path: '/inventario',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHorariosRoute = AdminHorariosRouteImport.update({
+  id: '/horarios',
+  path: '/horarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFormatosRoute = AdminFormatosRouteImport.update({
+  id: '/formatos',
+  path: '/formatos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCampanhasRoute = AdminCampanhasRouteImport.update({
   id: '/campanhas',
   path: '/campanhas',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBloqueiosRoute = AdminBloqueiosRouteImport.update({
+  id: '/bloqueios',
+  path: '/bloqueios',
   getParentRoute: () => AdminRoute,
 } as any)
 const DashboardPedidosIndexRoute = DashboardPedidosIndexRouteImport.update({
@@ -149,6 +181,11 @@ const DashboardCampanhasIndexRoute = DashboardCampanhasIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardCampanhasRoute,
+} as any)
+const AdminInventarioIndexRoute = AdminInventarioIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminInventarioRoute,
 } as any)
 const AdminCampanhasIndexRoute = AdminCampanhasIndexRouteImport.update({
   id: '/',
@@ -164,6 +201,11 @@ const DashboardCampanhasNovaRoute = DashboardCampanhasNovaRouteImport.update({
   id: '/nova',
   path: '/nova',
   getParentRoute: () => DashboardCampanhasRoute,
+} as any)
+const AdminInventarioAtivosRoute = AdminInventarioAtivosRouteImport.update({
+  id: '/ativos',
+  path: '/ativos',
+  getParentRoute: () => AdminInventarioRoute,
 } as any)
 const AdminCampanhasNovaRoute = AdminCampanhasNovaRouteImport.update({
   id: '/nova',
@@ -207,7 +249,12 @@ export interface FileRoutesByFullPath {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/campanhas': typeof AdminCampanhasRouteWithChildren
+  '/admin/formatos': typeof AdminFormatosRoute
+  '/admin/horarios': typeof AdminHorariosRoute
+  '/admin/inventario': typeof AdminInventarioRouteWithChildren
+  '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
@@ -217,9 +264,11 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
+  '/admin/inventario/ativos': typeof AdminInventarioAtivosRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/admin/campanhas/': typeof AdminCampanhasIndexRoute
+  '/admin/inventario/': typeof AdminInventarioIndexRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -237,6 +286,10 @@ export interface FileRoutesByTo {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/bloqueios': typeof AdminBloqueiosRoute
+  '/admin/formatos': typeof AdminFormatosRoute
+  '/admin/horarios': typeof AdminHorariosRoute
+  '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/midias': typeof DashboardMidiasRoute
@@ -244,8 +297,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
+  '/admin/inventario/ativos': typeof AdminInventarioAtivosRoute
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/admin/campanhas': typeof AdminCampanhasIndexRoute
+  '/admin/inventario': typeof AdminInventarioIndexRoute
   '/dashboard/campanhas': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -266,7 +321,12 @@ export interface FileRoutesById {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/bloqueios': typeof AdminBloqueiosRoute
   '/admin/campanhas': typeof AdminCampanhasRouteWithChildren
+  '/admin/formatos': typeof AdminFormatosRoute
+  '/admin/horarios': typeof AdminHorariosRoute
+  '/admin/inventario': typeof AdminInventarioRouteWithChildren
+  '/admin/precos': typeof AdminPrecosRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
@@ -276,9 +336,11 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
+  '/admin/inventario/ativos': typeof AdminInventarioAtivosRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/admin/campanhas/': typeof AdminCampanhasIndexRoute
+  '/admin/inventario/': typeof AdminInventarioIndexRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -300,7 +362,12 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/bloqueios'
     | '/admin/campanhas'
+    | '/admin/formatos'
+    | '/admin/horarios'
+    | '/admin/inventario'
+    | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
@@ -310,9 +377,11 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/admin/campanhas/nova'
+    | '/admin/inventario/ativos'
     | '/dashboard/campanhas/nova'
     | '/dashboard/pedidos/$id'
     | '/admin/campanhas/'
+    | '/admin/inventario/'
     | '/dashboard/campanhas/'
     | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
@@ -330,6 +399,10 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/bloqueios'
+    | '/admin/formatos'
+    | '/admin/horarios'
+    | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/midias'
@@ -337,8 +410,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/dashboard'
     | '/admin/campanhas/nova'
+    | '/admin/inventario/ativos'
     | '/dashboard/pedidos/$id'
     | '/admin/campanhas'
+    | '/admin/inventario'
     | '/dashboard/campanhas'
     | '/dashboard/pedidos'
     | '/dashboard/campanhas/nova/horarios'
@@ -358,7 +433,12 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/bloqueios'
     | '/admin/campanhas'
+    | '/admin/formatos'
+    | '/admin/horarios'
+    | '/admin/inventario'
+    | '/admin/precos'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
@@ -368,9 +448,11 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/dashboard/'
     | '/admin/campanhas/nova'
+    | '/admin/inventario/ativos'
     | '/dashboard/campanhas/nova'
     | '/dashboard/pedidos/$id'
     | '/admin/campanhas/'
+    | '/admin/inventario/'
     | '/dashboard/campanhas/'
     | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
@@ -529,11 +611,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsuariosRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/precos': {
+      id: '/admin/precos'
+      path: '/precos'
+      fullPath: '/admin/precos'
+      preLoaderRoute: typeof AdminPrecosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/inventario': {
+      id: '/admin/inventario'
+      path: '/inventario'
+      fullPath: '/admin/inventario'
+      preLoaderRoute: typeof AdminInventarioRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/horarios': {
+      id: '/admin/horarios'
+      path: '/horarios'
+      fullPath: '/admin/horarios'
+      preLoaderRoute: typeof AdminHorariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/formatos': {
+      id: '/admin/formatos'
+      path: '/formatos'
+      fullPath: '/admin/formatos'
+      preLoaderRoute: typeof AdminFormatosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/campanhas': {
       id: '/admin/campanhas'
       path: '/campanhas'
       fullPath: '/admin/campanhas'
       preLoaderRoute: typeof AdminCampanhasRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/bloqueios': {
+      id: '/admin/bloqueios'
+      path: '/bloqueios'
+      fullPath: '/admin/bloqueios'
+      preLoaderRoute: typeof AdminBloqueiosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/dashboard/pedidos/': {
@@ -549,6 +666,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/campanhas/'
       preLoaderRoute: typeof DashboardCampanhasIndexRouteImport
       parentRoute: typeof DashboardCampanhasRoute
+    }
+    '/admin/inventario/': {
+      id: '/admin/inventario/'
+      path: '/'
+      fullPath: '/admin/inventario/'
+      preLoaderRoute: typeof AdminInventarioIndexRouteImport
+      parentRoute: typeof AdminInventarioRoute
     }
     '/admin/campanhas/': {
       id: '/admin/campanhas/'
@@ -570,6 +694,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/campanhas/nova'
       preLoaderRoute: typeof DashboardCampanhasNovaRouteImport
       parentRoute: typeof DashboardCampanhasRoute
+    }
+    '/admin/inventario/ativos': {
+      id: '/admin/inventario/ativos'
+      path: '/ativos'
+      fullPath: '/admin/inventario/ativos'
+      preLoaderRoute: typeof AdminInventarioAtivosRouteImport
+      parentRoute: typeof AdminInventarioRoute
     }
     '/admin/campanhas/nova': {
       id: '/admin/campanhas/nova'
@@ -623,14 +754,38 @@ const AdminCampanhasRouteWithChildren = AdminCampanhasRoute._addFileChildren(
   AdminCampanhasRouteChildren,
 )
 
+interface AdminInventarioRouteChildren {
+  AdminInventarioAtivosRoute: typeof AdminInventarioAtivosRoute
+  AdminInventarioIndexRoute: typeof AdminInventarioIndexRoute
+}
+
+const AdminInventarioRouteChildren: AdminInventarioRouteChildren = {
+  AdminInventarioAtivosRoute: AdminInventarioAtivosRoute,
+  AdminInventarioIndexRoute: AdminInventarioIndexRoute,
+}
+
+const AdminInventarioRouteWithChildren = AdminInventarioRoute._addFileChildren(
+  AdminInventarioRouteChildren,
+)
+
 interface AdminRouteChildren {
+  AdminBloqueiosRoute: typeof AdminBloqueiosRoute
   AdminCampanhasRoute: typeof AdminCampanhasRouteWithChildren
+  AdminFormatosRoute: typeof AdminFormatosRoute
+  AdminHorariosRoute: typeof AdminHorariosRoute
+  AdminInventarioRoute: typeof AdminInventarioRouteWithChildren
+  AdminPrecosRoute: typeof AdminPrecosRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminBloqueiosRoute: AdminBloqueiosRoute,
   AdminCampanhasRoute: AdminCampanhasRouteWithChildren,
+  AdminFormatosRoute: AdminFormatosRoute,
+  AdminHorariosRoute: AdminHorariosRoute,
+  AdminInventarioRoute: AdminInventarioRouteWithChildren,
+  AdminPrecosRoute: AdminPrecosRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

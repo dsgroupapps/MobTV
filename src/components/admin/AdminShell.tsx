@@ -3,12 +3,18 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  Ban,
+  CalendarDays,
+  Clock,
+  DollarSign,
   LayoutDashboard,
   LoaderCircle,
   LogOut,
   Megaphone,
   Menu,
+  Monitor,
   Plus,
+  Settings,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -21,13 +27,35 @@ import type { AuthUser } from "@/lib/auth/types";
 import { cn } from "@/lib/utils";
 
 type AdminShellProps = { user: AuthUser; children: ReactNode };
-type AdminPath = "/admin" | "/admin/usuarios" | "/admin/campanhas" | "/admin/campanhas/nova";
-type NavigationItem = { label: string; to: AdminPath; icon: LucideIcon; adminOnly?: boolean };
+type AdminPath =
+  | "/admin"
+  | "/admin/usuarios"
+  | "/admin/campanhas"
+  | "/admin/campanhas/nova"
+  | "/admin/inventario"
+  | "/admin/inventario/ativos"
+  | "/admin/formatos"
+  | "/admin/horarios"
+  | "/admin/precos"
+  | "/admin/bloqueios";
+type NavigationItem = {
+  label: string;
+  to: AdminPath;
+  icon: LucideIcon;
+  adminOnly?: boolean;
+  exact?: boolean;
+};
 
 const NAVIGATION: NavigationItem[] = [
-  { label: "Visão geral", to: "/admin", icon: LayoutDashboard },
+  { label: "Visão geral", to: "/admin", icon: LayoutDashboard, exact: true },
   { label: "Usuários", to: "/admin/usuarios", icon: Users, adminOnly: true },
   { label: "Campanhas", to: "/admin/campanhas", icon: Megaphone },
+  { label: "Inventário", to: "/admin/inventario", icon: CalendarDays, exact: true },
+  { label: "Ativos", to: "/admin/inventario/ativos", icon: Monitor },
+  { label: "Formatos", to: "/admin/formatos", icon: Settings },
+  { label: "Horários", to: "/admin/horarios", icon: Clock },
+  { label: "Preços", to: "/admin/precos", icon: DollarSign },
+  { label: "Bloqueios", to: "/admin/bloqueios", icon: Ban },
 ];
 
 function getInitials(name: string): string {
@@ -49,10 +77,9 @@ function AdminNavigation({ user, onNavigate }: { user: AuthUser; onNavigate?: ()
       <div className="space-y-1 px-4">
         {items.map((item) => {
           const Icon = item.icon;
-          const isActive =
-            item.to === "/admin"
-              ? pathname === item.to || pathname === `${item.to}/`
-              : pathname === item.to || pathname.startsWith(`${item.to}/`);
+          const isActive = item.exact
+            ? pathname === item.to || pathname === `${item.to}/`
+            : pathname === item.to || pathname.startsWith(`${item.to}/`);
           return (
             <Link
               key={item.to}
