@@ -31,7 +31,7 @@ function databaseError(context: string, error: { message: string }): Error {
   return new Error(`${context}: ${error.message}`);
 }
 
-function mapPanel(panel: {
+export function mapCampaignPanel(panel: {
   id: string;
   name: string;
   region: string;
@@ -99,7 +99,7 @@ export const getCampaignInventory = createServerFn({ method: "GET" }).handler(
       .eq("active", true);
 
     if (error) throw databaseError("Erro ao carregar painéis", error);
-    return (data ?? []).map(mapPanel);
+    return (data ?? []).map(mapCampaignPanel);
   },
 );
 

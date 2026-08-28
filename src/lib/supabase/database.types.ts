@@ -814,6 +814,31 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      admin_create_campaign_for_user: {
+        Args: {
+          p_date_end: string;
+          p_date_start: string;
+          p_duration_seconds: number;
+          p_expires_at: string;
+          p_items: Json;
+          p_total_insertions: number | null;
+          p_total_price: number;
+          p_type: Database["public"]["Enums"]["quote_type"];
+          p_user_id: string;
+        };
+        Returns: {
+          order_id: string;
+          quote_id: string;
+        }[];
+      };
+      admin_reschedule_order_item: {
+        Args: {
+          p_date: string;
+          p_order_item_id: string;
+          p_start_time: string;
+        };
+        Returns: undefined;
+      };
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"];
