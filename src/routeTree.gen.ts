@@ -21,15 +21,20 @@ import { Route as ContatoRouteImport } from './routes/contato'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PontoSlugRouteImport } from './routes/ponto.$slug'
 import { Route as DashboardPedidosRouteImport } from './routes/dashboard.pedidos'
 import { Route as DashboardMidiasRouteImport } from './routes/dashboard.midias'
 import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campanhas'
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
+import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as AdminCampanhasRouteImport } from './routes/admin.campanhas'
 import { Route as DashboardPedidosIndexRouteImport } from './routes/dashboard.pedidos.index'
 import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
+import { Route as AdminCampanhasIndexRouteImport } from './routes/admin.campanhas.index'
 import { Route as DashboardPedidosIdRouteImport } from './routes/dashboard.pedidos.$id'
 import { Route as DashboardCampanhasNovaRouteImport } from './routes/dashboard.campanhas.nova'
+import { Route as AdminCampanhasNovaRouteImport } from './routes/admin.campanhas.nova'
 import { Route as DashboardCampanhasNovaIndexRouteImport } from './routes/dashboard.campanhas.nova.index'
 import { Route as DashboardCampanhasNovaRevisaoRouteImport } from './routes/dashboard.campanhas.nova.revisao'
 import { Route as DashboardCampanhasNovaPontosRouteImport } from './routes/dashboard.campanhas.nova.pontos'
@@ -95,6 +100,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const PontoSlugRoute = PontoSlugRouteImport.update({
   id: '/ponto/$slug',
   path: '/ponto/$slug',
@@ -120,6 +130,16 @@ const DashboardCalendarioRoute = DashboardCalendarioRouteImport.update({
   path: '/calendario',
   getParentRoute: () => DashboardRoute,
 } as any)
+const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCampanhasRoute = AdminCampanhasRouteImport.update({
+  id: '/campanhas',
+  path: '/campanhas',
+  getParentRoute: () => AdminRoute,
+} as any)
 const DashboardPedidosIndexRoute = DashboardPedidosIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -130,6 +150,11 @@ const DashboardCampanhasIndexRoute = DashboardCampanhasIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardCampanhasRoute,
 } as any)
+const AdminCampanhasIndexRoute = AdminCampanhasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminCampanhasRoute,
+} as any)
 const DashboardPedidosIdRoute = DashboardPedidosIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -139,6 +164,11 @@ const DashboardCampanhasNovaRoute = DashboardCampanhasNovaRouteImport.update({
   id: '/nova',
   path: '/nova',
   getParentRoute: () => DashboardCampanhasRoute,
+} as any)
+const AdminCampanhasNovaRoute = AdminCampanhasNovaRouteImport.update({
+  id: '/nova',
+  path: '/nova',
+  getParentRoute: () => AdminCampanhasRoute,
 } as any)
 const DashboardCampanhasNovaIndexRoute =
   DashboardCampanhasNovaIndexRouteImport.update({
@@ -167,7 +197,7 @@ const DashboardCampanhasNovaHorariosRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contato': typeof ContatoRoute
   '/criar-conta': typeof CriarContaRoute
   '/dashboard': typeof DashboardRouteWithChildren
@@ -177,14 +207,19 @@ export interface FileRoutesByFullPath {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/campanhas': typeof AdminCampanhasRouteWithChildren
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
   '/dashboard/midias': typeof DashboardMidiasRoute
   '/dashboard/pedidos': typeof DashboardPedidosRouteWithChildren
   '/ponto/$slug': typeof PontoSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
+  '/admin/campanhas/': typeof AdminCampanhasIndexRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -194,7 +229,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/contato': typeof ContatoRoute
   '/criar-conta': typeof CriarContaRoute
   '/entrar': typeof EntrarRoute
@@ -203,11 +237,15 @@ export interface FileRoutesByTo {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/midias': typeof DashboardMidiasRoute
   '/ponto/$slug': typeof PontoSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
+  '/admin/campanhas': typeof AdminCampanhasIndexRoute
   '/dashboard/campanhas': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -218,7 +256,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/contato': typeof ContatoRoute
   '/criar-conta': typeof CriarContaRoute
   '/dashboard': typeof DashboardRouteWithChildren
@@ -228,14 +266,19 @@ export interface FileRoutesById {
   '/planejador': typeof PlanejadorRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
+  '/admin/campanhas': typeof AdminCampanhasRouteWithChildren
+  '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
   '/dashboard/midias': typeof DashboardMidiasRoute
   '/dashboard/pedidos': typeof DashboardPedidosRouteWithChildren
   '/ponto/$slug': typeof PontoSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
+  '/admin/campanhas/': typeof AdminCampanhasIndexRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -257,14 +300,19 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/campanhas'
+    | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
     | '/dashboard/midias'
     | '/dashboard/pedidos'
     | '/ponto/$slug'
+    | '/admin/'
     | '/dashboard/'
+    | '/admin/campanhas/nova'
     | '/dashboard/campanhas/nova'
     | '/dashboard/pedidos/$id'
+    | '/admin/campanhas/'
     | '/dashboard/campanhas/'
     | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
@@ -274,7 +322,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/contato'
     | '/criar-conta'
     | '/entrar'
@@ -283,11 +330,15 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/midias'
     | '/ponto/$slug'
+    | '/admin'
     | '/dashboard'
+    | '/admin/campanhas/nova'
     | '/dashboard/pedidos/$id'
+    | '/admin/campanhas'
     | '/dashboard/campanhas'
     | '/dashboard/pedidos'
     | '/dashboard/campanhas/nova/horarios'
@@ -307,14 +358,19 @@ export interface FileRouteTypes {
     | '/planejador'
     | '/rede'
     | '/sobre'
+    | '/admin/campanhas'
+    | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
     | '/dashboard/midias'
     | '/dashboard/pedidos'
     | '/ponto/$slug'
+    | '/admin/'
     | '/dashboard/'
+    | '/admin/campanhas/nova'
     | '/dashboard/campanhas/nova'
     | '/dashboard/pedidos/$id'
+    | '/admin/campanhas/'
     | '/dashboard/campanhas/'
     | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
@@ -325,7 +381,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ContatoRoute: typeof ContatoRoute
   CriarContaRoute: typeof CriarContaRoute
   DashboardRoute: typeof DashboardRouteWithChildren
@@ -424,6 +480,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/ponto/$slug': {
       id: '/ponto/$slug'
       path: '/ponto/$slug'
@@ -459,6 +522,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCalendarioRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/admin/usuarios': {
+      id: '/admin/usuarios'
+      path: '/usuarios'
+      fullPath: '/admin/usuarios'
+      preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/campanhas': {
+      id: '/admin/campanhas'
+      path: '/campanhas'
+      fullPath: '/admin/campanhas'
+      preLoaderRoute: typeof AdminCampanhasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/dashboard/pedidos/': {
       id: '/dashboard/pedidos/'
       path: '/'
@@ -473,6 +550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCampanhasIndexRouteImport
       parentRoute: typeof DashboardCampanhasRoute
     }
+    '/admin/campanhas/': {
+      id: '/admin/campanhas/'
+      path: '/'
+      fullPath: '/admin/campanhas/'
+      preLoaderRoute: typeof AdminCampanhasIndexRouteImport
+      parentRoute: typeof AdminCampanhasRoute
+    }
     '/dashboard/pedidos/$id': {
       id: '/dashboard/pedidos/$id'
       path: '/$id'
@@ -486,6 +570,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/campanhas/nova'
       preLoaderRoute: typeof DashboardCampanhasNovaRouteImport
       parentRoute: typeof DashboardCampanhasRoute
+    }
+    '/admin/campanhas/nova': {
+      id: '/admin/campanhas/nova'
+      path: '/nova'
+      fullPath: '/admin/campanhas/nova'
+      preLoaderRoute: typeof AdminCampanhasNovaRouteImport
+      parentRoute: typeof AdminCampanhasRoute
     }
     '/dashboard/campanhas/nova/': {
       id: '/dashboard/campanhas/nova/'
@@ -517,6 +608,34 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminCampanhasRouteChildren {
+  AdminCampanhasNovaRoute: typeof AdminCampanhasNovaRoute
+  AdminCampanhasIndexRoute: typeof AdminCampanhasIndexRoute
+}
+
+const AdminCampanhasRouteChildren: AdminCampanhasRouteChildren = {
+  AdminCampanhasNovaRoute: AdminCampanhasNovaRoute,
+  AdminCampanhasIndexRoute: AdminCampanhasIndexRoute,
+}
+
+const AdminCampanhasRouteWithChildren = AdminCampanhasRoute._addFileChildren(
+  AdminCampanhasRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminCampanhasRoute: typeof AdminCampanhasRouteWithChildren
+  AdminUsuariosRoute: typeof AdminUsuariosRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminCampanhasRoute: AdminCampanhasRouteWithChildren,
+  AdminUsuariosRoute: AdminUsuariosRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface DashboardCampanhasNovaRouteChildren {
   DashboardCampanhasNovaHorariosRoute: typeof DashboardCampanhasNovaHorariosRoute
@@ -586,7 +705,7 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   ContatoRoute: ContatoRoute,
   CriarContaRoute: CriarContaRoute,
   DashboardRoute: DashboardRouteWithChildren,
