@@ -45,7 +45,8 @@ type AdminPath =
   | "/admin/moderacao"
   | "/admin/players"
   | "/admin/analytics"
-  | "/admin/midias/filler";
+  | "/admin/midias/filler"
+  | "/admin/sistema";
 type NavigationItem = {
   label: string;
   to: AdminPath;
@@ -68,6 +69,7 @@ const NAVIGATION: NavigationItem[] = [
   { label: "Players", to: "/admin/players", icon: MonitorPlay },
   { label: "Analytics", to: "/admin/analytics", icon: BarChart3 },
   { label: "Mídias filler", to: "/admin/midias/filler", icon: Film, adminOnly: true },
+  { label: "Sistema", to: "/admin/sistema", icon: Settings, adminOnly: true },
 ];
 
 function getInitials(name: string): string {

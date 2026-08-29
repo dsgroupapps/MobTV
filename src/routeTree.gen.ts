@@ -29,6 +29,7 @@ import { Route as DashboardMidiasRouteImport } from './routes/dashboard.midias'
 import { Route as DashboardCampanhasRouteImport } from './routes/dashboard.campanhas'
 import { Route as DashboardCalendarioRouteImport } from './routes/dashboard.calendario'
 import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
+import { Route as AdminSistemaRouteImport } from './routes/admin.sistema'
 import { Route as AdminPrecosRouteImport } from './routes/admin.precos'
 import { Route as AdminPlayersRouteImport } from './routes/admin.players'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
@@ -152,6 +153,11 @@ const DashboardCalendarioRoute = DashboardCalendarioRouteImport.update({
 const AdminUsuariosRoute = AdminUsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSistemaRoute = AdminSistemaRouteImport.update({
+  id: '/sistema',
+  path: '/sistema',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPrecosRoute = AdminPrecosRouteImport.update({
@@ -301,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
+  '/admin/sistema': typeof AdminSistemaRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
@@ -342,6 +349,7 @@ export interface FileRoutesByTo {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
+  '/admin/sistema': typeof AdminSistemaRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/midias': typeof DashboardMidiasRoute
@@ -386,6 +394,7 @@ export interface FileRoutesById {
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
+  '/admin/sistema': typeof AdminSistemaRoute
   '/admin/usuarios': typeof AdminUsuariosRoute
   '/dashboard/calendario': typeof DashboardCalendarioRoute
   '/dashboard/campanhas': typeof DashboardCampanhasRouteWithChildren
@@ -434,6 +443,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/players'
     | '/admin/precos'
+    | '/admin/sistema'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
@@ -475,6 +485,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/players'
     | '/admin/precos'
+    | '/admin/sistema'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/midias'
@@ -518,6 +529,7 @@ export interface FileRouteTypes {
     | '/admin/moderacao'
     | '/admin/players'
     | '/admin/precos'
+    | '/admin/sistema'
     | '/admin/usuarios'
     | '/dashboard/calendario'
     | '/dashboard/campanhas'
@@ -699,6 +711,13 @@ declare module '@tanstack/react-router' {
       path: '/usuarios'
       fullPath: '/admin/usuarios'
       preLoaderRoute: typeof AdminUsuariosRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sistema': {
+      id: '/admin/sistema'
+      path: '/sistema'
+      fullPath: '/admin/sistema'
+      preLoaderRoute: typeof AdminSistemaRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/precos': {
@@ -925,6 +944,7 @@ interface AdminRouteChildren {
   AdminModeracaoRoute: typeof AdminModeracaoRoute
   AdminPlayersRoute: typeof AdminPlayersRoute
   AdminPrecosRoute: typeof AdminPrecosRoute
+  AdminSistemaRoute: typeof AdminSistemaRoute
   AdminUsuariosRoute: typeof AdminUsuariosRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -940,6 +960,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminModeracaoRoute: AdminModeracaoRoute,
   AdminPlayersRoute: AdminPlayersRoute,
   AdminPrecosRoute: AdminPrecosRoute,
+  AdminSistemaRoute: AdminSistemaRoute,
   AdminUsuariosRoute: AdminUsuariosRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
