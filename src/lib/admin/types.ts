@@ -231,3 +231,21 @@ export type AdminAnalyticsData = {
   recentOppLogs: AdminOppLog[];
   recentLogLimit: number;
 };
+
+export type AdminFillerMedia = {
+  id: string;
+  name: string;
+  type: string;
+  width: number;
+  height: number;
+  durationSeconds: number;
+  storagePath: string;
+  panelIds: string[];
+  active: boolean;
+  createdAt: string;
+};
+
+export type AdminFillerData = {
+  media: AdminFillerMedia[];
+  panels: Array<{ id: string; name: string }>;
+};

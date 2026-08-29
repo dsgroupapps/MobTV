@@ -32,6 +32,7 @@ import { Route as AdminUsuariosRouteImport } from './routes/admin.usuarios'
 import { Route as AdminPrecosRouteImport } from './routes/admin.precos'
 import { Route as AdminPlayersRouteImport } from './routes/admin.players'
 import { Route as AdminModeracaoRouteImport } from './routes/admin.moderacao'
+import { Route as AdminMidiasRouteImport } from './routes/admin.midias'
 import { Route as AdminInventarioRouteImport } from './routes/admin.inventario'
 import { Route as AdminHorariosRouteImport } from './routes/admin.horarios'
 import { Route as AdminFormatosRouteImport } from './routes/admin.formatos'
@@ -40,10 +41,12 @@ import { Route as AdminBloqueiosRouteImport } from './routes/admin.bloqueios'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as DashboardPedidosIndexRouteImport } from './routes/dashboard.pedidos.index'
 import { Route as DashboardCampanhasIndexRouteImport } from './routes/dashboard.campanhas.index'
+import { Route as AdminMidiasIndexRouteImport } from './routes/admin.midias.index'
 import { Route as AdminInventarioIndexRouteImport } from './routes/admin.inventario.index'
 import { Route as AdminCampanhasIndexRouteImport } from './routes/admin.campanhas.index'
 import { Route as DashboardPedidosIdRouteImport } from './routes/dashboard.pedidos.$id'
 import { Route as DashboardCampanhasNovaRouteImport } from './routes/dashboard.campanhas.nova'
+import { Route as AdminMidiasFillerRouteImport } from './routes/admin.midias.filler'
 import { Route as AdminInventarioAtivosRouteImport } from './routes/admin.inventario.ativos'
 import { Route as AdminCampanhasNovaRouteImport } from './routes/admin.campanhas.nova'
 import { Route as DashboardCampanhasNovaIndexRouteImport } from './routes/dashboard.campanhas.nova.index'
@@ -166,6 +169,11 @@ const AdminModeracaoRoute = AdminModeracaoRouteImport.update({
   path: '/moderacao',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminMidiasRoute = AdminMidiasRouteImport.update({
+  id: '/midias',
+  path: '/midias',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInventarioRoute = AdminInventarioRouteImport.update({
   id: '/inventario',
   path: '/inventario',
@@ -206,6 +214,11 @@ const DashboardCampanhasIndexRoute = DashboardCampanhasIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardCampanhasRoute,
 } as any)
+const AdminMidiasIndexRoute = AdminMidiasIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminMidiasRoute,
+} as any)
 const AdminInventarioIndexRoute = AdminInventarioIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -225,6 +238,11 @@ const DashboardCampanhasNovaRoute = DashboardCampanhasNovaRouteImport.update({
   id: '/nova',
   path: '/nova',
   getParentRoute: () => DashboardCampanhasRoute,
+} as any)
+const AdminMidiasFillerRoute = AdminMidiasFillerRouteImport.update({
+  id: '/filler',
+  path: '/filler',
+  getParentRoute: () => AdminMidiasRoute,
 } as any)
 const AdminInventarioAtivosRoute = AdminInventarioAtivosRouteImport.update({
   id: '/ativos',
@@ -279,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/inventario': typeof AdminInventarioRouteWithChildren
+  '/admin/midias': typeof AdminMidiasRouteWithChildren
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
@@ -293,10 +312,12 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
   '/admin/inventario/ativos': typeof AdminInventarioAtivosRoute
+  '/admin/midias/filler': typeof AdminMidiasFillerRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/admin/campanhas/': typeof AdminCampanhasIndexRoute
   '/admin/inventario/': typeof AdminInventarioIndexRoute
+  '/admin/midias/': typeof AdminMidiasIndexRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -330,9 +351,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardIndexRoute
   '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
   '/admin/inventario/ativos': typeof AdminInventarioAtivosRoute
+  '/admin/midias/filler': typeof AdminMidiasFillerRoute
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/admin/campanhas': typeof AdminCampanhasIndexRoute
   '/admin/inventario': typeof AdminInventarioIndexRoute
+  '/admin/midias': typeof AdminMidiasIndexRoute
   '/dashboard/campanhas': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -359,6 +382,7 @@ export interface FileRoutesById {
   '/admin/formatos': typeof AdminFormatosRoute
   '/admin/horarios': typeof AdminHorariosRoute
   '/admin/inventario': typeof AdminInventarioRouteWithChildren
+  '/admin/midias': typeof AdminMidiasRouteWithChildren
   '/admin/moderacao': typeof AdminModeracaoRoute
   '/admin/players': typeof AdminPlayersRoute
   '/admin/precos': typeof AdminPrecosRoute
@@ -373,10 +397,12 @@ export interface FileRoutesById {
   '/dashboard/': typeof DashboardIndexRoute
   '/admin/campanhas/nova': typeof AdminCampanhasNovaRoute
   '/admin/inventario/ativos': typeof AdminInventarioAtivosRoute
+  '/admin/midias/filler': typeof AdminMidiasFillerRoute
   '/dashboard/campanhas/nova': typeof DashboardCampanhasNovaRouteWithChildren
   '/dashboard/pedidos/$id': typeof DashboardPedidosIdRoute
   '/admin/campanhas/': typeof AdminCampanhasIndexRoute
   '/admin/inventario/': typeof AdminInventarioIndexRoute
+  '/admin/midias/': typeof AdminMidiasIndexRoute
   '/dashboard/campanhas/': typeof DashboardCampanhasIndexRoute
   '/dashboard/pedidos/': typeof DashboardPedidosIndexRoute
   '/dashboard/campanhas/nova/horarios': typeof DashboardCampanhasNovaHorariosRoute
@@ -404,6 +430,7 @@ export interface FileRouteTypes {
     | '/admin/formatos'
     | '/admin/horarios'
     | '/admin/inventario'
+    | '/admin/midias'
     | '/admin/moderacao'
     | '/admin/players'
     | '/admin/precos'
@@ -418,10 +445,12 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/admin/campanhas/nova'
     | '/admin/inventario/ativos'
+    | '/admin/midias/filler'
     | '/dashboard/campanhas/nova'
     | '/dashboard/pedidos/$id'
     | '/admin/campanhas/'
     | '/admin/inventario/'
+    | '/admin/midias/'
     | '/dashboard/campanhas/'
     | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
@@ -455,9 +484,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/admin/campanhas/nova'
     | '/admin/inventario/ativos'
+    | '/admin/midias/filler'
     | '/dashboard/pedidos/$id'
     | '/admin/campanhas'
     | '/admin/inventario'
+    | '/admin/midias'
     | '/dashboard/campanhas'
     | '/dashboard/pedidos'
     | '/dashboard/campanhas/nova/horarios'
@@ -483,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/formatos'
     | '/admin/horarios'
     | '/admin/inventario'
+    | '/admin/midias'
     | '/admin/moderacao'
     | '/admin/players'
     | '/admin/precos'
@@ -497,10 +529,12 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/admin/campanhas/nova'
     | '/admin/inventario/ativos'
+    | '/admin/midias/filler'
     | '/dashboard/campanhas/nova'
     | '/dashboard/pedidos/$id'
     | '/admin/campanhas/'
     | '/admin/inventario/'
+    | '/admin/midias/'
     | '/dashboard/campanhas/'
     | '/dashboard/pedidos/'
     | '/dashboard/campanhas/nova/horarios'
@@ -688,6 +722,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminModeracaoRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/midias': {
+      id: '/admin/midias'
+      path: '/midias'
+      fullPath: '/admin/midias'
+      preLoaderRoute: typeof AdminMidiasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inventario': {
       id: '/admin/inventario'
       path: '/inventario'
@@ -744,6 +785,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardCampanhasIndexRouteImport
       parentRoute: typeof DashboardCampanhasRoute
     }
+    '/admin/midias/': {
+      id: '/admin/midias/'
+      path: '/'
+      fullPath: '/admin/midias/'
+      preLoaderRoute: typeof AdminMidiasIndexRouteImport
+      parentRoute: typeof AdminMidiasRoute
+    }
     '/admin/inventario/': {
       id: '/admin/inventario/'
       path: '/'
@@ -771,6 +819,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/campanhas/nova'
       preLoaderRoute: typeof DashboardCampanhasNovaRouteImport
       parentRoute: typeof DashboardCampanhasRoute
+    }
+    '/admin/midias/filler': {
+      id: '/admin/midias/filler'
+      path: '/filler'
+      fullPath: '/admin/midias/filler'
+      preLoaderRoute: typeof AdminMidiasFillerRouteImport
+      parentRoute: typeof AdminMidiasRoute
     }
     '/admin/inventario/ativos': {
       id: '/admin/inventario/ativos'
@@ -845,6 +900,20 @@ const AdminInventarioRouteWithChildren = AdminInventarioRoute._addFileChildren(
   AdminInventarioRouteChildren,
 )
 
+interface AdminMidiasRouteChildren {
+  AdminMidiasFillerRoute: typeof AdminMidiasFillerRoute
+  AdminMidiasIndexRoute: typeof AdminMidiasIndexRoute
+}
+
+const AdminMidiasRouteChildren: AdminMidiasRouteChildren = {
+  AdminMidiasFillerRoute: AdminMidiasFillerRoute,
+  AdminMidiasIndexRoute: AdminMidiasIndexRoute,
+}
+
+const AdminMidiasRouteWithChildren = AdminMidiasRoute._addFileChildren(
+  AdminMidiasRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminBloqueiosRoute: typeof AdminBloqueiosRoute
@@ -852,6 +921,7 @@ interface AdminRouteChildren {
   AdminFormatosRoute: typeof AdminFormatosRoute
   AdminHorariosRoute: typeof AdminHorariosRoute
   AdminInventarioRoute: typeof AdminInventarioRouteWithChildren
+  AdminMidiasRoute: typeof AdminMidiasRouteWithChildren
   AdminModeracaoRoute: typeof AdminModeracaoRoute
   AdminPlayersRoute: typeof AdminPlayersRoute
   AdminPrecosRoute: typeof AdminPrecosRoute
@@ -866,6 +936,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminFormatosRoute: AdminFormatosRoute,
   AdminHorariosRoute: AdminHorariosRoute,
   AdminInventarioRoute: AdminInventarioRouteWithChildren,
+  AdminMidiasRoute: AdminMidiasRouteWithChildren,
   AdminModeracaoRoute: AdminModeracaoRoute,
   AdminPlayersRoute: AdminPlayersRoute,
   AdminPrecosRoute: AdminPrecosRoute,

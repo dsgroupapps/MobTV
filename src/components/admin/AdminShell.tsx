@@ -9,6 +9,7 @@ import {
   Clock,
   DollarSign,
   FileCheck2,
+  Film,
   LayoutDashboard,
   LoaderCircle,
   LogOut,
@@ -43,7 +44,8 @@ type AdminPath =
   | "/admin/bloqueios"
   | "/admin/moderacao"
   | "/admin/players"
-  | "/admin/analytics";
+  | "/admin/analytics"
+  | "/admin/midias/filler";
 type NavigationItem = {
   label: string;
   to: AdminPath;
@@ -65,6 +67,7 @@ const NAVIGATION: NavigationItem[] = [
   { label: "Moderação", to: "/admin/moderacao", icon: FileCheck2 },
   { label: "Players", to: "/admin/players", icon: MonitorPlay },
   { label: "Analytics", to: "/admin/analytics", icon: BarChart3 },
+  { label: "Mídias filler", to: "/admin/midias/filler", icon: Film, adminOnly: true },
 ];
 
 function getInitials(name: string): string {
