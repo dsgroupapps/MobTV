@@ -33,6 +33,7 @@ type PaidAssetQueryRow = {
 
 export function PanelPlayer({ panelId }: { panelId: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [playCycle, setPlayCycle] = useState(0);
   const panelQuery = useQuery({
     queryKey: ["panel-player", panelId],
     queryFn: async (): Promise<Panel> => {
@@ -119,7 +120,7 @@ export function PanelPlayer({ panelId }: { panelId: string }) {
   }, [currentIndex, displayContent.length]);
 
   useEffect(() => {
-    if (!currentAsset) return;
+    if (!currentAsset || !signedUrl) return;
     const timer = window.setTimeout(
       () => {
         if (currentAsset.source === "paid") {
@@ -135,11 +136,12 @@ export function PanelPlayer({ panelId }: { panelId: string }) {
         setCurrentIndex((index) =>
           displayContent.length > 1 ? (index + 1) % displayContent.length : 0,
         );
+        setPlayCycle((cycle) => cycle + 1);
       },
       Math.max(1, currentAsset.durationSeconds) * 1_000,
     );
     return () => window.clearTimeout(timer);
-  }, [currentAsset, displayContent.length, panelId]);
+  }, [currentAsset, displayContent.length, panelId, playCycle, signedUrl]);
 
   if (panelQuery.isLoading) return <PlayerMessage message="Carregando painel..." />;
   if (panelQuery.isError || !panelQuery.data)
@@ -160,7 +162,7 @@ export function PanelPlayer({ panelId }: { panelId: string }) {
 
   return (
     <div className="relative h-screen w-screen overflow-hidden bg-black">
-      {currentAsset.type.startsWith("image/") ? (
+      {currentAsset.type.startsWith("image") ? (
         <img src={signedUrl} alt="Anúncio" className="h-full w-full object-contain" />
       ) : (
         <video
