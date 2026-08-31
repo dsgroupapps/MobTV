@@ -524,13 +524,13 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Brazlândia",
     metrics: [
       {
-        type: "attendances",
-        value: 3526,
-        unit: "atendimentos/mês",
-        raw: "3.526 atendimentos de urgência/mês (média)",
-        period: "média calculada a partir do 1º quadrimestre de 2024 (jan-abr/2024)",
+        type: "procedures",
+        value: 25732,
+        unit: "procedimentos/mês",
+        raw: "25.732 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
         source:
-          "SES-DF / IgesDF - Relatório de Avaliação Técnico-Assistencial (UPAs novas, 1º Quadrimestre 2024)",
+          'InfoSaúde / SES-DF — painel "UPAs - Pronto atendimento — Procedimentos realizados"',
         sourceQuality: "A",
         estimated: false,
       },
@@ -554,7 +554,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "Total no quadrimestre: 14.104 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 19.662 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Notícia de fev/2023 (anoticiacerta.com.br) citava 'mais de 30 mil atendimentos' no 1º ano de funcionamento (~2022, fonte não-SES-DF, período impreciso) — dado mais antigo e menos confiável, substituído pelo relatório oficial 2024. REVISÃO (auditoria profunda, rodada 4): nova busca por relatório SES-DF/IgesDF mais recente que 1º Quadrimestre/2024 não encontrou atualização publicada; fonte permanece a melhor disponível (A, institucional, auditável). MANTIDO sem alteração.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (3.526/mês, 1º quadrimestre 2024) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente — procedimentos e atendimentos são indicadores DISTINTOS (um atendimento pode gerar múltiplos procedimentos), não comparáveis diretamente. Série mensal jan-jun/2026: jan=21.001, fev=19.051, mar=28.115, abr=27.562, mai=31.183, jun=27.478 — média = 25.731,67 ≈ 25.732/mês. Valor antigo (3.526 atendimentos/mês, 1º Quadrimestre 2024, SES-DF/IgesDF) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: Total no quadrimestre 2024: 14.104 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 19.662 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Notícia de fev/2023 (anoticiacerta.com.br) citava 'mais de 30 mil atendimentos' no 1º ano de funcionamento (~2022, fonte não-SES-DF, período impreciso) — dado mais antigo e menos confiável, substituído pelo relatório oficial 2024. REVISÃO (auditoria profunda, rodada 4): nova busca por relatório SES-DF/IgesDF mais recente que 1º Quadrimestre/2024 não encontrou atualização publicada; fonte permanece a melhor disponível (A, institucional, auditável). MANTIDO sem alteração (até a correção de procedimentos acima).",
   },
   "upa-ceilandia-setor-o": {
     slug: "upa-ceilandia-setor-o",
@@ -562,13 +562,13 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Ceilândia",
     metrics: [
       {
-        type: "attendances",
-        value: 12740,
-        unit: "atendimentos/mês",
-        raw: "12.740 atendimentos de urgência/mês (média)",
-        period: "média calculada a partir do 1º quadrimestre de 2024 (jan-abr/2024)",
+        type: "procedures",
+        value: 62165,
+        unit: "procedimentos/mês",
+        raw: "62.165 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
         source:
-          "SES-DF / IgesDF - Relatório de Avaliação Técnico-Assistencial (UPAs novas, 1º Quadrimestre 2024)",
+          "InfoSaúde / SES-DF — painel \"UPAs - Pronto atendimento — Procedimentos realizados\" (estabelecimento listado como 'UPA II Ceilândia')",
         sourceQuality: "A",
         estimated: false,
       },
@@ -592,7 +592,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "Total no quadrimestre: 50.959 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 32.131 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Relatório mais antigo (1º Quadrimestre 2023, mesma fonte SES-DF): 31.603 atendimentos/4 meses (~7.901/mês) — mostra crescimento expressivo entre 2023 e 2024, ou possível mudança de metodologia de contagem; recomenda-se confirmar tendência antes de publicar como definitivo. REVISÃO (auditoria profunda, rodada 4): crescimento 2023→2024 (~61%) investigado como possível outlier — consistente com aumento geral de demanda registrado em outras UPAs do DF no mesmo período (ex.: UPA Gama, mesma tendência abaixo); não há indício de mudança de unidade/nome/equipamento, portanto não é tratado como erro de correspondência, apenas registrado como variação a confirmar. Nenhuma fonte mais recente que 2024 localizada. MANTIDO sem alteração.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (12.740/mês, 1º quadrimestre 2024) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente. RESSALVA DE CORRESPONDÊNCIA: o ponto MOBTV \"UPA Ceilândia Setor O\" corresponde à \"UPA II Ceilândia\" no painel InfoSaúde — mesma unidade, nomenclatura distinta entre as duas fontes. Série mensal jan-jun/2026: jan=63.254, fev=55.303, mar=63.309, abr=64.422, mai=66.225, jun=60.479 — média = 62.165,33 ≈ 62.165/mês. Valor antigo (12.740 atendimentos/mês, 1º Quadrimestre 2024, SES-DF/IgesDF) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: Total no quadrimestre 2024: 50.959 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 32.131 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Relatório mais antigo (1º Quadrimestre 2023, mesma fonte SES-DF): 31.603 atendimentos/4 meses (~7.901/mês) — mostra crescimento expressivo entre 2023 e 2024, ou possível mudança de metodologia de contagem. REVISÃO (auditoria profunda, rodada 4): crescimento 2023→2024 (~61%) investigado como possível outlier — consistente com aumento geral de demanda registrado em outras UPAs do DF no mesmo período (ex.: UPA Gama, mesma tendência abaixo); não há indício de mudança de unidade/nome/equipamento, portanto não é tratado como erro de correspondência, apenas registrado como variação a confirmar. Nenhuma fonte mais recente que 2024 localizada para o indicador de atendimentos (MANTIDO até a correção de procedimentos acima).",
   },
   "upa-gama": {
     slug: "upa-gama",
@@ -600,13 +600,13 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Gama",
     metrics: [
       {
-        type: "attendances",
-        value: 10887,
-        unit: "atendimentos/mês",
-        raw: "10.887 atendimentos de urgência/mês (média)",
-        period: "média calculada a partir do 1º quadrimestre de 2024 (jan-abr/2024)",
+        type: "procedures",
+        value: 42061,
+        unit: "procedimentos/mês",
+        raw: "42.061 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
         source:
-          "SES-DF / IgesDF - Relatório de Avaliação Técnico-Assistencial (UPAs novas, 1º Quadrimestre 2024)",
+          'InfoSaúde / SES-DF — painel "UPAs - Pronto atendimento — Procedimentos realizados"',
         sourceQuality: "A",
         estimated: false,
       },
@@ -630,7 +630,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "Total no quadrimestre: 43.548 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 30.038 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Relatório mais antigo (1º Quadrimestre 2023, mesma fonte SES-DF): 29.086 atendimentos/4 meses (~7.272/mês). REVISÃO (auditoria profunda, rodada 4): mesmo padrão de crescimento 2023→2024 observado em outras UPAs do DF (ver UPA Ceilândia II) — reforça que é tendência real de aumento de demanda, não erro pontual desta unidade. Nenhuma fonte mais recente que 2024 localizada. MANTIDO sem alteração.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (10.887/mês, 1º quadrimestre 2024) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente. Série mensal jan-jun/2026: jan=42.889, fev=36.613, mar=40.874, abr=43.095, mai=44.314, jun=44.581 — média = 42.061/mês (exata). Valor antigo (10.887 atendimentos/mês, 1º Quadrimestre 2024, SES-DF/IgesDF) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: Total no quadrimestre 2024: 43.548 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 30.038 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Relatório mais antigo (1º Quadrimestre 2023, mesma fonte SES-DF): 29.086 atendimentos/4 meses (~7.272/mês). REVISÃO (auditoria profunda, rodada 4): mesmo padrão de crescimento 2023→2024 observado em outras UPAs do DF (ver UPA Ceilândia II) — reforça que é tendência real de aumento de demanda, não erro pontual desta unidade (MANTIDO até a correção de procedimentos acima).",
   },
   "upa-planaltina": {
     slug: "upa-planaltina",
@@ -638,13 +638,13 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Planaltina",
     metrics: [
       {
-        type: "attendances",
-        value: 10935,
-        unit: "atendimentos/mês",
-        raw: "10.935 atendimentos de urgência/mês (média)",
-        period: "média calculada a partir do 1º quadrimestre de 2024 (jan-abr/2024)",
+        type: "procedures",
+        value: 31497,
+        unit: "procedimentos/mês",
+        raw: "31.497 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
         source:
-          "SES-DF / IgesDF - Relatório de Avaliação Técnico-Assistencial (UPAs novas, 1º Quadrimestre 2024)",
+          'InfoSaúde / SES-DF — painel "UPAs - Pronto atendimento — Procedimentos realizados"',
         sourceQuality: "A",
         estimated: false,
       },
@@ -668,7 +668,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "Total no quadrimestre: 43.739 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 26.550 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). REVISÃO (auditoria profunda, rodada 4): reexaminado — fonte SES-DF/IgesDF 1º Quadrimestre/2024 permanece a única encontrada com correspondência direta e auditável para este ponto; nenhuma fonte mais recente localizada. MANTIDO sem alteração. | [Renda] Valor fornecido manualmente pelo usuário na 3ª rodada ('renda domiciliar média R$ 3.183,47/mês'), preenchendo a lacuna que a extração automática do relatório PDAD 2021 não havia conseguido nas rodadas anteriores. O usuário não especificou a fonte/URL exata usada para obter este número — classificado como qualidade B (fonte secundária confiável/estimativa documentada). Recomenda-se ao site obter a fonte primária exata antes de citar publicamente.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (10.935/mês, 1º quadrimestre 2024) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente. Série mensal jan-jun/2026: jan=31.365, fev=27.893, mar=30.575, abr=31.459, mai=33.719, jun=33.968 — média = 31.496,5 ≈ 31.497/mês. Valor antigo (10.935 atendimentos/mês, 1º Quadrimestre 2024, SES-DF/IgesDF) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: Total no quadrimestre 2024: 43.739 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 26.550 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). REVISÃO (auditoria profunda, rodada 4): reexaminado — fonte SES-DF/IgesDF 1º Quadrimestre/2024 permanece a única encontrada com correspondência direta e auditável para este ponto; nenhuma fonte mais recente localizada (MANTIDO até a correção de procedimentos acima). | [Renda] Valor fornecido manualmente pelo usuário na 3ª rodada ('renda domiciliar média R$ 3.183,47/mês'), preenchendo a lacuna que a extração automática do relatório PDAD 2021 não havia conseguido nas rodadas anteriores. O usuário não especificou a fonte/URL exata usada para obter este número — classificado como qualidade B (fonte secundária confiável/estimativa documentada). Recomenda-se ao site obter a fonte primária exata antes de citar publicamente.",
   },
   "upa-riacho-fundo-ii": {
     slug: "upa-riacho-fundo-ii",
@@ -714,13 +714,13 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Vicente Pires",
     metrics: [
       {
-        type: "attendances",
-        value: 9113,
-        unit: "atendimentos/mês",
-        raw: "9.113 atendimentos de urgência/mês (média)",
-        period: "média calculada a partir do 1º quadrimestre de 2024 (jan-abr/2024)",
+        type: "procedures",
+        value: 45098,
+        unit: "procedimentos/mês",
+        raw: "45.098 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
         source:
-          "SES-DF / IgesDF - Relatório de Avaliação Técnico-Assistencial (UPAs novas, 1º Quadrimestre 2024)",
+          'InfoSaúde / SES-DF — painel "UPAs - Pronto atendimento — Procedimentos realizados"',
         sourceQuality: "A",
         estimated: false,
       },
@@ -744,7 +744,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "Total no quadrimestre: 36.451 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 24.511 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Notícia oficial (segov.df.gov.br) cita separadamente 'média de 6,6 mil PROCEDIMENTOS mensais em um ano' — indicador diferente de 'atendimentos' (procedimento ≠ atendimento; um atendimento pode gerar múltiplos procedimentos), não comparável diretamente. REVISÃO (auditoria profunda, rodada 4): reexaminado — fonte SES-DF/IgesDF 1º Quadrimestre/2024 permanece a melhor disponível; nenhuma atualização mais recente localizada. MANTIDO sem alteração. | [Renda] Valor fornecido manualmente pelo usuário na 3ª rodada ('renda domiciliar média ≈ R$ 9.257,00/mês'), preenchendo a lacuna que a extração automática do relatório PDAD 2021 não havia conseguido nas rodadas anteriores. O usuário não especificou a fonte/URL exata usada para obter este número — classificado como qualidade B (fonte secundária confiável/estimativa documentada). Recomenda-se ao site obter a fonte primária exata antes de citar publicamente.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (9.113/mês, 1º quadrimestre 2024) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente — confirma e substitui a estimativa de 'média de 6,6 mil PROCEDIMENTOS mensais' já citada no histórico abaixo. Série mensal jan-jun/2026: jan=42.295, fev=37.189, mar=49.120, abr=47.162, mai=49.008, jun=45.811 — média = 45.097,5 ≈ 45.098/mês. Valor antigo (9.113 atendimentos/mês, 1º Quadrimestre 2024, SES-DF/IgesDF) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: Total no quadrimestre 2024: 36.451 atendimentos em 4 meses (média mensal calculada = total ÷ 4). Acolhimentos com classificação de risco no mesmo período: 24.511 (indicador DIFERENTE de 'atendimentos' — não somado ao total para evitar dupla contagem). Notícia oficial (segov.df.gov.br) cita separadamente 'média de 6,6 mil PROCEDIMENTOS mensais em um ano' — indicador diferente de 'atendimentos' (procedimento ≠ atendimento; um atendimento pode gerar múltiplos procedimentos), não comparável diretamente à época (MANTIDO até a correção de procedimentos acima). | [Renda] Valor fornecido manualmente pelo usuário na 3ª rodada ('renda domiciliar média ≈ R$ 9.257,00/mês'), preenchendo a lacuna que a extração automática do relatório PDAD 2021 não havia conseguido nas rodadas anteriores. O usuário não especificou a fonte/URL exata usada para obter este número — classificado como qualidade B (fonte secundária confiável/estimativa documentada). Recomenda-se ao site obter a fonte primária exata antes de citar publicamente.",
   },
   "upa-ceilandia": {
     slug: "upa-ceilandia",
@@ -752,14 +752,14 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Ceilândia",
     metrics: [
       {
-        type: "attendances",
-        value: 8818,
-        unit: "atendimentos/mês",
-        raw: "8.818 atendimentos/mês (média jan-mai/2026, calculada a partir de total de 5 meses)",
-        period: "jan-mai/2026 (reportagens de 26/05/2026)",
+        type: "procedures",
+        value: 71340,
+        unit: "procedimentos/mês",
+        raw: "71.340 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
         source:
-          "Jornal de Brasília e Agita Brasília, citando painel epidemiológico em tempo real do IgesDF",
-        sourceQuality: "B",
+          "InfoSaúde / SES-DF — painel \"UPAs - Pronto atendimento — Procedimentos realizados\" (estabelecimento listado como 'UPA Ceilândia', distinta de 'UPA II Ceilândia')",
+        sourceQuality: "A",
         estimated: false,
       },
     ],
@@ -779,10 +779,10 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     targetAudience: "Pacientes e acompanhantes (categoria)",
     consumptionProfile:
       "Planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros (categoria)",
-    publicationReadiness: "B",
-    historicalConfidence: "B",
+    publicationReadiness: "A",
+    historicalConfidence: "A",
     notes:
-      "REVISÃO (auditoria profunda): o dado de 2019 (2.507/mês) foi SUBSTITUÍDO por um dado muito mais recente e melhor corroborado — duas reportagens INDEPENDENTES, ambas datadas de 26/05/2026 (Jornal de Brasília e Agita Brasília), ambas citando o painel epidemiológico em tempo real do IgesDF como fonte primária, informam '44.092 atendimentos' na UPA Ceilândia I entre janeiro e maio de 2026 (5 meses), com 'média mensal superior a 8 mil atendimentos' — as próprias reportagens descrevem a unidade como a de 'maior demanda assistencial do Distrito Federal'. 44.092 ÷ 5 = 8.818,4 ≈ 8.818/mês (média calculada, não estimativa). Qualidade mantida em B (não elevada a A) porque a fonte primária é um painel citado pela imprensa, não um documento PDF ou painel acessado diretamente por esta pesquisa — mas a corroboração por DUAS reportagens independentes na mesma data fortalece consideravelmente a confiabilidade em relação ao caso típico de fonte única. AUMENTO DE ~3,5x em relação ao valor anterior (2.507→8.818/mês) — investigado: não é artefato de mudança de indicador (o valor de 2019 usava 'atendimento médico em UPA', um subtipo de procedimento; o de 2026 usa 'atendimentos', um indicador mais amplo — se algo, essa mudança de indicador tenderia a diminuir o número, não aumentá-lo, o que reforça que o crescimento é real, não um artefato metodológico); é consistente com o hiato de 7 anos entre as medições e com a descrição da unidade como a de maior demanda do DF. Valor de 2019 (2.507/mês, relatório quadrimestral oficial SES-DF, 3º quad. 2019) preservado abaixo como registro histórico, para rastreabilidade — não foi localizado nas rodadas 1-3 um relatório quadrimestral OFICIAL mais recente especificamente da UPA-Ceilândia I (os relatórios 'UPAS_novas_..._Quad_2024' da SES-DF cobrem apenas UPAs mais novas, sem incluir esta). | Valor de 2026 (8.818/mês) vem de imprensa citando painel IgesDF, corroborado por 2 fontes independentes na mesma data — bom nível de confiança, mas recomenda-se confirmar via acesso direto ao painel InfoSaúde antes de uso comercial irrestrito. Dado histórico de 2019 (2.507/mês, relatório oficial SES-DF) mantido nesta base como registro auditável, não como indicador ativo.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (8.818/mês, imprensa citando painel IgesDF, jan-mai/2026) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente — esta é a UPA identificada simplesmente como 'UPA Ceilândia' no InfoSaúde, NÃO confundir com 'UPA II Ceilândia' (= ponto 'UPA Ceilândia Setor O' desta base). Série mensal jan-jun/2026: jan=67.001, fev=59.862, mar=72.836, abr=76.875, mai=76.483, jun=74.980 — média = 71.339,5 ≈ 71.340/mês. Valor antigo (8.818 atendimentos/mês, imprensa) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: o dado de 2019 (2.507/mês) foi SUBSTITUÍDO por um dado muito mais recente e melhor corroborado — duas reportagens INDEPENDENTES, ambas datadas de 26/05/2026 (Jornal de Brasília e Agita Brasília), ambas citando o painel epidemiológico em tempo real do IgesDF como fonte primária, informam '44.092 atendimentos' na UPA Ceilândia I entre janeiro e maio de 2026 (5 meses), com 'média mensal superior a 8 mil atendimentos' — as próprias reportagens descrevem a unidade como a de 'maior demanda assistencial do Distrito Federal'. 44.092 ÷ 5 = 8.818,4 ≈ 8.818/mês (média calculada, não estimativa). Qualidade mantida em B (não elevada a A) porque a fonte primária é um painel citado pela imprensa, não um documento PDF ou painel acessado diretamente por esta pesquisa — mas a corroboração por DUAS reportagens independentes na mesma data fortalece consideravelmente a confiabilidade em relação ao caso típico de fonte única. AUMENTO DE ~3,5x em relação ao valor anterior (2.507→8.818/mês) — investigado: não é artefato de mudança de indicador (o valor de 2019 usava 'atendimento médico em UPA', um subtipo de procedimento; o de 2026 usa 'atendimentos', um indicador mais amplo — se algo, essa mudança de indicador tenderia a diminuir o número, não aumentá-lo, o que reforça que o crescimento é real, não um artefato metodológico); é consistente com o hiato de 7 anos entre as medições e com a descrição da unidade como a de maior demanda do DF. Valor de 2019 (2.507/mês, relatório quadrimestral oficial SES-DF, 3º quad. 2019) preservado abaixo como registro histórico, para rastreabilidade — não foi localizado nas rodadas 1-3 um relatório quadrimestral OFICIAL mais recente especificamente da UPA-Ceilândia I (os relatórios 'UPAS_novas_..._Quad_2024' da SES-DF cobrem apenas UPAs mais novas, sem incluir esta). | Valor de 2026 via imprensa (8.818/mês, atendimentos) foi a melhor fonte disponível até esta correção — agora substituído pelo acesso direto ao painel oficial InfoSaúde/SES-DF (procedimentos, qualidade A). Dado histórico de 2019 (2.507/mês, relatório oficial SES-DF) mantido nesta base como registro auditável, não como indicador ativo.",
   },
   "upa-samambaia": {
     slug: "upa-samambaia",
@@ -790,13 +790,14 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Samambaia",
     metrics: [
       {
-        type: "attendances",
-        value: 6167,
-        unit: "atendimentos/mês",
-        raw: "6.167 atendimentos/mês (média calculada)",
-        period: "média calculada a partir do total do ano de 2024",
-        source: "Agência Brasília / IgesDF",
-        sourceQuality: "B",
+        type: "procedures",
+        value: 56565,
+        unit: "procedimentos/mês",
+        raw: "56.565 procedimentos/mês (média jan-jun/2026)",
+        period: "média jan-jun/2026",
+        source:
+          "InfoSaúde / SES-DF — painel \"UPAs - Pronto atendimento — Procedimentos realizados\" (estabelecimento listado como 'UPA Tipo III Samambaia')",
+        sourceQuality: "A",
         estimated: false,
       },
     ],
@@ -816,10 +817,10 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     targetAudience: "Pacientes e acompanhantes (categoria)",
     consumptionProfile:
       "Planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros (categoria)",
-    publicationReadiness: "B",
-    historicalConfidence: "B",
+    publicationReadiness: "A",
+    historicalConfidence: "A",
     notes:
-      "Total 2024: 'mais de 74 mil atendimentos' (ano completo) ÷ 12 = ~6.167/mês. Publicado 26/02/2025 por ocasião do aniversário de 14 anos da unidade (inaugurada em 15/02/2011, é a primeira UPA do DF). CONFLITO DE FONTES: a própria Secretaria de Saúde do DF publicou notícia com o título 'UPA de Samambaia registra mais de 155 mil atendimentos', mas não foi possível acessar o texto completo (link retornou erro 404) para confirmar o período de referência desse número — pode se tratar de total acumulado em período maior (ex.: desde a inauguração ou dois anos), não sendo diretamente comparável aos 74 mil de 2024. Recomenda-se usar o número de 74 mil/2024 por ter período claro e fonte confirmada. REVISÃO (auditoria profunda): valor de 6.167/mês CORROBORADO por uma segunda fonte independente (Jornal de Brasília, 26/02/2025, mesma efeméride, mesmo número de 74 mil atendimentos em 2024). Essa mesma reportagem também revela um dado de contexto valioso: quando o IgesDF assumiu a gestão da unidade em 2019, a média era de apenas ~2.000 atendimentos/mês — o que sugere que a cifra de '155 mil atendimentos' do título da SES-DF (inacessível) provavelmente se refere a um total ACUMULADO desde 2019 (6 anos de crescimento, de ~2.000 a ~6.167/mês, soma plausivelmente na faixa de 150-160 mil no total do período) — reforça a recomendação de NÃO usar os 155 mil como indicador mensal ou anual. Nenhum dado de 2025/2026 mais recente que fev/2025 foi localizado. Valor mantido em 6.167/mês, agora com maior confiança pela dupla corroboração. | Valor corroborado por duas fontes de imprensa independentes na auditoria profunda (rodada 4); permanece sem confirmação por documento oficial primário.",
+      "CORREÇÃO (jan-jun/2026): indicador principal trocado de 'atendimentos' (6.167/mês, média 2024 via imprensa) para PROCEDIMENTOS REALIZADOS, conforme série oficial do painel InfoSaúde/SES-DF conferida manualmente pelo cliente — no painel o estabelecimento aparece como 'UPA Tipo III Samambaia', correspondente a este ponto MOBTV ('UPA Samambaia'). Série mensal jan-jun/2026: jan=61.578, fev=51.804, mar=57.902, abr=58.102, mai=55.507, jun=54.496 — média = 56.564,83 ≈ 56.565/mês. Valor antigo (6.167 atendimentos/mês) preservado abaixo como registro histórico, para rastreabilidade — não descartado, apenas substituído como indicador principal do ponto. HISTÓRICO: Total 2024: 'mais de 74 mil atendimentos' (ano completo) ÷ 12 = ~6.167/mês. Publicado 26/02/2025 por ocasião do aniversário de 14 anos da unidade (inaugurada em 15/02/2011, é a primeira UPA do DF). CONFLITO DE FONTES: a própria Secretaria de Saúde do DF publicou notícia com o título 'UPA de Samambaia registra mais de 155 mil atendimentos', mas não foi possível acessar o texto completo (link retornou erro 404) para confirmar o período de referência desse número — pode se tratar de total acumulado em período maior (ex.: desde a inauguração ou dois anos), não sendo diretamente comparável aos 74 mil de 2024. Recomenda-se usar o número de 74 mil/2024 por ter período claro e fonte confirmada. REVISÃO (auditoria profunda): valor de 6.167/mês CORROBORADO por uma segunda fonte independente (Jornal de Brasília, 26/02/2025, mesma efeméride, mesmo número de 74 mil atendimentos em 2024). Essa mesma reportagem também revela um dado de contexto valioso: quando o IgesDF assumiu a gestão da unidade em 2019, a média era de apenas ~2.000 atendimentos/mês — o que sugere que a cifra de '155 mil atendimentos' do título da SES-DF (inacessível) provavelmente se refere a um total ACUMULADO desde 2019 (6 anos de crescimento, de ~2.000 a ~6.167/mês, soma plausivelmente na faixa de 150-160 mil no total do período) — reforça a recomendação de NÃO usar os 155 mil como indicador mensal ou anual. Nenhum dado de 2025/2026 mais recente que fev/2025 foi localizado. Valor mantido em 6.167/mês, agora com maior confiança pela dupla corroboração. | Valor corroborado por duas fontes de imprensa independentes na auditoria profunda (rodada 4); permanecia sem confirmação por documento oficial primário até a correção de procedimentos acima (agora com fonte oficial InfoSaúde/SES-DF, qualidade A).",
   },
   "upa-sao-sebastiao": {
     slug: "upa-sao-sebastiao",

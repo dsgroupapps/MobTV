@@ -126,3 +126,37 @@ test("7 pontos (5 Metrô + 2 BRT) têm impactos Mídia Kit preservados; os outro
   );
   assert.equal(withImpacts.length, 7);
 });
+
+/**
+ * Regressão: estas 7 UPAs foram corrigidas de "attendances" (relatório
+ * SES-DF/IgesDF, quadrimestral) para "procedures" (painel oficial
+ * InfoSaúde/SES-DF, média jan-jun/2026, conferida manualmente pelo cliente).
+ * Não recalcular/pesquisar de novo — os valores abaixo são a fonte de
+ * verdade travada por este teste.
+ */
+const correctedUpaProcedures: Record<string, number> = {
+  "upa-brazlandia": 25732,
+  "upa-ceilandia-setor-o": 62165,
+  "upa-ceilandia": 71340,
+  "upa-gama": 42061,
+  "upa-planaltina": 31497,
+  "upa-vicente-pires": 45098,
+  "upa-samambaia": 56565,
+};
+
+test("as 7 UPAs corrigidas usam procedures/mês (InfoSaúde jan-jun/2026), não attendances", () => {
+  for (const [slug, expectedValue] of Object.entries(correctedUpaProcedures)) {
+    const data = pointAudienceData[slug];
+    assert.ok(data, `"${slug}" não existe em pointAudienceData`);
+
+    const procedures = data.metrics.find((m) => m.type === "procedures");
+    assert.ok(procedures, `"${slug}" deveria ter uma métrica "procedures"`);
+    assert.equal(procedures.value, expectedValue, `"${slug}".procedures.value incorreto`);
+    assert.equal(procedures.unit, "procedimentos/mês");
+    assert.equal(procedures.sourceQuality, "A");
+    assert.match(procedures.source, /InfoSaúde/);
+
+    const attendances = data.metrics.find((m) => m.type === "attendances");
+    assert.equal(attendances, undefined, `"${slug}" não deveria mais ter métrica "attendances"`);
+  }
+});
