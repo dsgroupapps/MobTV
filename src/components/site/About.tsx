@@ -39,7 +39,7 @@ export function About() {
           </p>
 
           <div className="reveal reveal-4 mt-8">
-            <a href="#midia" className="btn-primary">
+            <a href="/midia-kit-mobtv.pdf" download className="btn-primary">
               Download do Mídia Kit
             </a>
           </div>
