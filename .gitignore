@@ -31,3 +31,5 @@ supabase/.temp/
 *.njsproj
 *.sln
 *.sw?
+# Local data input (not for bundle/commit)
+Tabela_Mestre_MOBTV_DF_REVISADA_FINAL.xlsx
