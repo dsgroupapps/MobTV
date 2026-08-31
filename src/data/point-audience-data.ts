@@ -1152,3 +1152,43 @@ export function getPointWithAudienceData(slug: string): PointWithAudienceData | 
   if (!found) return undefined;
   return { ...found, audienceData: pointAudienceData[slug] };
 }
+
+/** Rótulo de exibição por tipo de métrica — nunca genérico "Pessoas/mês" para indicadores que não são isso. */
+const METRIC_TYPE_LABELS: Record<MetricType, string> = {
+  audited_impacts: "Impactos/mês",
+  passengers: "Passageiros/mês",
+  attendances: "Atendimentos/mês",
+  procedures: "Procedimentos/mês",
+  outpatient_consultations: "Consultas/mês",
+  estimated_visitors: "Pessoas/mês (estimado)",
+};
+
+export function getMetricLabel(type: MetricType): string {
+  return METRIC_TYPE_LABELS[type];
+}
+
+/** Rótulo de exibição por tipo de renda — domiciliar, familiar e per capita nunca compartilham rótulo. */
+const INCOME_TYPE_LABELS: Record<IncomeType, string> = {
+  domiciliar: "Renda média domiciliar",
+  familiar: "Renda média familiar",
+  per_capita: "Renda per capita",
+};
+
+export function getIncomeLabel(type: IncomeType): string {
+  return INCOME_TYPE_LABELS[type];
+}
+
+/**
+ * Métrica priorizada para o card comercial principal de um ponto:
+ * impactos auditados (Datavision/Mídia Kit) > passageiros > primeira métrica
+ * disponível. Todo registro de `pointAudienceData` tem pelo menos 1 métrica
+ * (ver `point-audience-data.test.ts`), então isto nunca retorna undefined
+ * para um `data` válido.
+ */
+export function getPrimaryMetric(data: PointAudienceData): PointMetric {
+  return (
+    data.metrics.find((metric) => metric.type === "audited_impacts") ??
+    data.metrics.find((metric) => metric.type === "passengers") ??
+    data.metrics[0]
+  );
+}

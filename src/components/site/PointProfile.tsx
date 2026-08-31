@@ -1,13 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  CheckCircle2,
-  ExternalLink,
-  MapPin,
-  Send,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { CheckCircle2, ExternalLink, MapPin, Send, Sparkles, Users } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,14 +19,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { pointMediaTypes, type Category, type NetworkPoint } from "@/data/network-points";
 import { regionSummaries } from "@/data/df-regions";
 import type { PointInsights } from "@/data/point-insights";
+import {
+  getIncomeLabel,
+  getMetricLabel,
+  getPointAudienceData,
+  getPrimaryMetric,
+} from "@/data/point-audience-data";
 import { createPointTracker, type PointTracker } from "@/lib/analytics/client";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
 import type { PointContext } from "@/lib/analytics/types";
 import { submitPointLead } from "@/lib/leads/point-lead";
 
-/** "85000" → "85 mil"; valores abaixo de 1000 aparecem por extenso. */
+/** "85000" → "85 mil"; valores abaixo de 1000 aparecem por extenso. Usado só no fallback de dados demonstrativos (point-insights.ts). */
 function formatAudience(value: number) {
   return value >= 1000 ? `${Math.round(value / 1000)} mil` : value.toLocaleString("pt-BR");
+}
+
+/** Número completo com separador de milhar pt-BR — ex.: 2167660 → "2.167.660". Usado para métricas reais (pointAudienceData), que precisam do valor exato auditado/pesquisado, não uma abreviação. */
+function formatMetricValue(value: number) {
+  return value.toLocaleString("pt-BR");
 }
 
 function formatCurrency(value: number) {
@@ -359,13 +363,36 @@ export function PointProfile({
   const region = regionForPoint(point.nome);
   const mediaTypes = pointMediaTypes(point);
   const photo = point.images?.[0];
-  const isDemo = insights?.isDemo ?? false;
+  const audienceData = getPointAudienceData(slug);
+  // Dado real (planilha revisada, Fase 7) sempre tem prioridade sobre o
+  // protótipo demonstrativo — o badge "dados demonstrativos" só aparece
+  // quando não há audienceData para o ponto.
+  const isDemo = !audienceData && (insights?.isDemo ?? false);
   const audience = insights?.audience;
 
-  const monthlyAudienceValue =
-    insights?.monthlyAudience != null ? formatAudience(insights.monthlyAudience) : "—";
-  const averageFamilyIncomeValue =
-    insights?.averageFamilyIncome != null ? formatCurrency(insights.averageFamilyIncome) : "R$ —";
+  // Card principal: impactos Datavision/Mídia Kit > passageiros > primeira
+  // métrica disponível (ver getPrimaryMetric) — nunca rotulado genericamente
+  // como "Pessoas/mês" quando o dado real é outra coisa (impactos,
+  // atendimentos, procedimentos, consultas, estimativa de visitantes).
+  const primaryMetric = audienceData ? getPrimaryMetric(audienceData) : undefined;
+  const monthlyAudienceValue = primaryMetric
+    ? formatMetricValue(primaryMetric.value)
+    : insights?.monthlyAudience != null
+      ? formatAudience(insights.monthlyAudience)
+      : "—";
+  const monthlyAudienceLabel = primaryMetric ? getMetricLabel(primaryMetric.type) : "Pessoas/mês";
+
+  // Card de renda: tipo (domiciliar/familiar/per capita) vem do dado real —
+  // nunca rotulado como "familiar" quando o dado é domiciliar ou per capita.
+  const averageFamilyIncomeValue = audienceData?.income
+    ? formatCurrency(audienceData.income.value)
+    : insights?.averageFamilyIncome != null
+      ? formatCurrency(insights.averageFamilyIncome)
+      : "R$ —";
+  const averageIncomeLabel = audienceData?.income
+    ? getIncomeLabel(audienceData.income.type)
+    : "Renda média familiar";
+
   const hasAgeBrackets = audience?.ageBrackets && audience.ageBrackets.length > 0;
   const hasGender = audience?.femalePercent != null && audience?.malePercent != null;
   const hasAudienceSection = hasAgeBrackets || hasGender;
@@ -427,13 +454,12 @@ export function PointProfile({
           <div className="mx-auto max-w-3xl">
             <SectionLabel>Principais indicadores</SectionLabel>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <StatCard value={monthlyAudienceValue} label="Pessoas/mês" />
-              <StatCard value={averageFamilyIncomeValue} label="Renda média familiar" />
+              <StatCard value={monthlyAudienceValue} label={monthlyAudienceLabel} />
+              <StatCard value={averageFamilyIncomeValue} label={averageIncomeLabel} />
             </div>
             {isDemo && (
               <p className="mt-4 text-xs leading-relaxed text-off-white/40">
-                Protótipo — indicadores acima são ilustrativos, para visualização do formato
-                final.
+                Protótipo — indicadores acima são ilustrativos, para visualização do formato final.
               </p>
             )}
           </div>
