@@ -1,4 +1,4 @@
-import { networkPoints, type Category, type NetworkPoint } from "@/data/network-points";
+import { networkPoints, type Category, type NetworkPoint } from "../data/network-points.ts";
 
 export type PointWithCategory = { point: NetworkPoint; category: Category };
 
