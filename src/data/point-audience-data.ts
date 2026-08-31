@@ -151,7 +151,16 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         estimated: false,
       },
     ],
-    income: undefined,
+    income: {
+      value: 14894.5,
+      type: "domiciliar",
+      typeLabel:
+        "domiciliar média (estimativa derivada — média simples entre Asa Sul e Asa Norte, proxy para o Plano Piloto central)",
+      raw: "R$ 14.894,50 (domiciliar, estimativa derivada)",
+      source:
+        "Estimativa derivada — média simples entre a renda média domiciliar da Asa Sul (R$ 16.455,00) e da Asa Norte (R$ 13.334,00)",
+      sourceQuality: "B",
+    },
     demographics: {
       averageAge: 40.5,
       gender: { femalePercent: 54, malePercent: 46 },
@@ -163,7 +172,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "B",
     historicalConfidence: "A",
     notes:
-      "Valor aproximado divulgado pela imprensa oficial ('quase meio milhão'), sem casa decimal exata. CONFLITO leve com o Mídia Kit MOBTV, que cita 'Central - 478 Mil', fonte 'Dados Oficiais - Metrô/DF', sem data de referência explícita — provavelmente mesma série de dados em período ligeiramente diferente. Recomendação: usar o valor da Agência Brasília por ter data e fonte publicada verificável; registrar o do mídia kit como dado complementar. | [Renda] Relatório localizado mas os valores de renda (Tabelas A.66/A.67) não puderam ser extraídos nesta pesquisa. | Estação localizada no Plano Piloto (Rodoviária do Plano Piloto / Asa Sul-Asa Norte). REVISÃO (auditoria profunda, rodada 4): reexaminado — fonte (Agência Brasília/Metrô-DF, com data e URL) é a melhor disponível e já supera o valor arredondado do mídia kit ('478 Mil'); nenhuma fonte mais recente ou mais granular foi localizada nesta rodada. MANTIDO sem alteração. RENDA PENDENTE (integração ao site, pós-revisão): foram encontrados valores de renda domiciliar média para Asa Sul (R$ 16.455,00/mês) e Asa Norte (R$ 13.334,00/mês), mas NENHUM foi aplicado a este ponto — a Estação Central é a Rodoviária do Plano Piloto, interligação central que atende tanto a Asa Sul quanto a Asa Norte (e o fluxo intermunicipal/regional em geral), sem correspondência territorial defensável com um único bairro. Renda deste ponto permanece N/D até que uma fonte com correspondência segura seja identificada — não atribuir arbitrariamente o valor de Asa Sul apenas por ser o maior.",
+      "CORREÇÃO PONTUAL (renda): Estimativa calculada pela média simples entre a renda média domiciliar da Asa Sul (R$ 16.455,00) e da Asa Norte (R$ 13.334,00), utilizada como proxy para a região central do Plano Piloto — (16.455,00 + 13.334,00) ÷ 2 = R$ 14.894,50/mês. Decisão explícita do cliente, por instrução direta, substituindo o estado anterior 'N/D' (ver HISTÓRICO abaixo). Classificada como estimativa DERIVADA (sourceQuality B) — não é valor observado diretamente para a Estação Central, é uma proxy calculada a partir de dois valores de bairros vizinhos, mantendo o tipo domiciliar (as duas fontes de origem já são domiciliares, não misturadas com familiar/per capita). Indicador de audiência (passengers/audited_impacts) NÃO alterado por esta correção. HISTÓRICO: Valor aproximado divulgado pela imprensa oficial ('quase meio milhão'), sem casa decimal exata. CONFLITO leve com o Mídia Kit MOBTV, que cita 'Central - 478 Mil', fonte 'Dados Oficiais - Metrô/DF', sem data de referência explícita — provavelmente mesma série de dados em período ligeiramente diferente. Recomendação: usar o valor da Agência Brasília por ter data e fonte publicada verificável; registrar o do mídia kit como dado complementar. | [Renda] Relatório localizado mas os valores de renda (Tabelas A.66/A.67) não puderam ser extraídos nesta pesquisa. | Estação localizada no Plano Piloto (Rodoviária do Plano Piloto / Asa Sul-Asa Norte). REVISÃO (auditoria profunda, rodada 4): reexaminado — fonte (Agência Brasília/Metrô-DF, com data e URL) é a melhor disponível e já supera o valor arredondado do mídia kit ('478 Mil'); nenhuma fonte mais recente ou mais granular foi localizada nesta rodada. MANTIDO sem alteração. RENDA PENDENTE (integração ao site, pós-revisão): foram encontrados valores de renda domiciliar média para Asa Sul (R$ 16.455,00/mês) e Asa Norte (R$ 13.334,00/mês), mas NENHUM havia sido aplicado a este ponto até esta correção — a Estação Central é a Rodoviária do Plano Piloto, interligação central que atende tanto a Asa Sul quanto a Asa Norte (e o fluxo intermunicipal/regional em geral), sem correspondência territorial defensável com um único bairro; por isso a renda permanecera N/D até que o cliente decidisse explicitamente usar a média dos dois valores como proxy (ver CORREÇÃO PONTUAL acima).",
   },
   "estacao-shopping": {
     slug: "estacao-shopping",
