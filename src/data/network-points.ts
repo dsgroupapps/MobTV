@@ -69,6 +69,8 @@ export type PointLocation = {
 
 export type NetworkPoint = {
   nome: string;
+  /** Identificador permanente usado em URLs públicas e integrações. Nunca derivar novamente do nome. */
+  slug: string;
   /** Formatos DOOH com preço — ausente quando o rate card não lista o ponto. */
   produtos?: DoohProduct[];
   /** WiFi Ads — custo por engajamento (CPE), quando o ponto está na lista de WiFi Ads (p.52). */
@@ -126,6 +128,7 @@ export const networkPoints: Category[] = [
     points: [
       {
         nome: "Estação Central (Plano Piloto)",
+        slug: "estacao-central-plano-piloto",
         // p.28: "Metrô Estação Central — 2 Painéis de LED". p.52 item 1: WiFi.
         // rate-card-2026 tem 2 painéis para "Estação Central" (entrada+saída),
         // mesmo fluxo mensal reportado nos dois — não somado.
@@ -146,6 +149,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Estação Shopping",
+        slug: "estacao-shopping",
         // p.28: "Metrô Estação Shopping — 1 Painel de LED". p.52 item 2: WiFi.
         produtos: [{ tipo: "LED 3x2m", telas: 1, custoInsercao15s: 3.2 }],
         valorPorCpe: WIFI_CPE,
@@ -164,6 +168,7 @@ export const networkPoints: Category[] = [
         // não confundir com o ponto "Feira do Guará" (categoria Feiras).
         // Não aparece em p.28 (sem LED/monitor confirmado).
         nome: "Estação Feira",
+        slug: "estacao-feira",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_feira_guara.jpg"],
         location: {
@@ -174,6 +179,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Estação Guará",
+        slug: "estacao-guara",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_guara.png"],
         location: {
@@ -184,6 +190,7 @@ export const networkPoints: Category[] = [
       }, // p.52 item 3.
       {
         nome: "Estação Ceilândia Centro",
+        slug: "estacao-ceilandia-centro",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_ceilandia_centro.png"],
         location: {
@@ -194,6 +201,7 @@ export const networkPoints: Category[] = [
       }, // p.52 item 5.
       {
         nome: "Estação Ceilândia Sul",
+        slug: "estacao-ceilandia-sul",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_sul.png"],
         location: {
@@ -204,6 +212,7 @@ export const networkPoints: Category[] = [
       }, // p.52 item 6.
       {
         nome: "Estação Ceilândia Norte",
+        slug: "estacao-ceilandia-norte",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_norte.webp"],
         location: {
@@ -214,6 +223,7 @@ export const networkPoints: Category[] = [
       }, // p.52 item 7.
       {
         nome: "Estação Guariroba",
+        slug: "estacao-guariroba",
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_guariroba.jpg"],
         location: {
@@ -224,6 +234,7 @@ export const networkPoints: Category[] = [
       }, // p.52 item 8.
       {
         nome: "Estação Águas Claras",
+        slug: "estacao-aguas-claras",
         // p.28: "Metrô Estação Águas Claras — 1 Painel de LED". NÃO está entre
         // as 8 estações de metrô da p.52 — sem valorPorCpe (removido nesta
         // reauditoria; a versão anterior herdava WiFi de uma tabela de preços
@@ -241,6 +252,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Estação Arniqueiras",
+        slug: "estacao-arniqueiras",
         // p.28: "Metrô Estação Arniqueiras — 1 Painel de LED". Mesma situação
         // de Águas Claras: não está na p.52, sem valorPorCpe.
         produtos: [{ tipo: "LED 3x1m", telas: 1, custoInsercao15s: 3.2 }],
@@ -256,6 +268,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Estação Praça do Relógio",
+        slug: "estacao-praca-do-relogio",
         // p.28: "Metrô Praça do Relógio — 1 Painel de LED". Não está na p.52
         // (que lista só 8 das 11 estações de metrô) — sem valorPorCpe.
         produtos: [{ tipo: "LED 2,2x3m", telas: 1, custoInsercao15s: 3.2 }],
@@ -280,6 +293,7 @@ export const networkPoints: Category[] = [
         // p.52 item 26: "Rodoviária do Plano Piloto" — nome idêntico, sem
         // ambiguidade. Não está em p.28 (sem Tela/LED confirmado).
         nome: "Rodoviária do Plano Piloto",
+        slug: "rodoviaria-do-plano-piloto",
         valorPorCpe: WIFI_CPE,
         images: ["/rodoviaria_plano_piloto.webp"],
         location: {
@@ -290,6 +304,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Rodoviária de Sobradinho",
+        slug: "rodoviaria-de-sobradinho",
         // p.28 item 9 e p.52 item 27 usam o mesmo nome, "Terminal Rodoviário
         // de Sobradinho I" — único terminal de Sobradinho no Media Kit, sem
         // ambiguidade. p.28: 2 monitores (sem preço de inserção publicado,
@@ -305,6 +320,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Terminal BRT Santa Maria",
+        slug: "terminal-brt-santa-maria",
         // p.28 itens 6+26 ("Terminal do BRT de Santa Maria"): 2 monitores + 2
         // painéis de LED. p.52 item 28 ("Terminal BRT Santa Maria"): WiFi.
         // Tabela de preços (p.60) diz 3 painéis de LED aqui — diverge do
@@ -330,6 +346,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Terminal BRT Gama",
+        slug: "terminal-brt-gama",
         // p.28 itens 7+27 ("Terminal do BRT do Gama"): 2 monitores + 2 painéis
         // de LED. p.52 item 30 ("Terminal BRT Gama"): WiFi. Mesma nota de
         // divergência 2 vs 3 painéis de LED entre p.28/31 e p.60 — mantido 3.
@@ -351,6 +368,7 @@ export const networkPoints: Category[] = [
         // p.28 item 8 e p.52 item 29 usam o mesmo nome, 'Terminal do "Setor
         // O"' — 3 monitores (p.28) + WiFi (p.52).
         nome: 'Terminal Setor "O"',
+        slug: "terminal-setor-o",
         produtos: [
           { tipo: 'Monitor 49"', telas: 3, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -379,6 +397,7 @@ export const networkPoints: Category[] = [
       {
         // p.28 item 11: "UPA da Ceilândia". p.52 item 39: "UPA Ceilândia".
         nome: "UPA Ceilândia",
+        slug: "upa-ceilandia",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -392,6 +411,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Samambaia",
+        slug: "upa-samambaia",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -405,6 +425,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA São Sebastião",
+        slug: "upa-sao-sebastiao",
         // p.28 item 13: "UPA de São Sebastião". Não está na p.52 (40 itens) —
         // sem valorPorCpe.
         produtos: [
@@ -419,6 +440,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Sobradinho II",
+        slug: "upa-sobradinho-ii",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -435,6 +457,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Gama",
+        slug: "upa-gama",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -448,6 +471,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Recanto das Emas",
+        slug: "upa-recanto-das-emas",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -461,6 +485,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Riacho Fundo II",
+        slug: "upa-riacho-fundo-ii",
         // p.28 item 17: "UPA do Riacho Fundo II". p.52 item 40: "UPA Riacho
         // Fundo" (sem "II") — única UPA de Riacho Fundo no Media Kit, sem
         // ambiguidade.
@@ -477,6 +502,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Planaltina",
+        slug: "upa-planaltina",
         // p.28 item 18: "UPA de Planaltina". p.52 item 36: "UPA Planaltina".
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
@@ -491,6 +517,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Vicente Pires",
+        slug: "upa-vicente-pires",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -504,6 +531,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Brazlândia",
+        slug: "upa-brazlandia",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -517,6 +545,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "UPA Ceilândia Setor O",
+        slug: "upa-ceilandia-setor-o",
         // p.28 item 10: 'UPA Setor "O"' — 1 monitor, sem preço de inserção
         // publicado em nenhuma tabela. p.52 item 31: 'UPA Ceilândia II "Setor
         // O"' — WiFi.
@@ -538,6 +567,7 @@ export const networkPoints: Category[] = [
     points: [
       {
         nome: "Hospital Regional de Taguatinga",
+        slug: "hospital-regional-de-taguatinga",
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -551,6 +581,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Hospital Regional de Ceilândia",
+        slug: "hospital-regional-de-ceilandia",
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -564,6 +595,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Hospital Regional do Gama",
+        slug: "hospital-regional-do-gama",
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -577,6 +609,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Hospital Regional de Sobradinho",
+        slug: "hospital-regional-de-sobradinho",
         // Não está em p.28 (sem Tela confirmada). p.52 item 18: "Hospital
         // Regional Sobradinho" — WiFi Ads adicionado nesta reauditoria (a
         // versão anterior deixava sem preço por seguir só a tabela de preços
@@ -592,6 +625,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Hospital Regional de Santa Maria",
+        slug: "hospital-regional-de-santa-maria",
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -612,6 +646,7 @@ export const networkPoints: Category[] = [
     points: [
       {
         nome: "Feira do Guará",
+        slug: "feira-do-guara",
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
@@ -625,6 +660,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Feira dos Goianos",
+        slug: "feira-dos-goianos",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_goianos.jpg"],
         location: {
@@ -635,6 +671,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Feira Modelo de Sobradinho I",
+        slug: "feira-modelo-de-sobradinho-i",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_modelo.jpeg", "/feira_sobradinho1.jpg"],
         location: {
@@ -646,6 +683,7 @@ export const networkPoints: Category[] = [
       {
         // p.52 item 9: "Feira Central da Ceilândia".
         nome: "Feira da Ceilândia",
+        slug: "feira-da-ceilandia",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_central_ceilandia.jpeg"],
         location: {
@@ -666,6 +704,7 @@ export const networkPoints: Category[] = [
         // como 2 pontos separados (ver "Feira Samambaia 2" abaixo). WiFi Ads
         // adicionado a este ponto (não tinha nenhuma mídia antes).
         nome: "Feira de Samambaia",
+        slug: "feira-de-samambaia",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_samambaia.webp"],
         location: {
@@ -684,6 +723,7 @@ export const networkPoints: Category[] = [
         // foto específica deste ponto, só reaproveita a mesma imagem genérica
         // já usada em outro lugar do site para a categoria.
         nome: "Feira Samambaia 2",
+        slug: "feira-samambaia-2",
         valorPorCpe: WIFI_CPE,
         images: ["/feira_samambaia_2.jpg"],
         location: {
@@ -701,6 +741,7 @@ export const networkPoints: Category[] = [
     points: [
       {
         nome: "Na Hora Ceilândia",
+        slug: "na-hora-ceilandia",
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_ceilandia.jpg"],
         location: {
@@ -711,6 +752,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Na Hora Taguatinga",
+        slug: "na-hora-taguatinga",
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_taguatinga.jpg"],
         location: {
@@ -722,6 +764,7 @@ export const networkPoints: Category[] = [
       {
         // p.52 item 21: "Na Hora - Rodoviária Plano Piloto".
         nome: "Na Hora Rodoviária Plano Piloto",
+        slug: "na-hora-rodoviaria-plano-piloto",
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_rodoviaria_plano.png"],
         location: {
@@ -732,6 +775,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Na Hora Gama",
+        slug: "na-hora-gama",
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_gama.jpeg"],
         location: {
@@ -746,6 +790,7 @@ export const networkPoints: Category[] = [
         // tabela de preços p.62, que não lista Brazlândia entre as 5 unidades
         // de Na Hora — mas a p.52 confirma).
         nome: "Na Hora Brazlândia",
+        slug: "na-hora-brazlandia",
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_brazlandia.jpg"],
         location: {
@@ -756,6 +801,7 @@ export const networkPoints: Category[] = [
       },
       {
         nome: "Na Hora Sobradinho",
+        slug: "na-hora-sobradinho",
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_sobradinho.jpeg"],
       },
