@@ -4,7 +4,6 @@ import { Footer } from "@/components/site/Footer";
 import { FloatingCTA } from "@/components/site/FloatingCTA";
 import { About } from "@/components/site/About";
 import { Results } from "@/components/site/Results";
-import { Cases } from "@/components/site/Cases";
 
 export const Route = createFileRoute("/sobre")({
   head: () => ({
@@ -27,7 +26,6 @@ function SobrePage() {
       <main className="flex-1 pt-20">
         <About />
         <Results />
-        <Cases />
       </main>
       <Footer />
       <FloatingCTA />
