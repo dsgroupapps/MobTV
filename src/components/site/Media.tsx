@@ -2,15 +2,15 @@ import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import {
   Check,
-  Wifi,
-  UserRoundCheck,
+  CircleCheckBig,
   Image as ImageIcon,
+  MapPin,
+  MonitorPlay,
   Play,
   MousePointerClick,
-  MessageCircle,
-  Send,
-  Users,
-  ShoppingBag,
+  Repeat2,
+  Wifi,
+  UserRoundCheck,
 } from "lucide-react";
 import { mediaFormatExamples } from "@/data/media-format-examples";
 
@@ -32,15 +32,21 @@ const fluxo = [
 ];
 
 const jornada = [
-  { icon: Wifi, body: "Usuário acessa uma das redes WiFi e aceita os Termos de Uso." },
   {
-    icon: MessageCircle,
-    body: 'É impactado pela publicidade e clica em "Conecte-se e Saiba Mais".',
+    icon: MapPin,
+    body: "O público circula por pontos estratégicos da rede MOBTV.",
   },
-  { icon: Send, body: "O anunciante recebe os leads qualificados em tempo real." },
   {
-    icon: ShoppingBag,
-    body: "Usuário recebe atendimento personalizado e pode finalizar a compra.",
+    icon: MonitorPlay,
+    body: "É impactado pela comunicação exibida em telas e painéis.",
+  },
+  {
+    icon: Repeat2,
+    body: "A presença recorrente reforça a mensagem ao longo da jornada.",
+  },
+  {
+    icon: CircleCheckBig,
+    body: "A marca ganha frequência, lembrança e presença no cotidiano.",
   },
 ];
 
@@ -53,7 +59,7 @@ const mediaProducts = [
   {
     ...mediaFormatExamples[1],
     eyebrow: "Alcance e performance",
-    body: "Publicidade integrada à conexão gratuita, com banners, vídeo, captação de leads e mensuração por engajamento.",
+    body: "Publicidade integrada à conexão gratuita, com banners, vídeo e mensuração por engajamento.",
   },
   {
     ...mediaFormatExamples[2],
@@ -269,25 +275,24 @@ export function Media() {
           </p>
         </div>
 
-        {/* BLOCO 4 — Captação de Leads via WhatsApp */}
+        {/* BLOCO 4 — Jornada de exposição */}
         <div ref={bloco4.ref} data-visible={bloco4.visible} className="reveal-root">
           <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-navy to-navy-soft text-off-white p-8 md:p-14">
             <div className="max-w-3xl">
               <div className="font-mono text-xs uppercase tracking-[0.3em] text-gold mb-4">
-                / WHATSAPP
+                / PRESENÇA DE MARCA
               </div>
               <h3 className="font-display font-semibold text-2xl md:text-3xl mb-5">
-                Captação de Leads
+                Jornada de exposição
               </h3>
               <p className="text-off-white/80 leading-relaxed mb-10">
-                Oferecemos a possibilidade do usuário iniciar uma conversa com o anunciante pelo
-                WhatsApp. Clicando no botão "Saber mais e conectar", o usuário recebe a internet
-                gratuita e o anunciante recebe o lead do interessado no produto ou serviço.
+                A mídia acompanha a rotina do público em ambientes de circulação e permanência,
+                aumentando a frequência de contato com a marca.
               </p>
             </div>
 
             <h4 className="font-display font-semibold text-lg md:text-xl mb-6 text-gold">
-              Jornada do Lead
+              Quatro momentos de exposição
             </h4>
 
             <div className="relative grid md:grid-cols-4 gap-8 md:gap-4">

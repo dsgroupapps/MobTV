@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
-import { Camera, Eye, MessageCircle, MapPin } from "lucide-react";
+import { Camera, Eye, MapPin, Repeat2 } from "lucide-react";
 
 const diferenciais = [
   {
@@ -14,9 +14,9 @@ const diferenciais = [
     desc: "No WiFi Ads, só contam engajamentos entregues por completo",
   },
   {
-    icon: MessageCircle,
-    title: "Captação de Leads",
-    desc: "Usuário inicia conversa com sua marca via WhatsApp direto da conexão",
+    icon: Repeat2,
+    title: "Alta frequência de exposição",
+    desc: "Presença recorrente em pontos de alto fluxo ao longo da jornada diária.",
   },
   {
     icon: MapPin,
