@@ -13,6 +13,8 @@ import { categoryIcon, MediaTypeChips, mediaTypeMeta } from "./MediaBadges";
 import { PhotoFallback } from "./AssetExplorer";
 import { PlannerMediaPicker } from "./PlannerMediaPicker";
 import { loadPlannerState, savePlannerState } from "@/lib/planner/storage";
+import { trackFunnel } from "@/lib/analytics/funnel";
+import { MEDIA_SELECT_TOKEN } from "@/lib/analytics/types";
 
 const WHATSAPP_NUMBER = "5561992590234";
 
@@ -219,6 +221,46 @@ export function CampaignPlanner({
   const [mediaPicker, setMediaPicker] = useState<MediaPickerTarget | null>(null);
   const hydratedRef = useRef(false);
 
+  // --- Funil de jornada (compartilha anonymous_session_id + initial_point_slug) ---
+  const plannerStartedRef = useRef(false);
+  const summaryViewedRef = useRef(false);
+
+  const firePlannerStart = (intent?: MidiaOption | null) => {
+    if (plannerStartedRef.current) return;
+    plannerStartedRef.current = true;
+    trackFunnel("planner_start", { planningIntent: intent ?? undefined });
+  };
+
+  const firePointAdd = (entry: PointEntry, media: MediaTypeKey[]) => {
+    trackFunnel("planner_point_add", {
+      pointSlug: entry.point.slug,
+      pointName: entry.point.nome,
+      categoryKey: entry.categoryKey,
+    });
+    for (const m of media) {
+      trackFunnel("planner_media_select", {
+        pointSlug: entry.point.slug,
+        pointName: entry.point.nome,
+        categoryKey: entry.categoryKey,
+        mediaType: MEDIA_SELECT_TOKEN[m],
+      });
+    }
+  };
+
+  useEffect(() => {
+    trackFunnel("planner_open", { planningIntent: midia ?? undefined });
+    // Quem chega já na etapa 2 (seed do /rede) também "começou" o planejador.
+    if (seeded) firePlannerStart(midia);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (step === 2 && !summaryViewedRef.current) {
+      summaryViewedRef.current = true;
+      trackFunnel("planner_summary_view", { planningIntent: midia ?? undefined });
+    }
+  }, [step, midia]);
+
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [step]);
@@ -341,6 +383,7 @@ export function CampaignPlanner({
   const midiaLabel = midiaOptions.find((m) => m.value === midia)?.label ?? "";
 
   const selectMedia = (value: MidiaOption) => {
+    firePlannerStart(value);
     setMidia(value);
     setSelections((prev) => {
       const next: SelectionMap = {};
@@ -377,6 +420,7 @@ export function CampaignPlanner({
     const available = pointMediaTypes(entry.point);
     if (available.length <= 1) {
       setSelections((prev) => ({ ...prev, [key]: available }));
+      firePointAdd(entry, available);
       return;
     }
     setMediaPicker({ key, entry, available, initial: [], mode: "add" });
@@ -395,7 +439,21 @@ export function CampaignPlanner({
   const commitMediaPicker = (media: MediaTypeKey[]) => {
     if (!mediaPicker || media.length === 0) return;
     const chosen = mediaPicker.available.filter((m) => media.includes(m));
+    const isNewPoint = mediaPicker.mode === "add";
     setSelections((prev) => ({ ...prev, [mediaPicker.key]: chosen }));
+    if (isNewPoint) {
+      firePointAdd(mediaPicker.entry, chosen);
+    } else {
+      // Edição de mídia de um ponto já no planejador — só media_select.
+      for (const m of chosen) {
+        trackFunnel("planner_media_select", {
+          pointSlug: mediaPicker.entry.point.slug,
+          pointName: mediaPicker.entry.point.nome,
+          categoryKey: mediaPicker.entry.categoryKey,
+          mediaType: MEDIA_SELECT_TOKEN[m],
+        });
+      }
+    }
     setMediaPicker(null);
   };
 
@@ -739,6 +797,9 @@ export function CampaignPlanner({
                 href={buildProposalUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackFunnel("planner_submit", { planningIntent: midia ?? undefined })
+                }
                 className="btn-primary inline-flex items-center justify-center px-8 py-4 text-base"
               >
                 Solicitar proposta
