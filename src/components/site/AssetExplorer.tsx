@@ -5,7 +5,13 @@ import type { LucideIcon } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 import { CoverageMap } from "./CoverageMap";
 import { categoryIcon, MediaTypeChips } from "./MediaBadges";
-import { Sheet, SheetContent, SheetClose, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetClose,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import {
   networkPoints,
   pointMediaTypes,
@@ -269,39 +275,27 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
     <div className="flex h-full flex-col">
       {/* Viewer da foto — só existe dentro do drawer em mobile/tablet (< md).
           Em desktop a foto vira um elemento flutuante independente sobre o
-          overlay da página (ver FloatingPointPhoto em AssetExplorer), então
-          este bloco some a partir de md. Fundo escuro sólido (nunca a própria
-          foto em full-bleed) com a fotografia centralizada e contida dentro
-          dele — largura generosa mas nunca 100%, altura sempre limitada,
-          nunca um crop vertical agressivo. */}
+          overlay da página. O frame 3:2 é compartilhado visualmente entre
+          todos os pontos; a foto preenche a moldura sem depender da proporção
+          ou das dimensões do arquivo original. */}
       <div
-        className="relative md:hidden h-64 sm:h-80 shrink-0 overflow-hidden"
+        className="relative hidden shrink-0 p-5 max-md:block sm:p-6"
         style={{ background: "color-mix(in oklab, var(--navy) 88%, black)" }}
       >
-        {point.images && point.images.length > 0 ? (
-          <>
-            {/* Vinheta muito sutil — só para dar profundidade ao fundo, não
-                para ambientar com a própria foto. */}
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  "radial-gradient(130% 100% at 50% 42%, transparent 35%, color-mix(in oklab, var(--navy) 40%, transparent) 100%)",
-              }}
+        <div
+          data-point-photo-frame
+          className="relative aspect-[3/2] w-full overflow-hidden rounded-[18px] shadow-[0_24px_60px_-20px_rgba(0,0,0,0.65)] ring-1 ring-white/10"
+        >
+          {point.images && point.images.length > 0 ? (
+            <img
+              src={point.images[0]}
+              alt={point.nome}
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
-            <div className="relative flex h-full w-full items-center justify-center p-6 sm:p-8">
-              <img
-                src={point.images[0]}
-                alt={point.nome}
-                className="w-auto h-auto max-w-[85%] rounded-[20px] object-contain shadow-[0_24px_60px_-20px_rgba(0,0,0,0.65)] ring-1 ring-white/10"
-                style={{ maxHeight: "min(68vh, 100%)" }}
-              />
-            </div>
-          </>
-        ) : (
-          <PhotoFallback Icon={Icon} size="detail" />
-        )}
+          ) : (
+            <PhotoFallback Icon={Icon} size="detail" />
+          )}
+        </div>
       </div>
 
       {/* Coluna de informações — único conteúdo do drawer em desktop (a foto
@@ -638,21 +632,21 @@ export function AssetExplorer() {
           aria-hidden
           className="pointer-events-none fixed inset-y-0 left-0 z-[60] hidden md:right-[440px] md:flex md:items-center md:justify-center md:px-10 lg:px-16"
         >
-          {openPoint.point.images && openPoint.point.images.length > 0 ? (
-            <img
-              src={openPoint.point.images[0]}
-              alt=""
-              className="w-auto h-auto rounded-[18px] object-contain shadow-[0_30px_90px_-24px_rgba(0,0,0,0.75)] ring-1 ring-white/10"
-              style={{ maxWidth: "min(78%, 900px)", maxHeight: "78vh" }}
-            />
-          ) : (
-            <div
-              className="w-full overflow-hidden rounded-[18px] shadow-[0_30px_90px_-24px_rgba(0,0,0,0.75)] ring-1 ring-white/10"
-              style={{ maxWidth: "min(78%, 900px)", aspectRatio: "16 / 9" }}
-            >
+          <div
+            data-point-photo-frame
+            className="relative aspect-[3/2] shrink-0 overflow-hidden rounded-[18px] shadow-[0_30px_90px_-24px_rgba(0,0,0,0.75)] ring-1 ring-white/10"
+            style={{ width: "min(78%, 900px, 117vh)" }}
+          >
+            {openPoint.point.images && openPoint.point.images.length > 0 ? (
+              <img
+                src={openPoint.point.images[0]}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover object-center"
+              />
+            ) : (
               <PhotoFallback Icon={categoryIcon[openPoint.category.key]} size="detail" />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </section>
