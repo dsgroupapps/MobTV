@@ -11,6 +11,7 @@ import {
   Smartphone,
   Store,
 } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
   CarouselContent,
@@ -27,7 +28,8 @@ import {
 } from "@/data/mobtv-data";
 import { totalPointsCount } from "@/data/network-points";
 
-const AUTOPLAY_INTERVAL_MS = 5000;
+const AUTOPLAY_INTERVAL_MS = 4500;
+const RESEARCH_KICKER = "Pesquisa Wi-Fi · DF";
 const consumerResearchIcons = [
   ShoppingCart,
   Store,
@@ -197,28 +199,6 @@ function AudienceCol({
   );
 }
 
-function Pill({
-  icon: Icon,
-  value,
-  text,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  value: string;
-  text: string;
-}) {
-  return (
-    <div className="flex items-center gap-4 rounded-full border border-gold/25 bg-[color:var(--navy-soft)]/50 px-5 py-3">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold/10 text-gold">
-        <Icon className="h-5 w-5" />
-      </span>
-      <div className="flex items-baseline gap-2 min-w-0">
-        <span className="font-mono font-medium text-gold text-lg">{value}</span>
-        <span className="text-sm text-off-white/80 leading-snug">{text}</span>
-      </div>
-    </div>
-  );
-}
-
 function usePrefersReducedMotion() {
   const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
 
@@ -234,23 +214,58 @@ function usePrefersReducedMotion() {
   return prefersReducedMotion;
 }
 
+function ResearchCard({
+  icon: Icon,
+  value,
+  text,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  value: string;
+  text: string;
+}) {
+  return (
+    <article className="flex h-full min-h-[15rem] flex-col rounded-xl border border-gold/25 bg-[color:var(--navy-soft)]/60 p-6 backdrop-blur-sm">
+      <div className="flex items-center gap-3 text-gold/80">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gold/10 text-gold">
+          <Icon className="h-4 w-4" />
+        </span>
+        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em]">
+          {RESEARCH_KICKER}
+        </span>
+      </div>
+      <div className="mt-5 font-display font-bold leading-none text-gold text-[2.75rem] md:text-5xl">
+        {value}
+      </div>
+      <p className="mt-3 line-clamp-3 text-sm leading-snug text-off-white/80">{text}</p>
+    </article>
+  );
+}
+
 function ConsumerResearchCarousel() {
-  const carouselRef = React.useRef<HTMLDivElement>(null);
   const [api, setApi] = React.useState<CarouselApi>();
   const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [autoplayCycle, setAutoplayCycle] = React.useState(0);
-  const [isHovered, setIsHovered] = React.useState(false);
-  const [hasFocus, setHasFocus] = React.useState(false);
-  const [isPointerDown, setIsPointerDown] = React.useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
-  const autoplayPaused = prefersReducedMotion || isHovered || hasFocus || isPointerDown;
+
+  // Official Embla plugin — pauses on hover / drag / focus and resumes on its own
+  // (stopOnInteraction: false) a few seconds after the last interaction.
+  const autoplay = React.useRef(
+    Autoplay({
+      delay: AUTOPLAY_INTERVAL_MS,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      stopOnFocusIn: true,
+    }),
+  );
+
+  const plugins = React.useMemo(
+    () => (prefersReducedMotion ? [] : [autoplay.current]),
+    [prefersReducedMotion],
+  );
 
   React.useEffect(() => {
     if (!api) return;
 
-    const updateSelection = () => {
-      setSelectedIndex(api.selectedScrollSnap());
-    };
+    const updateSelection = () => setSelectedIndex(api.selectedScrollSnap());
 
     updateSelection();
     api.on("select", updateSelection);
@@ -262,86 +277,46 @@ function ConsumerResearchCarousel() {
     };
   }, [api]);
 
-  React.useEffect(() => {
-    if (!api || autoplayPaused) return;
-
-    const timeoutId = window.setTimeout(() => {
-      const carousel = carouselRef.current;
-      const hasActiveFocus = carousel?.contains(document.activeElement) ?? false;
-      const hasActiveHover = carousel?.matches(":hover") ?? false;
-
-      if (hasActiveFocus || hasActiveHover) {
-        setAutoplayCycle((cycle) => cycle + 1);
-        return;
-      }
-
-      api.scrollNext();
-    }, AUTOPLAY_INTERVAL_MS);
-    return () => window.clearTimeout(timeoutId);
-  }, [api, autoplayCycle, autoplayPaused, selectedIndex]);
-
-  React.useEffect(() => {
-    if (!isPointerDown) return;
-
-    const releasePointer = () => setIsPointerDown(false);
-    window.addEventListener("pointerup", releasePointer, { once: true });
-    window.addEventListener("pointercancel", releasePointer, { once: true });
-
-    return () => {
-      window.removeEventListener("pointerup", releasePointer);
-      window.removeEventListener("pointercancel", releasePointer);
-    };
-  }, [isPointerDown]);
-
   return (
     <Carousel
-      ref={carouselRef}
       setApi={setApi}
-      opts={{ align: "start", loop: true, duration: 35 }}
-      aria-label="Indicadores da pesquisa de consumo"
+      plugins={plugins}
+      opts={{ align: "start", loop: true, duration: 30 }}
+      aria-label="Pesquisa de consumo"
       className="mt-6"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onFocusCapture={() => setHasFocus(true)}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-          setHasFocus(false);
-        }
-      }}
-      onPointerDownCapture={() => setIsPointerDown(true)}
     >
       <CarouselContent className="touch-pan-y">
-        {consumerResearch.map((item, index) => {
-          const Icon = consumerResearchIcons[index];
-          return (
-            <CarouselItem
-              key={item.text}
-              className="basis-full sm:basis-1/2 lg:basis-1/3"
-              aria-label={`${index + 1} de ${consumerResearch.length}`}
-            >
-              <div className="reveal reveal-2 h-full">
-                <Pill icon={Icon} value={item.value} text={item.text} />
-              </div>
-            </CarouselItem>
-          );
-        })}
+        {consumerResearch.map((item, index) => (
+          <CarouselItem
+            key={item.text}
+            className="basis-full sm:basis-1/2 lg:basis-1/3"
+            aria-label={`${index + 1} de ${consumerResearch.length}`}
+          >
+            <ResearchCard icon={consumerResearchIcons[index]} value={item.value} text={item.text} />
+          </CarouselItem>
+        ))}
       </CarouselContent>
 
-      <div className="mt-5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2" aria-label="Posição no carrossel">
+      <div className="mt-6 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-1" role="tablist" aria-label="Selecionar indicador">
           {consumerResearch.map((item, index) => (
             <button
               key={item.text}
               type="button"
-              aria-label={`Ir para o indicador ${index + 1}`}
-              aria-current={selectedIndex === index ? "true" : undefined}
+              role="tab"
+              aria-label={`Indicador ${index + 1} de ${consumerResearch.length}`}
+              aria-selected={selectedIndex === index}
               onClick={() => api?.scrollTo(index)}
-              className={`h-2.5 rounded-full transition-[width,background-color] duration-300 ${
-                selectedIndex === index
-                  ? "w-7 bg-gold"
-                  : "w-2.5 bg-off-white/25 hover:bg-off-white/50"
-              }`}
-            />
+              className="group flex h-6 w-6 items-center justify-center focus-visible:outline-none"
+            >
+              <span
+                className={`block h-1.5 w-1.5 rounded-full transition-colors ${
+                  selectedIndex === index
+                    ? "bg-gold"
+                    : "bg-off-white/25 group-hover:bg-off-white/50 group-focus-visible:bg-off-white/60"
+                }`}
+              />
+            </button>
           ))}
         </div>
 
