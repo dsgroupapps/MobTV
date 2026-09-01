@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, ImageOff, X } from "lucide-react";
 import {
   networkPoints,
@@ -9,8 +9,10 @@ import {
 } from "@/data/network-points";
 import { midiaOptions, type MidiaOption } from "@/data/planner-options";
 import { regionSummaries } from "@/data/df-regions";
-import { categoryIcon, MediaTypeChips } from "./MediaBadges";
+import { categoryIcon, MediaTypeChips, mediaTypeMeta } from "./MediaBadges";
 import { PhotoFallback } from "./AssetExplorer";
+import { PlannerMediaPicker } from "./PlannerMediaPicker";
+import { loadPlannerState, savePlannerState } from "@/lib/planner/storage";
 
 const WHATSAPP_NUMBER = "5561992590234";
 
@@ -52,9 +54,25 @@ function mediaEligible(point: NetworkPoint, midia: MidiaOption) {
   return hasDooh(types) || types.includes("wifi");
 }
 
-type SelectionMap = Record<string, true>;
+/** key do ponto (`${categoria}::${nome}`) -> mídias escolhidas nele (nunca vazio). */
+type SelectionMap = Record<string, MediaTypeKey[]>;
 
 type PointEntry = { point: NetworkPoint; categoryKey: CategoryKey; categoryLabel: string };
+
+type MediaPickerTarget = {
+  key: string;
+  entry: PointEntry;
+  /** mídias oferecidas pelo ponto — nada fora disso é selecionável */
+  available: MediaTypeKey[];
+  /** pré-seleção (edição); vazio na adição */
+  initial: MediaTypeKey[];
+  mode: "add" | "edit";
+};
+
+/** "Tela + WiFi Ads" — para o resumo e a mensagem de proposta. */
+function mediaLabelList(media: MediaTypeKey[]) {
+  return media.map((m) => mediaTypeMeta[m].label).join(" + ");
+}
 
 function findPoint(key: string): PointEntry | undefined {
   for (const cat of networkPoints) {
@@ -189,13 +207,90 @@ export function CampaignPlanner({
   );
   const [regionFilter, setRegionFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState<CategoryKey | "all">("all");
-  const [selections, setSelections] = useState<SelectionMap>(() =>
-    seeded ? { [pointKey(seeded.cat.key, seeded.point.nome)]: true } : {},
-  );
+  const [selections, setSelections] = useState<SelectionMap>(() => {
+    if (!seeded) return {};
+    // Seed vindo de /rede (?ponto=&categoria=): ponto de mídia única entra
+    // direto; ponto multimídia fica de fora até o usuário escolher no picker
+    // (aberto pelo efeito de hidratação abaixo).
+    const key = pointKey(seeded.cat.key, seeded.point.nome);
+    const available = pointMediaTypes(seeded.point);
+    return available.length === 1 ? { [key]: available } : {};
+  });
+  const [mediaPicker, setMediaPicker] = useState<MediaPickerTarget | null>(null);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [step]);
+
+  // Hidratação única: restaura a sessão anterior (sessionStorage) e concilia
+  // com o seed do /rede. Compatível com estado antigo sem mídia — sanitiza
+  // contra os produtos reais do ponto e nunca escolhe uma mídia arbitrária
+  // para pontos multimídia.
+  useEffect(() => {
+    const stored = loadPlannerState();
+
+    const restored: SelectionMap = {};
+    if (stored) {
+      for (const sel of stored.selections) {
+        const found = findPoint(sel.key);
+        if (!found) continue;
+        const offered = pointMediaTypes(found.point);
+        let media = sel.media.filter((m) => offered.includes(m));
+        if (media.length === 0) {
+          if (offered.length === 1)
+            media = offered; // única opção → seguro
+          else continue; // multimídia sem escolha salva → pede de novo ao voltar
+        }
+        restored[sel.key] = media;
+      }
+    }
+
+    let seedPicker: MediaPickerTarget | null = null;
+    if (seeded) {
+      const key = pointKey(seeded.cat.key, seeded.point.nome);
+      const available = pointMediaTypes(seeded.point);
+      if (!restored[key] && available.length > 1) {
+        seedPicker = {
+          key,
+          entry: {
+            point: seeded.point,
+            categoryKey: seeded.cat.key,
+            categoryLabel: seeded.cat.label,
+          },
+          available,
+          initial: [],
+          mode: "add",
+        };
+      }
+    }
+
+    if (Object.keys(restored).length > 0) {
+      setSelections((prev) => ({ ...restored, ...prev }));
+    }
+    if (!seeded && stored) {
+      if (stored.midia) setMidia(stored.midia);
+      let target = stored.step ?? 0;
+      if (target >= 1 && !stored.midia) target = 0;
+      if (target >= 2 && Object.keys(restored).length === 0) target = 1;
+      setStep(Math.max(0, Math.min(STEP_LABELS.length - 1, target)));
+    }
+    if (seedPicker) setMediaPicker(seedPicker);
+
+    hydratedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persiste (sessionStorage) — só depois da hidratação, para não sobrescrever
+  // a sessão restaurada com o estado inicial.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    savePlannerState({
+      midia,
+      step,
+      selections: Object.entries(selections).map(([key, media]) => ({ key, media })),
+    });
+  }, [midia, step, selections]);
 
   const regionPointNames = useMemo(
     () => new Map(regionSummaries.map((r) => [r.region, new Set(r.pointNames)])),
@@ -234,9 +329,11 @@ export function CampaignPlanner({
 
   const selectedEntries = useMemo(
     () =>
-      Object.keys(selections)
-        .map((key) => ({ key, entry: findPoint(key) }))
-        .filter((x): x is { key: string; entry: PointEntry } => x.entry != null),
+      Object.entries(selections)
+        .map(([key, media]) => ({ key, media, entry: findPoint(key) }))
+        .filter(
+          (x): x is { key: string; media: MediaTypeKey[]; entry: PointEntry } => x.entry != null,
+        ),
     [selections],
   );
 
@@ -247,23 +344,59 @@ export function CampaignPlanner({
     setMidia(value);
     setSelections((prev) => {
       const next: SelectionMap = {};
-      for (const key of Object.keys(prev)) {
+      for (const [key, media] of Object.entries(prev)) {
         const entry = findPoint(key);
-        if (entry && mediaEligible(entry.point, value)) next[key] = true;
+        if (!entry || !mediaEligible(entry.point, value)) continue;
+        // Mantém só mídias que o ponto realmente oferece (validação — a
+        // intenção dooh/wifi/both é lente de descoberta, não filtro de chip).
+        const offered = pointMediaTypes(entry.point);
+        const kept = media.filter((m) => offered.includes(m));
+        if (kept.length > 0) next[key] = kept;
       }
       return next;
     });
     setStep(1);
   };
 
-  const togglePointSelection = (entry: PointEntry) => {
-    const key = pointKey(entry.categoryKey, entry.point.nome);
+  const removePoint = (key: string) => {
     setSelections((prev) => {
       const next = { ...prev };
-      if (next[key]) delete next[key];
-      else next[key] = true;
+      delete next[key];
       return next;
     });
+  };
+
+  // Clique no card da etapa 2: já selecionado -> remove; mídia única -> adiciona
+  // direto; 2+ mídias -> abre o picker.
+  const handlePointClick = (entry: PointEntry) => {
+    const key = pointKey(entry.categoryKey, entry.point.nome);
+    if (selections[key]) {
+      removePoint(key);
+      return;
+    }
+    const available = pointMediaTypes(entry.point);
+    if (available.length <= 1) {
+      setSelections((prev) => ({ ...prev, [key]: available }));
+      return;
+    }
+    setMediaPicker({ key, entry, available, initial: [], mode: "add" });
+  };
+
+  const openEditPicker = (key: string, entry: PointEntry) => {
+    setMediaPicker({
+      key,
+      entry,
+      available: pointMediaTypes(entry.point),
+      initial: selections[key] ?? [],
+      mode: "edit",
+    });
+  };
+
+  const commitMediaPicker = (media: MediaTypeKey[]) => {
+    if (!mediaPicker || media.length === 0) return;
+    const chosen = mediaPicker.available.filter((m) => media.includes(m));
+    setSelections((prev) => ({ ...prev, [mediaPicker.key]: chosen }));
+    setMediaPicker(null);
   };
 
   const clearFilters = () => {
@@ -276,7 +409,8 @@ export function CampaignPlanner({
       "Olá! Montei uma campanha no site da MOBTV.",
       "",
       `Mídia: ${midiaLabel}`,
-      `Pontos (${selectedEntries.length}): ${selectedEntries.map((s) => s.entry.point.nome).join(", ")}`,
+      `Pontos (${selectedEntries.length}):`,
+      ...selectedEntries.map((s) => `• ${s.entry.point.nome} — ${mediaLabelList(s.media)}`),
       "",
       "Gostaria de receber uma proposta comercial.",
     ];
@@ -423,7 +557,8 @@ export function CampaignPlanner({
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {visiblePoints.map((entry) => {
                       const key = pointKey(entry.categoryKey, entry.point.nome);
-                      const isSelected = Boolean(selections[key]);
+                      const selectedMedia = selections[key];
+                      const isSelected = selectedMedia != null;
                       const Icon = categoryIcon[entry.categoryKey];
                       return (
                         <button
@@ -433,7 +568,8 @@ export function CampaignPlanner({
                           data-point-name={entry.point.nome}
                           data-point-category={entry.categoryKey}
                           data-selected={isSelected ? "true" : "false"}
-                          onClick={() => togglePointSelection(entry)}
+                          data-selected-media={isSelected ? selectedMedia.join(",") : undefined}
+                          onClick={() => handlePointClick(entry)}
                           className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-[color-mix(in_oklab,var(--navy-soft)_55%,transparent)] text-left ring-1 transition-all duration-200 ${
                             isSelected
                               ? "ring-2 ring-gold shadow-[0_0_0_4px_rgba(242,183,5,0.15)]"
@@ -465,8 +601,16 @@ export function CampaignPlanner({
                               {entry.point.nome}
                             </div>
                             <div className="mt-2">
-                              <MediaTypeChips types={pointMediaTypes(entry.point)} />
+                              <MediaTypeChips
+                                types={pointMediaTypes(entry.point)}
+                                selected={isSelected ? selectedMedia : undefined}
+                              />
                             </div>
+                            {isSelected && pointMediaTypes(entry.point).length > 1 && (
+                              <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-gold/70">
+                                Editar mídia em “Sua seleção” →
+                              </div>
+                            )}
                           </div>
                         </button>
                       );
@@ -488,31 +632,51 @@ export function CampaignPlanner({
                   <p className="text-sm text-white/50">Nenhum ponto selecionado ainda.</p>
                 ) : (
                   <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto pr-1">
-                    {selectedEntries.map(({ key, entry }) => (
-                      <div
-                        key={key}
-                        data-selection-item
-                        data-point-name={entry.point.nome}
-                        className="flex items-start justify-between gap-3 border-b border-white/8 pb-3 last:border-b-0 last:pb-0"
-                      >
-                        <div>
-                          <div className="font-display text-sm font-semibold leading-snug text-white">
-                            {entry.point.nome}
+                    {selectedEntries.map(({ key, entry, media }) => {
+                      const offered = pointMediaTypes(entry.point);
+                      const canEditMedia = offered.length > 1;
+                      return (
+                        <div
+                          key={key}
+                          data-selection-item
+                          data-point-name={entry.point.nome}
+                          data-selected-media={media.join(",")}
+                          className="border-b border-white/8 pb-3 last:border-b-0 last:pb-0"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="font-display text-sm font-semibold leading-snug text-white">
+                                {entry.point.nome}
+                              </div>
+                              <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-off-white/40">
+                                {entry.categoryLabel}
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removePoint(key)}
+                              aria-label={`Remover ${entry.point.nome}`}
+                              className="shrink-0 cursor-pointer text-white/40 transition-colors hover:text-red"
+                            >
+                              <X className="h-4 w-4" strokeWidth={2} />
+                            </button>
                           </div>
-                          <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-off-white/40">
-                            {entry.categoryLabel}
+                          <div className="mt-2 flex items-center justify-between gap-2">
+                            <MediaTypeChips types={offered} selected={media} />
+                            {canEditMedia && (
+                              <button
+                                type="button"
+                                data-edit-media
+                                onClick={() => openEditPicker(key, entry)}
+                                className="shrink-0 cursor-pointer font-mono text-[10px] uppercase tracking-wider text-gold/80 transition-colors hover:text-gold"
+                              >
+                                Editar mídia
+                              </button>
+                            )}
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => togglePointSelection(entry)}
-                          aria-label={`Remover ${entry.point.nome}`}
-                          className="shrink-0 cursor-pointer text-white/40 transition-colors hover:text-red"
-                        >
-                          <X className="h-4 w-4" strokeWidth={2} />
-                        </button>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -548,11 +712,22 @@ export function CampaignPlanner({
                 <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-gold/80">
                   Locais
                 </div>
-                <ul className="max-h-64 space-y-2 overflow-y-auto pr-1">
-                  {selectedEntries.map(({ key, entry }) => (
-                    <li key={key} className="flex items-start gap-2 text-sm text-white/85">
+                <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">
+                  {selectedEntries.map(({ key, entry, media }) => (
+                    <li
+                      key={key}
+                      data-summary-item
+                      data-point-name={entry.point.nome}
+                      data-selected-media={media.join(",")}
+                      className="flex items-start gap-2 text-sm text-white/85"
+                    >
                       <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-teal" />
-                      {entry.point.nome}
+                      <div className="min-w-0">
+                        <div>{entry.point.nome}</div>
+                        <div className="mt-1">
+                          <MediaTypeChips types={media} />
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -587,6 +762,19 @@ export function CampaignPlanner({
           nextLabel={step === 1 ? "Ver resumo" : "Continuar"}
           nextDisabled={!canNext}
           showBack={step > 0}
+        />
+      )}
+
+      {mediaPicker && (
+        <PlannerMediaPicker
+          open
+          pointName={mediaPicker.entry.point.nome}
+          categoryLabel={mediaPicker.entry.categoryLabel}
+          available={mediaPicker.available}
+          initialSelected={mediaPicker.initial}
+          confirmLabel={mediaPicker.mode === "edit" ? "Salvar mídia" : "Adicionar ao planejador"}
+          onConfirm={commitMediaPicker}
+          onCancel={() => setMediaPicker(null)}
         />
       )}
     </section>
