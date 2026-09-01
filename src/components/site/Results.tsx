@@ -1,6 +1,22 @@
+import * as React from "react";
 import { useReveal } from "@/hooks/useReveal";
 import { useCountUp } from "@/hooks/useCountUp";
-import { ShoppingBag, GraduationCap, HeartPulse } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Clapperboard,
+  GraduationCap,
+  HeartPulse,
+  ShoppingCart,
+  Smartphone,
+  Store,
+} from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 import {
   auditedImpacts,
   networkFootprint,
@@ -10,6 +26,16 @@ import {
   consumerResearch,
 } from "@/data/mobtv-data";
 import { totalPointsCount } from "@/data/network-points";
+
+const AUTOPLAY_INTERVAL_MS = 5000;
+const consumerResearchIcons = [
+  ShoppingCart,
+  Store,
+  Smartphone,
+  GraduationCap,
+  HeartPulse,
+  Clapperboard,
+] as const;
 
 function formatBR(n: number) {
   return n.toLocaleString("pt-BR");
@@ -71,12 +97,7 @@ function StatsGrid() {
   const { ref, visible } = useReveal<HTMLDivElement>({ threshold: 0.2 });
   return (
     <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-      <StatCard
-        value={totalPointsCount}
-        label="pontos de cobertura"
-        delay={0}
-        visible={visible}
-      />
+      <StatCard value={totalPointsCount} label="pontos de cobertura" delay={0} visible={visible} />
       <StatCard
         value={networkFootprint.cities}
         label="cidades do Distrito Federal"
@@ -198,6 +219,157 @@ function Pill({
   );
 }
 
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false);
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    updatePreference();
+    mediaQuery.addEventListener("change", updatePreference);
+    return () => mediaQuery.removeEventListener("change", updatePreference);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
+function ConsumerResearchCarousel() {
+  const carouselRef = React.useRef<HTMLDivElement>(null);
+  const [api, setApi] = React.useState<CarouselApi>();
+  const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [autoplayCycle, setAutoplayCycle] = React.useState(0);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const [hasFocus, setHasFocus] = React.useState(false);
+  const [isPointerDown, setIsPointerDown] = React.useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const autoplayPaused = prefersReducedMotion || isHovered || hasFocus || isPointerDown;
+
+  React.useEffect(() => {
+    if (!api) return;
+
+    const updateSelection = () => {
+      setSelectedIndex(api.selectedScrollSnap());
+    };
+
+    updateSelection();
+    api.on("select", updateSelection);
+    api.on("reInit", updateSelection);
+
+    return () => {
+      api.off("select", updateSelection);
+      api.off("reInit", updateSelection);
+    };
+  }, [api]);
+
+  React.useEffect(() => {
+    if (!api || autoplayPaused) return;
+
+    const timeoutId = window.setTimeout(() => {
+      const carousel = carouselRef.current;
+      const hasActiveFocus = carousel?.contains(document.activeElement) ?? false;
+      const hasActiveHover = carousel?.matches(":hover") ?? false;
+
+      if (hasActiveFocus || hasActiveHover) {
+        setAutoplayCycle((cycle) => cycle + 1);
+        return;
+      }
+
+      api.scrollNext();
+    }, AUTOPLAY_INTERVAL_MS);
+    return () => window.clearTimeout(timeoutId);
+  }, [api, autoplayCycle, autoplayPaused, selectedIndex]);
+
+  React.useEffect(() => {
+    if (!isPointerDown) return;
+
+    const releasePointer = () => setIsPointerDown(false);
+    window.addEventListener("pointerup", releasePointer, { once: true });
+    window.addEventListener("pointercancel", releasePointer, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerup", releasePointer);
+      window.removeEventListener("pointercancel", releasePointer);
+    };
+  }, [isPointerDown]);
+
+  return (
+    <Carousel
+      ref={carouselRef}
+      setApi={setApi}
+      opts={{ align: "start", loop: true, duration: 35 }}
+      aria-label="Indicadores da pesquisa de consumo"
+      className="mt-6"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocusCapture={() => setHasFocus(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setHasFocus(false);
+        }
+      }}
+      onPointerDownCapture={() => setIsPointerDown(true)}
+    >
+      <CarouselContent className="touch-pan-y">
+        {consumerResearch.map((item, index) => {
+          const Icon = consumerResearchIcons[index];
+          return (
+            <CarouselItem
+              key={item.text}
+              className="basis-full sm:basis-1/2 lg:basis-1/3"
+              aria-label={`${index + 1} de ${consumerResearch.length}`}
+            >
+              <div className="reveal reveal-2 h-full">
+                <Pill icon={Icon} value={item.value} text={item.text} />
+              </div>
+            </CarouselItem>
+          );
+        })}
+      </CarouselContent>
+
+      <div className="mt-5 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2" aria-label="Posição no carrossel">
+          {consumerResearch.map((item, index) => (
+            <button
+              key={item.text}
+              type="button"
+              aria-label={`Ir para o indicador ${index + 1}`}
+              aria-current={selectedIndex === index ? "true" : undefined}
+              onClick={() => api?.scrollTo(index)}
+              className={`h-2.5 rounded-full transition-[width,background-color] duration-300 ${
+                selectedIndex === index
+                  ? "w-7 bg-gold"
+                  : "w-2.5 bg-off-white/25 hover:bg-off-white/50"
+              }`}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Indicador anterior"
+            title="Indicador anterior"
+            onClick={() => api?.scrollPrev()}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold/30 text-gold transition-colors hover:border-gold hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            aria-label="Próximo indicador"
+            title="Próximo indicador"
+            onClick={() => api?.scrollNext()}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-gold/30 text-gold transition-colors hover:border-gold hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          >
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+      </div>
+    </Carousel>
+  );
+}
+
 export function Results() {
   const header = useReveal<HTMLDivElement>({ threshold: 0.2 });
   const block1 = useReveal<HTMLDivElement>({ threshold: 0.2 });
@@ -299,29 +471,7 @@ export function Results() {
           <div className="reveal reveal-1 font-mono text-xs uppercase tracking-wider text-gold/80">
             / Pesquisa de consumo
           </div>
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <div className="reveal reveal-2">
-              <Pill
-                icon={ShoppingBag}
-                value={consumerResearch[0].value}
-                text={consumerResearch[0].text}
-              />
-            </div>
-            <div className="reveal reveal-3">
-              <Pill
-                icon={GraduationCap}
-                value={consumerResearch[1].value}
-                text={consumerResearch[1].text}
-              />
-            </div>
-            <div className="reveal reveal-4">
-              <Pill
-                icon={HeartPulse}
-                value={consumerResearch[2].value}
-                text={consumerResearch[2].text}
-              />
-            </div>
-          </div>
+          <ConsumerResearchCarousel />
         </div>
       </div>
     </section>

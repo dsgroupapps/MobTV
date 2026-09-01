@@ -36,7 +36,7 @@ export const auditedImpacts = {
 export const networkFootprint = {
   points: totalPointsCount,
   cities: 16,
-  source: 'Pontos: catálogo nominal atual (`network-points.ts`). Cidades: Media Kit p.33 e p.47.',
+  source: "Pontos: catálogo nominal atual (`network-points.ts`). Cidades: Media Kit p.33 e p.47.",
 };
 
 /**
@@ -130,11 +130,14 @@ export const audienceProfile = {
 
 /** Pesquisa de padrão de consumo coletada via enquete nas redes WiFi. */
 export const consumerResearch = [
-  { value: "55,6%", text: "planejam comprar eletrônicos de consumo nos próximos meses" },
-  { value: "46,9%", text: "pretendem fazer faculdade este ano" },
+  { value: "45,2%", text: "costumam fazer compras online" },
+  { value: "43,9%", text: "apontam a Shopee como plataforma mais utilizada" },
+  { value: "44,1%", text: "têm o celular como principal sonho de consumo para os próximos meses" },
+  { value: "41,8%", text: "planejam fazer uma faculdade nos próximos anos" },
   { value: "38,1%", text: "apontam saúde da mulher como tema de saúde mais relevante" },
+  { value: "41,9%", text: "escolhem o cinema como opção preferida de lazer" },
 ] as const;
-// Media Kit p.10 (eletrônicos), p.11 (faculdade) e p.14 (saúde da mulher).
+// Fonte: "Pesquias Wi-fi - DF.pdf", p.2 a p.7.
 
 /**
  * Fluxo mensal aproximado de pessoas por ambiente/categoria de ponto.
