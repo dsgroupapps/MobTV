@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { findPointBySlug } from "@/lib/point-slug";
 import { getPointInsights } from "@/data/point-insights";
 import { PointProfile } from "@/components/site/PointProfile";
+import { captureFirstTouch, trackFunnel } from "@/lib/analytics/funnel";
 
 /**
  * Página de perfil de ponto — destino dos QR Codes físicos instalados nos
@@ -13,6 +15,9 @@ import { PointProfile } from "@/components/site/PointProfile";
 type PontoSearch = {
   src?: string;
   asset?: string;
+  /** Opcional — identificador de QR físico. Nada depende dele nesta versão;
+   *  a atribuição principal é `src` + slug da rota. */
+  qr_id?: string;
   utm_source?: string;
   utm_medium?: string;
   utm_campaign?: string;
@@ -29,6 +34,7 @@ export const Route = createFileRoute("/ponto/$slug")({
   validateSearch: (search: Record<string, unknown>): PontoSearch => ({
     src: readStringParam(search, "src"),
     asset: readStringParam(search, "asset"),
+    qr_id: readStringParam(search, "qr_id"),
     utm_source: readStringParam(search, "utm_source"),
     utm_medium: readStringParam(search, "utm_medium"),
     utm_campaign: readStringParam(search, "utm_campaign"),
@@ -72,6 +78,31 @@ function PontoPage() {
     utm_content: search.utm_content,
   };
   const hasUtm = Object.values(utm).some((v) => v != null);
+
+  // Origem física do scan: grava a atribuição de primeira interação da
+  // sessão anônima (first-touch vence) e abre o funil da jornada. O próprio
+  // slug da rota identifica o ponto — `qr_id` é opcional e ninguém depende
+  // dele. Uma vez por montagem.
+  useEffect(() => {
+    captureFirstTouch({
+      source: search.src,
+      initialPointSlug: slug,
+      qrId: search.qr_id,
+    });
+    if (search.src === "qr") {
+      trackFunnel("qr_landing", {
+        pointSlug: slug,
+        pointName: point.nome,
+        categoryKey: category.key,
+      });
+    }
+    trackFunnel("point_view", {
+      pointSlug: slug,
+      pointName: point.nome,
+      categoryKey: category.key,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PointProfile

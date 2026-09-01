@@ -26,6 +26,7 @@ import {
   getPrimaryMetric,
 } from "@/data/point-audience-data";
 import { createPointTracker, type PointTracker } from "@/lib/analytics/client";
+import { trackFunnel } from "@/lib/analytics/funnel";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
 import type { PointContext } from "@/lib/analytics/types";
 import { submitPointLead } from "@/lib/leads/point-lead";
@@ -360,6 +361,17 @@ export function PointProfile({
 
   useScrollDepth((percent) => tracker.track("point_scroll_depth", { scrollDepthPercent: percent }));
 
+  // Saída do perfil de ponto para o site institucional — mantém o evento de
+  // ponto legado e registra o passo `site_continue` do funil da jornada.
+  const handleSiteContinue = () => {
+    tracker.track("point_site_click");
+    trackFunnel("site_continue", {
+      pointSlug: slug,
+      pointName: point.nome,
+      categoryKey: category.key,
+    });
+  };
+
   const region = regionForPoint(point.nome);
   const mediaTypes = pointMediaTypes(point);
   const photo = point.images?.[0];
@@ -401,7 +413,7 @@ export function PointProfile({
     <div className="flex min-h-screen flex-col bg-navy text-off-white">
       {/* Barra superior mínima — só a marca, sem navegação institucional. */}
       <header className="flex items-center justify-between border-b border-white/10 px-6 py-4">
-        <Link to="/" onClick={() => tracker.track("point_site_click")}>
+        <Link to="/" onClick={() => handleSiteContinue()}>
           <Logo variant="light" className="h-7" />
         </Link>
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-off-white/40">
@@ -541,7 +553,7 @@ export function PointProfile({
               <PointLeadForm slug={slug} pointName={point.nome} utm={utm} />
               <Link
                 to="/"
-                onClick={() => tracker.track("point_site_click")}
+                onClick={() => handleSiteContinue()}
                 className="mt-3 inline-flex w-full cursor-pointer items-center justify-center rounded-lg border border-gold/40 px-6 py-3 text-center font-semibold text-gold transition-colors hover:border-gold hover:bg-gold/10"
               >
                 Conhecer a MOBTV →
