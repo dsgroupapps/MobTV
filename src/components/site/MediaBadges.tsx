@@ -1,4 +1,14 @@
-import { Train, Bus, HeartPulse, Stethoscope, Store, Building2, Monitor, Grid3x3, Wifi } from "lucide-react";
+import {
+  Train,
+  Bus,
+  HeartPulse,
+  Stethoscope,
+  Store,
+  Building2,
+  Monitor,
+  Grid3x3,
+  Wifi,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { CategoryKey, MediaTypeKey } from "@/data/network-points";
 
@@ -43,18 +53,37 @@ export const mediaTypeMeta: Record<
   },
 };
 
-/** Chips de mídia — usados no card, no painel de detalhe, na Galeria, no Planejador e na Cobertura. */
-export function MediaTypeChips({ types }: { types: MediaTypeKey[] }) {
+/**
+ * Chips de mídia — usados no card, no painel de detalhe, na Galeria, no
+ * Planejador e na Cobertura.
+ *
+ * `selected` é opcional e só é usado pelo Planejador: quando presente, os
+ * tipos que não estão nele ficam esmaecidos, deixando visualmente claro
+ * quais mídias o usuário escolheu naquele ponto. Sem a prop, o
+ * comportamento é idêntico ao anterior (todos os chips cheios).
+ */
+export function MediaTypeChips({
+  types,
+  selected,
+}: {
+  types: MediaTypeKey[];
+  selected?: MediaTypeKey[];
+}) {
   if (types.length === 0) return null;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {types.map((t) => {
         const meta = mediaTypeMeta[t];
         const Icon = meta.Icon;
+        const dimmed = selected != null && !selected.includes(t);
         return (
           <span
             key={t}
-            className={`inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap ${meta.className}`}
+            data-media-chip={t}
+            data-selected={selected != null ? (!dimmed ? "true" : "false") : undefined}
+            className={`inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap transition-opacity ${meta.className} ${
+              dimmed ? "opacity-30" : "opacity-100"
+            }`}
           >
             <Icon className="h-3 w-3" strokeWidth={2.4} />
             {meta.label}
