@@ -1,6 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
-import { POINT_EVENT_NAMES, type PointEventPayload } from "./types";
+import {
+  FUNNEL_EVENT_NAMES,
+  POINT_EVENT_NAMES,
+  type FunnelEventPayload,
+  type PointEventPayload,
+} from "./types";
+
+/** País aproximado resolvido na borda da Cloudflare — nunca o IP. */
+function readApproxCountry(): string | undefined {
+  try {
+    return getRequestHeader("cf-ipcountry" as never) ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Sumidouro server-side dos eventos de perfil de ponto.
@@ -41,20 +55,46 @@ export const trackPointEvent = createServerFn({ method: "POST" })
     return payload;
   })
   .handler(async ({ data }) => {
-    let approxCountry: string | undefined;
-    try {
-      // Cabeçalho padrão da Cloudflare — não é o IP, só o país resolvido por ele
-      // na borda. Ausente em ambientes fora da Cloudflare (ex. `vite dev` local).
-      approxCountry = getRequestHeader("cf-ipcountry" as never) ?? undefined;
-    } catch {
-      approxCountry = undefined;
-    }
-
+    // Cabeçalho padrão da Cloudflare — não é o IP, só o país resolvido por ele
+    // na borda. Ausente em ambientes fora da Cloudflare (ex. `vite dev` local).
     console.log(
       JSON.stringify({
         kind: "point_analytics_event",
         ...data,
-        approxCountry,
+        approxCountry: readApproxCountry(),
+        receivedAt: new Date().toISOString(),
+      }),
+    );
+
+    return { ok: true } as const;
+  });
+
+/**
+ * Sumidouro server-side dos eventos de FUNIL (jornada QR → site → planejador
+ * → CTA). Mesma arquitetura do `trackPointEvent`: valida o payload e emite
+ * uma linha de log estruturada (`kind: "funnel_analytics_event"`). Sem IP,
+ * sem PII — só o país aproximado da borda. A persistência consultável
+ * continua sendo o próximo passo documentado (KV/D1/Analytics Engine),
+ * fora do escopo desta fase ("sem dashboard analytics").
+ */
+export const trackFunnelEvent = createServerFn({ method: "POST" })
+  .validator((data: unknown): FunnelEventPayload => {
+    if (typeof data !== "object" || data === null) throw new Error("invalid funnel payload");
+    const payload = data as FunnelEventPayload;
+    if (!FUNNEL_EVENT_NAMES.includes(payload.event)) {
+      throw new Error(`invalid funnel event: ${String((data as { event?: unknown }).event)}`);
+    }
+    if (typeof payload.anonymousSessionId !== "string" || payload.anonymousSessionId.length === 0) {
+      throw new Error("missing anonymousSessionId");
+    }
+    return payload;
+  })
+  .handler(async ({ data }) => {
+    console.log(
+      JSON.stringify({
+        kind: "funnel_analytics_event",
+        ...data,
+        approxCountry: readApproxCountry(),
         receivedAt: new Date().toISOString(),
       }),
     );
