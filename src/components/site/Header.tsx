@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/site/Logo";
 import { Link, useLocation } from "@tanstack/react-router";
-import { LogIn, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 const navItems = [
@@ -63,14 +63,6 @@ export function Header() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2 shrink-0">
-          <Link
-            to="/entrar"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-navy/20 px-4 text-sm font-semibold text-navy transition-colors hover:border-gold-deep hover:text-gold-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2"
-          >
-            <LogIn className="h-4 w-4" aria-hidden />
-            Entrar
-          </Link>
-
           {/* CTA comercial — desktop */}
           <a
             href={WHATSAPP_URL}
@@ -113,16 +105,7 @@ export function Header() {
               })}
             </nav>
 
-            <div className="mt-auto grid gap-3 pt-6 border-t border-ink/10">
-              <SheetClose asChild>
-                <Link
-                  to="/entrar"
-                  className="flex min-h-11 items-center justify-center gap-2 rounded-lg border border-navy/20 px-5 py-3 text-base font-semibold text-navy transition-colors hover:border-gold-deep hover:text-gold-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                >
-                  <LogIn className="h-5 w-5" aria-hidden />
-                  Entrar
-                </Link>
-              </SheetClose>
+            <div className="mt-auto pt-6 border-t border-ink/10">
               <a
                 href={WHATSAPP_URL}
                 target="_blank"

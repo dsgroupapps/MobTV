@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { LoaderCircle, LogIn } from "lucide-react";
 
@@ -93,13 +93,6 @@ export function LoginForm() {
         )}
         {isSubmitting ? "Entrando..." : "Entrar"}
       </button>
-
-      <p className="text-center text-sm text-off-white/65">
-        Ainda não tem conta?{" "}
-        <Link to="/criar-conta" className="font-semibold text-gold hover:text-gold-deep">
-          Criar conta
-        </Link>
-      </p>
     </form>
   );
 }
