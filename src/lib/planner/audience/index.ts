@@ -1,70 +1,76 @@
 import type { MediaTypeKey } from "../../../data/network-points.ts";
-import type { IncomeType, MetricType } from "../../../data/point-audience-data.ts";
+import type { IncomeType } from "../../../data/point-audience-data.ts";
 import { estimateLedCampaignImpacts, getLedPointIntelligence, ledCampaignModels } from "./led.ts";
+import { getUpaScreenPointIntelligence } from "./screen.ts";
+import { INCOME_LABEL, worstTier } from "./metrics.ts";
 import type {
-  AudienceConfidenceTier,
   CampaignAudienceRollup,
   CampaignMetricGroup,
+  CampaignPotentialGroup,
   CampaignSimInput,
   CampaignSimResult,
-  LedPointIntelligence,
+  MetricKind,
+  PointIntelligence,
 } from "./types.ts";
 
 export * from "./types.ts";
 export {
-  estimateLedCampaignImpacts,
-  getLedPointIntelligence,
-  ledCampaignModels,
   metricConfidenceTier,
   metricMonthlyLabel,
   metricNoun,
+  environmentLabelFor,
+} from "./metrics.ts";
+export {
+  estimateLedCampaignImpacts,
+  getLedPointIntelligence,
+  ledCampaignModels,
   LED_CAMPAIGN_MISSING_VARIABLE,
 } from "./led.ts";
+export {
+  estimateUpaScreenImpressions,
+  getUpaScreenPointIntelligence,
+  UPA_SCREEN_MODEL,
+  UPA_SCREEN_MULTIPLIER,
+} from "./screen.ts";
 
 /**
- * Dispatcher por tipo de mídia. Hoje só `Painel LED` tem estratégia; `screen`
- * (Tela) e `wifi` (WiFi Ads) ficam preparados mas retornam `null` — a
- * assinatura já aceita a lista de mídias escolhidas no ponto para quando
- * cada uma ganhar sua própria camada de cálculo.
+ * Dispatcher por tipo de mídia escolhido no ponto.
+ *  - `led`    → estratégia Painel LED (impactos auditados Datavision).
+ *  - `screen` → estratégia Tela/UPA (impactos potenciais modelados sobre procedimentos).
+ *  - `wifi`   → ainda não implementada.
+ *
+ * Se o ponto tiver as duas mídias selecionadas, o Painel LED tem prioridade
+ * (métrica medida). Trocar a mídia do ponto para `wifi` remove qualquer
+ * inteligência (retorna `null`).
  */
 export function getPointIntelligence(
   slug: string,
   selectedMedia: MediaTypeKey[],
-): LedPointIntelligence | null {
+): PointIntelligence | null {
   if (selectedMedia.includes("led")) {
-    return getLedPointIntelligence(slug);
+    const led = getLedPointIntelligence(slug);
+    if (led) return led;
   }
-  // TODO(fase Tela / WiFi): estratégias específicas de `screen` e `wifi`.
+  if (selectedMedia.includes("screen")) {
+    const screen = getUpaScreenPointIntelligence(slug);
+    if (screen) return screen;
+  }
+  // TODO(fase WiFi Ads): estratégia específica de `wifi`.
   return null;
 }
 
-const TIER_RANK: Record<AudienceConfidenceTier, number> = {
-  measured: 3,
-  derived: 2,
-  estimated: 1,
-};
-
-/** Menor (pior) nível de confiança entre dois. */
-function worstTier(a: AudienceConfidenceTier, b: AudienceConfidenceTier): AudienceConfidenceTier {
-  return TIER_RANK[a] <= TIER_RANK[b] ? a : b;
-}
-
-const INCOME_LABEL: Record<IncomeType, string> = {
-  domiciliar: "Renda média domiciliar",
-  familiar: "Renda média familiar",
-  per_capita: "Renda per capita",
-};
-
 /**
- * Consolida os pontos com `Painel LED` da seleção numa visão de campanha.
- * Só agrega o que é metodologicamente compatível: métricas mensais são
- * somadas APENAS dentro do mesmo tipo (`metricGroups`); rendas só viram
- * faixa quando todos os pontos usam o mesmo tipo de renda.
+ * Consolida os pontos com inteligência de audiência (LED e/ou Tela) numa
+ * visão de campanha. Só agrega o que é metodologicamente compatível:
+ * métricas mensais são somadas APENAS dentro do mesmo tipo (`metricGroups`) —
+ * impactos auditados, impactos potenciais modelados, fluxo e procedimentos
+ * NUNCA se misturam. Rendas só viram faixa quando todos os pontos com renda
+ * usam o mesmo tipo.
  */
 export function rollupCampaignAudience(
-  points: { slug: string; name: string; intelligence: LedPointIntelligence }[],
+  points: { slug: string; name: string; intelligence: PointIntelligence }[],
 ): CampaignAudienceRollup {
-  const groupsByType = new Map<MetricType, CampaignMetricGroup>();
+  const groupsByType = new Map<MetricKind, CampaignMetricGroup>();
   const environments: string[] = [];
   const ages: number[] = [];
   const female: number[] = [];
@@ -73,22 +79,24 @@ export function rollupCampaignAudience(
 
   for (const { name, intelligence } of points) {
     const m = intelligence.monthly;
-    const existing = groupsByType.get(m.metricType);
-    if (existing) {
-      existing.total += m.value;
-      existing.tier = worstTier(existing.tier, m.tier);
-      existing.pointCount += 1;
-      existing.pointNames.push(name);
-    } else {
-      groupsByType.set(m.metricType, {
-        metricType: m.metricType,
-        label: m.label,
-        noun: m.noun,
-        total: m.value,
-        tier: m.tier,
-        pointCount: 1,
-        pointNames: [name],
-      });
+    if (m) {
+      const existing = groupsByType.get(m.metricType);
+      if (existing) {
+        existing.total += m.value;
+        existing.tier = worstTier(existing.tier, m.tier);
+        existing.pointCount += 1;
+        existing.pointNames.push(name);
+      } else {
+        groupsByType.set(m.metricType, {
+          metricType: m.metricType,
+          label: m.label,
+          noun: m.noun,
+          total: m.value,
+          tier: m.tier,
+          pointCount: 1,
+          pointNames: [name],
+        });
+      }
     }
 
     if (!environments.includes(intelligence.environmentLabel)) {
@@ -165,14 +173,17 @@ export function clampSimInput(raw: Partial<CampaignSimInput> | null | undefined)
 }
 
 /**
- * Calcula a simulação de campanha a partir do rollup + duração/inserções.
+ * Simulação de campanha a partir do rollup + duração/inserções.
  *
  * - `totalInsertions` = days × insertionsPerDay (sempre).
- * - `monthlyEnvironmentPotential` / `dailyReference` / `windowEnvironmentPotential`
- *   só existem quando há um grupo de `audited_impacts` (impactos auditados).
- * - `campaignImpacts` só é preenchido se TODOS os pontos LED têm modelo de
- *   share de exibição (`ledCampaignModels`). Nesta fase nenhum tem → `null` +
- *   `missingVariable`.
+ * - `potentialGroups`: um bloco por TIPO de métrica (nunca somados entre si),
+ *   cada um com potencial mensal, média diária de referência (÷30) e
+ *   potencial na janela (× days/30 — potencial de EXPOSIÇÃO do ambiente, não
+ *   a entrega da campanha).
+ * - `campaignImpacts` só é preenchido quando TODOS os pontos têm modelo de
+ *   share de exibição (`ledCampaignModels`). Nesta fase nenhum tem — nem LED
+ *   nem Tela: o projeto não publica loop/spot/SOV/inventário diário —
+ *   → `null` + `missingVariable`.
  */
 export function simulateCampaign(
   rollup: CampaignAudienceRollup,
@@ -181,16 +192,25 @@ export function simulateCampaign(
   const { days, insertionsPerDay } = clampSimInput(input);
   const totalInsertions = days * insertionsPerDay;
 
-  const impactsGroup = rollup.metricGroups.find((g) => g.metricType === "audited_impacts");
-  const monthly = impactsGroup?.total ?? null;
+  const potentialGroups: CampaignPotentialGroup[] = rollup.metricGroups.map((g) => ({
+    metricType: g.metricType,
+    label: g.label,
+    noun: g.noun,
+    tier: g.tier,
+    pointCount: g.pointCount,
+    monthly: g.total,
+    dailyReference: Math.round(g.total / 30),
+    windowPotential: Math.round(g.total * (days / 30)),
+  }));
 
   let campaignImpacts: number | null = null;
   let missingVariable: string | null = null;
 
-  if (monthly != null && rollup.points.length > 0) {
+  if (potentialGroups.length > 0 && rollup.points.length > 0) {
     let sum = 0;
     let allModelled = true;
     for (const { slug, intelligence } of rollup.points) {
+      if (!intelligence.monthly) continue;
       const est = estimateLedCampaignImpacts({
         monthlyImpacts: intelligence.monthly.value,
         days,
@@ -214,9 +234,7 @@ export function simulateCampaign(
     days,
     insertionsPerDay,
     totalInsertions,
-    monthlyEnvironmentPotential: monthly,
-    dailyReference: monthly != null ? Math.round(monthly / 30) : null,
-    windowEnvironmentPotential: monthly != null ? Math.round(monthly * (days / 30)) : null,
+    potentialGroups,
     campaignImpacts,
     missingVariable,
   };
@@ -227,6 +245,16 @@ const BR_NUMBER = new Intl.NumberFormat("pt-BR");
 /** Formata um inteiro no padrão pt-BR (2.167.660). */
 export function formatCount(value: number): string {
   return BR_NUMBER.format(Math.round(value));
+}
+
+const BR_COMPACT = new Intl.NumberFormat("pt-BR", {
+  notation: "compact",
+  maximumFractionDigits: 0,
+});
+
+/** Formato compacto para números de destaque estimados ("143 mil", "1 mi"). */
+export function formatCompact(value: number): string {
+  return BR_COMPACT.format(Math.round(value));
 }
 
 const BR_CURRENCY = new Intl.NumberFormat("pt-BR", {

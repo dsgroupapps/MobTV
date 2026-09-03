@@ -21,7 +21,7 @@ import {
   rollupCampaignAudience,
   SIM_LIMITS,
   type CampaignSimInput,
-  type LedPointIntelligence,
+  type PointIntelligence,
 } from "@/lib/planner/audience";
 import { trackFunnel } from "@/lib/analytics/funnel";
 import { MEDIA_SELECT_TOKEN } from "@/lib/analytics/types";
@@ -395,13 +395,14 @@ export function CampaignPlanner({
     [selections],
   );
 
-  // Inteligência de audiência — SÓ para pontos com `Painel LED` selecionado
-  // que têm dados auditados (`point-audience-data.ts`). Trocar a mídia do
-  // ponto para Tela/WiFi remove o ponto daqui automaticamente.
-  const ledIntel = useMemo(() => {
-    const list: { slug: string; name: string; intelligence: LedPointIntelligence }[] = [];
+  // Inteligência de audiência — para pontos com `Painel LED` (impactos
+  // auditados Datavision) ou `Tela` em UPA (impactos potenciais modelados
+  // sobre procedimentos) selecionados. O dispatcher decide por mídia; trocar
+  // a mídia do ponto (ex.: para WiFi) remove o ponto daqui automaticamente.
+  const audienceIntel = useMemo(() => {
+    const list: { slug: string; name: string; intelligence: PointIntelligence }[] = [];
     for (const [key, media] of Object.entries(selections)) {
-      if (!media.includes("led")) continue;
+      if (!media.includes("led") && !media.includes("screen")) continue;
       const entry = findPoint(key);
       if (!entry) continue;
       const intelligence = getPointIntelligence(entry.point.slug, media);
@@ -412,11 +413,11 @@ export function CampaignPlanner({
     return list;
   }, [selections]);
 
-  const ledBySlug = useMemo(
-    () => new Map(ledIntel.map((x) => [x.slug, x.intelligence])),
-    [ledIntel],
+  const audienceBySlug = useMemo(
+    () => new Map(audienceIntel.map((x) => [x.slug, x.intelligence])),
+    [audienceIntel],
   );
-  const ledRollup = useMemo(() => rollupCampaignAudience(ledIntel), [ledIntel]);
+  const audienceRollup = useMemo(() => rollupCampaignAudience(audienceIntel), [audienceIntel]);
 
   const hasActiveFilters = regionFilter !== "all" || categoryFilter !== "all";
   const midiaLabel = midiaOptions.find((m) => m.value === midia)?.label ?? "";
@@ -771,7 +772,7 @@ export function CampaignPlanner({
                               </button>
                             )}
                           </div>
-                          {ledBySlug.has(entry.point.slug) && (
+                          {audienceBySlug.has(entry.point.slug) && (
                             <details data-audience-disclosure className="group mt-2">
                               <summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-wider text-gold/80 transition-colors hover:text-gold">
                                 <span className="group-open:hidden">Ver audiência do ponto →</span>
@@ -782,7 +783,7 @@ export function CampaignPlanner({
                               <div className="mt-3">
                                 <PointAudiencePanel
                                   dense
-                                  intelligence={ledBySlug.get(entry.point.slug)!}
+                                  intelligence={audienceBySlug.get(entry.point.slug)!}
                                   pointName={entry.point.nome}
                                 />
                               </div>
@@ -848,17 +849,18 @@ export function CampaignPlanner({
               </div>
             </div>
 
-            {ledIntel.length > 0 && (
-              <div className="mt-12" data-led-intelligence>
+            {audienceIntel.length > 0 && (
+              <div className="mt-12" data-audience-intelligence>
                 <div className="mb-2 font-mono text-xs uppercase tracking-[0.3em] text-gold">
-                  Painel LED — inteligência de audiência
+                  Inteligência de audiência
                 </div>
                 <p className="mb-6 max-w-2xl text-sm leading-relaxed text-white/55">
-                  O público que sua campanha pode alcançar em cada Painel LED selecionado e a
-                  dimensão aproximada da campanha conforme a duração e as inserções escolhidas.
+                  O público que sua campanha pode alcançar em cada ponto selecionado (Painel LED e
+                  Telas) e a dimensão aproximada da campanha conforme a duração e as inserções
+                  escolhidas.
                 </p>
                 <div className="grid gap-5 lg:grid-cols-2">
-                  {ledIntel.map((x) => (
+                  {audienceIntel.map((x) => (
                     <PointAudiencePanel
                       key={x.slug}
                       intelligence={x.intelligence}
@@ -867,7 +869,7 @@ export function CampaignPlanner({
                   ))}
                 </div>
                 <div className="mt-6">
-                  <CampaignAudienceSummary rollup={ledRollup} sim={sim} onSimChange={setSim} />
+                  <CampaignAudienceSummary rollup={audienceRollup} sim={sim} onSimChange={setSim} />
                 </div>
               </div>
             )}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   clampSimInput,
+  formatCompact,
   formatCount,
   formatCurrency,
   SIM_LIMITS,
@@ -10,19 +11,21 @@ import {
 } from "@/lib/planner/audience";
 
 /**
- * "Sua campanha" (agregado dos pontos com Painel LED) + "Simule sua campanha"
- * (duração × inserções/dia, atualização instantânea).
+ * "Sua campanha" (agregado dos pontos com inteligência de audiência — Painel
+ * LED e/ou Tela) + "Simule sua campanha" (duração × inserções/dia,
+ * atualização instantânea).
  *
  * Regras respeitadas aqui:
- *  - métricas de tipos diferentes NÃO são somadas — cada grupo aparece sozinho;
+ *  - métricas de tipos diferentes NÃO são somadas — cada grupo aparece sozinho
+ *    (impactos auditados x impactos potenciais modelados x fluxo x procedimentos);
  *  - não há linha de "impactos estimados da campanha" enquanto a metodologia
  *    não suportar o cálculo (ver `missingVariable`); no lugar, um aviso do que
  *    a MOBTV calcula na proposta.
  */
 
-const TIER_NOTE: Record<CampaignAudienceRollup["metricGroups"][number]["tier"], string> = {
+const TIER_NOTE: Record<string, string> = {
   measured: "medido e auditado",
-  derived: "estimativa derivada",
+  derived: "estimativa modelada",
   estimated: "estimativa",
 };
 
@@ -127,6 +130,7 @@ export function CampaignAudienceSummary({
   const safeSim = clampSimInput(sim);
   const result = simulateCampaign(rollup, safeSim);
   const multi = rollup.ledPointCount > 1;
+  const hasModeled = rollup.metricGroups.some((g) => g.metricType === "modeled_impressions");
 
   return (
     <div
@@ -137,7 +141,8 @@ export function CampaignAudienceSummary({
         Sua campanha
       </div>
       <div className="mt-1 text-sm text-white/60">
-        {rollup.ledPointCount} ponto{rollup.ledPointCount === 1 ? "" : "s"} com Painel LED
+        {rollup.ledPointCount} ponto{rollup.ledPointCount === 1 ? "" : "s"} com inteligência de
+        audiência
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -153,19 +158,22 @@ export function CampaignAudienceSummary({
 
       {/* Agregados — um bloco por tipo de métrica, nunca somados entre si */}
       <div className="mt-6 grid gap-5 sm:grid-cols-2">
-        {rollup.metricGroups.map((group) => (
-          <Stat
-            key={group.metricType}
-            strong
-            value={formatCount(group.total)}
-            label={`${group.noun}/mês — audiência potencial`}
-            hint={`${group.pointCount} ponto${group.pointCount === 1 ? "" : "s"} · ${
-              TIER_NOTE[group.tier]
-            }`}
-          />
-        ))}
+        {rollup.metricGroups.map((group) => {
+          const modeled = group.metricType === "modeled_impressions";
+          return (
+            <Stat
+              key={group.metricType}
+              strong
+              value={modeled ? `≈ ${formatCompact(group.total)}` : formatCount(group.total)}
+              label={`${group.label} — ${modeled ? "potencial de exposição" : "audiência potencial"}`}
+              hint={`${group.pointCount} ponto${group.pointCount === 1 ? "" : "s"} · ${
+                TIER_NOTE[group.tier]
+              }`}
+            />
+          );
+        })}
         {rollup.metricGroups.length > 1 && (
-          <p className="sm:col-span-2 text-[11px] leading-snug text-white/40">
+          <p className="text-[11px] leading-snug text-white/40 sm:col-span-2">
             Métricas de tipos diferentes não são somadas — cada uma é apresentada separadamente.
           </p>
         )}
@@ -200,7 +208,7 @@ export function CampaignAudienceSummary({
               />
             )}
             {rollup.income == null && rollup.incomeTypesMixed && (
-              <p className="sm:col-span-3 text-[11px] leading-snug text-white/40">
+              <p className="text-[11px] leading-snug text-white/40 sm:col-span-3">
                 Renda: os pontos usam tipos diferentes (domiciliar / familiar / per capita) —
                 exibida individualmente em cada ponto, não combinada.
               </p>
@@ -235,7 +243,7 @@ export function CampaignAudienceSummary({
           />
         </div>
 
-        <div className="mt-6 grid gap-5 sm:grid-cols-2">
+        <div className="mt-6">
           <Stat
             strong
             value={formatCount(result.totalInsertions)}
@@ -244,28 +252,33 @@ export function CampaignAudienceSummary({
               safeSim.insertionsPerDay,
             )} inserções/dia`}
           />
-          {result.monthlyEnvironmentPotential != null && (
-            <Stat
-              value={`${formatCount(result.monthlyEnvironmentPotential)}`}
-              label="potencial mensal dos pontos"
-              hint="impactos/mês auditados (Datavision)"
-            />
-          )}
-          {result.dailyReference != null && (
-            <Stat
-              value={formatCount(result.dailyReference)}
-              label="média diária de referência"
-              hint="potencial mensal ÷ 30"
-            />
-          )}
-          {result.windowEnvironmentPotential != null && (
-            <Stat
-              value={formatCount(result.windowEnvironmentPotential)}
-              label={`potencial de exposição em ${formatCount(safeSim.days)} dias`}
-              hint="audiência do ambiente na janela — não é a entrega garantida da campanha"
-            />
-          )}
         </div>
+
+        {result.potentialGroups.map((group) => (
+          <div key={group.metricType} className="mt-6 border-t border-white/8 pt-5">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-off-white/45">
+              {group.label}
+              {result.potentialGroups.length > 1 ? ` · ${group.pointCount} ponto(s)` : ""}
+            </div>
+            <div className="mt-3 grid gap-5 sm:grid-cols-3">
+              <Stat
+                value={formatCount(group.monthly)}
+                label="potencial mensal dos pontos"
+                hint={TIER_NOTE[group.tier]}
+              />
+              <Stat
+                value={formatCount(group.dailyReference)}
+                label="média diária de referência"
+                hint="potencial mensal ÷ 30"
+              />
+              <Stat
+                value={formatCount(group.windowPotential)}
+                label={`potencial de exposição em ${formatCount(safeSim.days)} dias`}
+                hint="potencial do ambiente na janela — não é a entrega garantida da campanha"
+              />
+            </div>
+          </div>
+        ))}
 
         {result.campaignImpacts != null ? (
           <div className="mt-5 rounded-xl bg-gold/10 p-4 ring-1 ring-gold/30">
@@ -275,20 +288,27 @@ export function CampaignAudienceSummary({
             <div className="mt-1 text-sm text-white/70">impactos estimados da campanha</div>
           </div>
         ) : (
-          <div className="mt-5 rounded-xl bg-white/[0.04] p-4 ring-1 ring-white/10">
-            <div className="font-mono text-[10px] uppercase tracking-wider text-off-white/45">
-              Impactos estimados da campanha
+          result.potentialGroups.length > 0 && (
+            <div className="mt-5 rounded-xl bg-white/[0.04] p-4 ring-1 ring-white/10">
+              <div className="font-mono text-[10px] uppercase tracking-wider text-off-white/45">
+                Impactos estimados da campanha
+              </div>
+              <p className="mt-1.5 text-sm leading-relaxed text-white/60">
+                A parcela desses impactos que pertence especificamente ao seu anúncio depende do
+                share de exibição (quantas inserções por dia o loop da tela/painel executa). Esse
+                dado não é publicado no material comercial — a MOBTV o calcula na proposta. Aqui
+                mostramos o potencial do ambiente e a programação (
+                {formatCount(result.totalInsertions)} inserções), sem fingir saber quanto do total
+                pertence ao anúncio.
+              </p>
             </div>
-            <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-              A MOBTV calcula esse número na proposta, a partir do share de exibição do painel
-              (quantas inserções por dia o loop do Painel LED executa). Esse dado não é publicado no
-              material comercial, então não é estimado aqui — em vez de mostrar um número que não
-              podemos defender.
-            </p>
-          </div>
+          )
         )}
 
         <p className="mt-4 text-[10px] leading-relaxed text-white/30">
+          {hasModeled
+            ? "Impactos potenciais representam oportunidades de exposição à mídia, não pessoas únicas. "
+            : ""}
           Estimativas baseadas em dados históricos de audiência e nas características dos pontos
           selecionados. Os resultados reais podem variar.
         </p>

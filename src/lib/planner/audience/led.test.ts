@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { LedPointIntelligence } from "./types.ts";
+import type { MonthlyAudienceMetric, PointIntelligence } from "./types.ts";
 import {
   clampSimInput,
   formatCount,
@@ -10,11 +10,8 @@ import {
   SIM_LIMITS,
   simulateCampaign,
 } from "./index.ts";
-import {
-  estimateLedCampaignImpacts,
-  getLedPointIntelligence,
-  metricConfidenceTier,
-} from "./led.ts";
+import { estimateLedCampaignImpacts, getLedPointIntelligence } from "./led.ts";
+import { metricConfidenceTier } from "./metrics.ts";
 import { getPointAudienceData } from "../../../data/point-audience-data.ts";
 
 const LED_SLUGS = [
@@ -27,21 +24,33 @@ const LED_SLUGS = [
   "terminal-brt-gama",
 ];
 
-function intelOf(slug: string): LedPointIntelligence {
+type WithMonthly = PointIntelligence & {
+  monthly: MonthlyAudienceMetric;
+  dailyReference: { value: number };
+};
+
+function intelOf(slug: string): WithMonthly {
   const intel = getLedPointIntelligence(slug);
   assert.ok(intel, `esperava inteligência LED para "${slug}"`);
-  return intel;
+  assert.ok(intel.monthly, `esperava métrica mensal para "${slug}"`);
+  assert.ok(intel.dailyReference, `esperava dailyReference para "${slug}"`);
+  return intel as WithMonthly;
 }
 
 function pointEntry(slug: string) {
-  const intelligence = intelOf(slug);
-  return { slug, name: slug, intelligence };
+  return { slug, name: slug, intelligence: intelOf(slug) };
+}
+
+/** Grupo de potencial de um tipo específico dentro do resultado da simulação. */
+function groupOf(result: ReturnType<typeof simulateCampaign>, metricType: string) {
+  const group = result.potentialGroups.find((g) => g.metricType === metricType);
+  assert.ok(group, `esperava grupo "${metricType}" na simulação`);
+  return group;
 }
 
 test("1. ponto sem Painel LED (ou inexistente) não recebe inteligência LED", () => {
   // UPA tem só Monitor (Tela), com dados de audiência — mas nunca LED.
   assert.equal(getLedPointIntelligence("upa-gama"), null);
-  assert.equal(getPointIntelligence("upa-gama", ["screen"]), null);
   // Ponto só-WiFi.
   assert.equal(getLedPointIntelligence("na-hora-gama"), null);
   // Slug inexistente.
@@ -50,11 +59,13 @@ test("1. ponto sem Painel LED (ou inexistente) não recebe inteligência LED", (
 
 test("2. ponto LED com dados expõe métrica, demografia e comportamento reais", () => {
   const intel = intelOf("estacao-central-plano-piloto");
+  assert.equal(intel.mediaType, "led");
   assert.equal(intel.monthly.value, 2_167_660);
   assert.equal(intel.monthly.metricType, "audited_impacts");
   assert.equal(intel.monthly.label, "impactos/mês");
   assert.equal(intel.monthly.noun, "impactos");
   assert.equal(intel.monthly.tier, "measured");
+  assert.equal(intel.baseMetric, undefined); // LED: `monthly` já é a medição
   assert.equal(intel.dailyReference.value, Math.round(2_167_660 / 30));
   assert.equal(intel.environmentLabel, "Metrô");
 
@@ -80,8 +91,9 @@ test("2b. todos os 7 pontos LED do catálogo produzem inteligência com impactos
 });
 
 test("3. campos ausentes não quebram o rollup nem a simulação", () => {
-  const bare: LedPointIntelligence = {
+  const bare: PointIntelligence = {
     slug: "fake",
+    mediaType: "led",
     researchCategory: "Metrô",
     environmentLabel: "Metrô",
     monthly: {
@@ -102,7 +114,7 @@ test("3. campos ausentes não quebram o rollup nem a simulação", () => {
   assert.equal(rollup.income, undefined);
   assert.equal(rollup.incomeTypesMixed, false);
   const result = simulateCampaign(rollup, { days: 10, insertionsPerDay: 50 });
-  assert.equal(result.monthlyEnvironmentPotential, 1_000_000);
+  assert.equal(groupOf(result, "audited_impacts").monthly, 1_000_000);
   assert.equal(result.totalInsertions, 500);
 });
 
@@ -121,8 +133,9 @@ test("4. múltiplos pontos: impactos auditados somam num único grupo compatíve
 });
 
 test("5. NÃO soma métricas de tipos diferentes — grupos separados", () => {
-  const ledLike: LedPointIntelligence = {
+  const ledLike: PointIntelligence = {
     slug: "a",
+    mediaType: "led",
     researchCategory: "Metrô",
     environmentLabel: "Metrô",
     monthly: {
@@ -136,7 +149,7 @@ test("5. NÃO soma métricas de tipos diferentes — grupos separados", () => {
     },
     dailyReference: { value: 17 },
   };
-  const flowLike: LedPointIntelligence = {
+  const flowLike: PointIntelligence = {
     ...ledLike,
     slug: "b",
     monthly: {
@@ -156,9 +169,10 @@ test("5. NÃO soma métricas de tipos diferentes — grupos separados", () => {
   assert.equal(rollup.metricGroups.length, 2);
   const types = rollup.metricGroups.map((g) => g.metricType).sort();
   assert.deepEqual(types, ["audited_impacts", "passengers"]);
-  // simulação só usa o grupo de impactos auditados
   const result = simulateCampaign(rollup, { days: 30, insertionsPerDay: 1 });
-  assert.equal(result.monthlyEnvironmentPotential, 500);
+  assert.equal(result.potentialGroups.length, 2);
+  assert.equal(groupOf(result, "audited_impacts").monthly, 500);
+  assert.equal(groupOf(result, "passengers").monthly, 300);
 });
 
 test("6+7. duração e inserções aceitam somente valores válidos (inteiros nos limites)", () => {
@@ -205,9 +219,10 @@ test("9. estimativa de impactos da campanha só aparece com metodologia válida"
   assert.equal(result.campaignImpacts, null);
   assert.ok(result.missingVariable && result.missingVariable.length > 0);
   // referências do ambiente (proporcionais ao tempo) continuam disponíveis
-  assert.equal(result.monthlyEnvironmentPotential, 2_167_660 + 2_149_173);
-  assert.equal(result.dailyReference, Math.round((2_167_660 + 2_149_173) / 30));
-  assert.equal(result.windowEnvironmentPotential, Math.round((2_167_660 + 2_149_173) * (15 / 30)));
+  const group = groupOf(result, "audited_impacts");
+  assert.equal(group.monthly, 2_167_660 + 2_149_173);
+  assert.equal(group.dailyReference, Math.round((2_167_660 + 2_149_173) / 30));
+  assert.equal(group.windowPotential, Math.round((2_167_660 + 2_149_173) * (15 / 30)));
 
   // com um modelo hipotético a fórmula documentada é aplicada
   const withModel = estimateLedCampaignImpacts({
@@ -224,6 +239,7 @@ test("10. troca de serviço LED → outro serviço não mantém métrica LED", (
   const led = "estacao-central-plano-piloto";
   assert.ok(getPointIntelligence(led, ["led"]));
   // usuário troca a mídia daquele ponto para Tela/WiFi → sem inteligência LED
+  // (estação de metrô não tem Tela nem é UPA → screen também é null)
   assert.equal(getPointIntelligence(led, ["screen"]), null);
   assert.equal(getPointIntelligence(led, ["wifi"]), null);
   assert.equal(getPointIntelligence(led, []), null);

@@ -1,16 +1,22 @@
 import type { ReactNode } from "react";
-import { formatCount, formatCurrency, type LedPointIntelligence } from "@/lib/planner/audience";
+import {
+  formatCompact,
+  formatCount,
+  formatCurrency,
+  type PointIntelligence,
+} from "@/lib/planner/audience";
 import { MediaTypeChips } from "./MediaBadges";
 
 /**
  * "Audiência do ponto" — área de inteligência comercial de um ponto com
- * `Painel LED`. Só mostra o que existe na fonte (`point-audience-data.ts`):
+ * `Painel LED` ou `Tela`. Só mostra o que existe na fonte
+ * (`point-audience-data.ts`) ou o que é derivado por modelo documentado:
  * campo ausente = seção some, nunca aparece "0" / "N/D" / valor inventado.
  */
 
-const TIER_NOTE: Record<LedPointIntelligence["monthly"]["tier"], string> = {
-  measured: "Impacto medido e auditado",
-  derived: "Estimativa derivada de dados históricos",
+const TIER_NOTE: Record<string, string> = {
+  measured: "Medido e auditado",
+  derived: "Estimativa modelada",
   estimated: "Estimativa",
 };
 
@@ -27,12 +33,22 @@ export function PointAudiencePanel({
   pointName,
   dense = false,
 }: {
-  intelligence: LedPointIntelligence;
+  intelligence: PointIntelligence;
   pointName: string;
   dense?: boolean;
 }) {
-  const { monthly, dailyReference, demographics, behavior, environmentLabel, referenceArea } =
-    intelligence;
+  const {
+    mediaType,
+    monthly,
+    baseMetric,
+    dailyReference,
+    methodology,
+    demographics,
+    behavior,
+    environmentLabel,
+    referenceArea,
+    profileIsCategoryLevel,
+  } = intelligence;
 
   const gender =
     demographics?.genderFemalePercent != null && demographics?.genderMalePercent != null
@@ -40,12 +56,19 @@ export function PointAudiencePanel({
       : null;
 
   const hasAudienceBlock =
-    demographics?.averageAge != null || gender != null || demographics?.income != null;
+    demographics?.averageAge != null ||
+    gender != null ||
+    demographics?.income != null ||
+    behavior?.dwellTime != null;
+
+  const isModeled = monthly?.metricType === "modeled_impressions";
+  const categoryTag = profileIsCategoryLevel ? " · perfil do ambiente" : "";
 
   return (
     <div
       data-point-audience
       data-point-name={pointName}
+      data-media-type={mediaType}
       className={`rounded-2xl bg-white/[0.03] ring-1 ring-white/10 ${dense ? "p-4" : "p-6"}`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -58,29 +81,68 @@ export function PointAudiencePanel({
             {pointName}
           </div>
         </div>
-        <MediaTypeChips types={["led"]} />
+        <MediaTypeChips types={[mediaType]} />
       </div>
 
-      {/* Métrica mensal */}
-      <div className="mt-5">
-        <div
-          className={`font-display font-bold leading-none text-gold ${
-            dense ? "text-3xl" : "text-4xl"
-          }`}
-        >
-          {formatCount(monthly.value)}
+      {/* Métrica principal */}
+      {monthly ? (
+        <div className="mt-5">
+          <div
+            className={`font-display font-bold leading-none text-gold ${
+              dense ? "text-3xl" : "text-4xl"
+            }`}
+          >
+            {isModeled ? `≈ ${formatCompact(monthly.value)}` : formatCount(monthly.value)}
+          </div>
+          <div className="mt-1.5 text-sm text-white/70">{monthly.label}</div>
+          <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-off-white/40">
+            {TIER_NOTE[monthly.tier]}
+            {monthly.period ? ` · ${monthly.period}` : ""}
+          </div>
+          {isModeled && (
+            <div className="mt-0.5 text-[11px] text-white/35">
+              {formatCount(monthly.value)} impactos potenciais — oportunidades de exposição, não
+              pessoas únicas
+            </div>
+          )}
         </div>
-        <div className="mt-1.5 text-sm text-white/70">{monthly.label}</div>
-        <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-off-white/40">
-          {TIER_NOTE[monthly.tier]}
-          {monthly.period ? ` · ${monthly.period}` : ""}
+      ) : (
+        <div className="mt-5 text-sm text-white/45">
+          Dados de audiência detalhados em atualização.
         </div>
-        <div className="mt-0.5 text-[11px] text-white/35">Fonte: {monthly.source}</div>
-      </div>
+      )}
+
+      {/* Base de circulação medida (só quando o destaque é derivado) */}
+      {baseMetric && (
+        <div className="mt-3 rounded-xl bg-white/[0.04] px-3 py-2 ring-1 ring-white/10">
+          <div className="font-mono text-[10px] uppercase tracking-wider text-off-white/45">
+            Base de circulação
+          </div>
+          <div className="mt-0.5 text-sm text-white/80">
+            <span className="font-display font-semibold text-white">
+              {formatCount(baseMetric.value)}
+            </span>{" "}
+            {baseMetric.label}
+          </div>
+          <div className="mt-0.5 text-[11px] text-white/35">
+            {baseMetric.tier === "measured" ? "Medido" : "Fonte com ressalva"} · {baseMetric.source}
+          </div>
+        </div>
+      )}
+
+      {methodology && (
+        <details className="group mt-3">
+          <summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-wider text-gold/80 transition-colors hover:text-gold">
+            Como calculamos?
+          </summary>
+          <p className="mt-2 text-[11px] leading-relaxed text-white/55">{methodology.summary}</p>
+          <p className="mt-1.5 text-[10px] leading-relaxed text-white/35">{methodology.formula}</p>
+        </details>
+      )}
 
       {hasAudienceBlock && (
         <div className="mt-5 border-t border-white/8 pt-4">
-          <SectionLabel>Audiência</SectionLabel>
+          <SectionLabel>Audiência{categoryTag}</SectionLabel>
           <div className="mt-3 grid grid-cols-2 gap-3">
             {demographics?.averageAge != null && (
               <div>
@@ -148,9 +210,12 @@ export function PointAudiencePanel({
       )}
 
       <p className="mt-5 border-t border-white/8 pt-3 text-[10px] leading-relaxed text-white/30">
-        Estimativas baseadas em dados históricos de audiência e nas características dos pontos
-        selecionados. Os resultados reais podem variar. Referência diária ≈{" "}
-        {formatCount(dailyReference.value)} {monthly.noun}/dia ({monthly.label} ÷ 30).
+        {isModeled
+          ? "Estimativa baseada no volume médio de atendimentos, circulação e características de permanência do ambiente. Impactos representam oportunidades de exposição e não pessoas únicas. Os resultados reais podem variar."
+          : "Estimativas baseadas em dados históricos de audiência e nas características dos pontos selecionados. Os resultados reais podem variar."}
+        {monthly && dailyReference
+          ? ` Referência diária ≈ ${formatCount(dailyReference.value)} ${monthly.noun}/dia.`
+          : ""}
       </p>
     </div>
   );

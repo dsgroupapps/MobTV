@@ -1,11 +1,16 @@
 import { pointMediaTypes } from "../../../data/network-points.ts";
-import {
-  getPointAudienceData,
-  type MetricType,
-  type PointMetric,
-} from "../../../data/point-audience-data.ts";
+import { getPointAudienceData } from "../../../data/point-audience-data.ts";
 import { findPointBySlug } from "../../point-slug.ts";
-import type { AudienceConfidenceTier, LedCampaignModel, LedPointIntelligence } from "./types.ts";
+import {
+  environmentLabelFor,
+  INCOME_LABEL,
+  metricConfidenceTier,
+  metricMonthlyLabel,
+  metricNoun,
+  parseConsumptionCategories,
+  stripCategoryTag,
+} from "./metrics.ts";
+import type { LedCampaignModel, PointIntelligence } from "./types.ts";
 
 /**
  * Estratégia de inteligência de audiência para a mídia `Painel LED`.
@@ -16,79 +21,7 @@ import type { AudienceConfidenceTier, LedCampaignModel, LedPointIntelligence } f
  * `point-audience-data.ts`. Um ponto sem Painel LED, ou sem impactos
  * auditados, não recebe inteligência LED (retorna `null`).
  */
-
-/** Substantivo minúsculo por tipo de métrica — para copy inline. Nunca "pessoas" genérico. */
-const METRIC_NOUN: Record<MetricType, string> = {
-  audited_impacts: "impactos",
-  passengers: "passageiros",
-  attendances: "atendimentos",
-  procedures: "procedimentos",
-  outpatient_consultations: "consultas",
-  estimated_visitors: "visitantes",
-};
-
-export function metricNoun(type: MetricType): string {
-  return METRIC_NOUN[type];
-}
-
-export function metricMonthlyLabel(type: MetricType): string {
-  return `${METRIC_NOUN[type]}/mês`;
-}
-
-/**
- * Classifica a confiança interna de uma métrica.
- *  - fonte C, ou estimativa de fonte C → `estimated`
- *  - medida, não-estimada, fonte primária (A) → `measured`
- *  - resto (estimativa documentada / fonte B) → `derived`
- */
-export function metricConfidenceTier(metric: PointMetric): AudienceConfidenceTier {
-  if (metric.sourceQuality === "C") return "estimated";
-  if (!metric.estimated && metric.sourceQuality === "A") return "measured";
-  return "derived";
-}
-
-/** Rótulo de ambiente para copy comercial. */
-const ENVIRONMENT_LABEL: Record<string, string> = {
-  Metrô: "Metrô",
-  BRT: "Terminal BRT",
-  "Terminal Rodoviário": "Terminal Rodoviário",
-  UPA: "UPA",
-  Hospital: "Hospital",
-  Feira: "Feira",
-};
-
-function environmentLabelFor(researchCategory: string): string {
-  return ENVIRONMENT_LABEL[researchCategory] ?? researchCategory;
-}
-
-/** Remove o sufixo "(categoria ...)" / "(...)" ao final de um texto de pesquisa. */
-function stripCategoryTag(text: string): string {
-  return text.replace(/\s*\([^)]*\)\s*\.?\s*$/u, "").trim();
-}
-
-/** "Alimentação rápida, tecnologia, moda (categoria)" -> ["Alimentação rápida", "tecnologia", "moda"] */
-function parseConsumptionCategories(raw: string | undefined): string[] | undefined {
-  if (!raw) return undefined;
-  const cleaned = stripCategoryTag(raw);
-  if (!cleaned) return undefined;
-  const parts = cleaned
-    .split(/,\s*/u)
-    .map((part) => part.trim())
-    .filter(Boolean);
-  return parts.length > 0 ? parts : undefined;
-}
-
-const INCOME_LABEL: Record<string, string> = {
-  domiciliar: "Renda média domiciliar",
-  familiar: "Renda média familiar",
-  per_capita: "Renda per capita",
-};
-
-/**
- * Monta a inteligência de audiência de um ponto para `Painel LED`.
- * Retorna `null` se o ponto não tem Painel LED ou não tem impactos auditados.
- */
-export function getLedPointIntelligence(slug: string): LedPointIntelligence | null {
+export function getLedPointIntelligence(slug: string): PointIntelligence | null {
   const found = findPointBySlug(slug);
   if (!found) return null;
   if (!pointMediaTypes(found.point).includes("led")) return null;
@@ -113,6 +46,7 @@ export function getLedPointIntelligence(slug: string): LedPointIntelligence | nu
 
   return {
     slug,
+    mediaType: "led",
     researchCategory: data.researchCategory,
     environmentLabel: environmentLabelFor(data.researchCategory),
     referenceArea: data.referenceArea,
@@ -167,14 +101,14 @@ export function getLedPointIntelligence(slug: string): LedPointIntelligence | nu
 export const ledCampaignModels: Record<string, LedCampaignModel> = {};
 
 export const LED_CAMPAIGN_MISSING_VARIABLE =
-  "share de exibição do Painel LED — quantas inserções por dia o loop do painel executa " +
-  "(ou, de forma equivalente: duração do loop + duração do spot + horas de operação, " +
-  "ou o total de inserções/dia que a MOBTV comercializa por painel). Sem isso não é " +
-  "possível converter a quantidade de inserções escolhida em uma fração defensável da " +
-  "audiência mensal auditada.";
+  "share de exibição do painel — quantas inserções por dia o loop executa (ou, de forma " +
+  "equivalente: duração do loop + duração do spot + nº de anunciantes no loop + horas de " +
+  "operação, ou o total de inserções/dia que a MOBTV comercializa por tela/painel). Sem " +
+  "isso não é possível converter a quantidade de inserções escolhida em uma fração " +
+  "defensável do potencial de exposição do ambiente.";
 
 /**
- * Estimativa de impactos ENTREGUES por uma campanha em um ponto LED.
+ * Estimativa de impactos ENTREGUES por uma campanha em um ponto.
  *
  * Fórmula (documentada, ativada só quando existir `model`):
  *   shareOfVoice   = min(1, insertionsPerDay / model.loopInsertionsPerDay)
