@@ -12,7 +12,17 @@ import { regionSummaries } from "@/data/df-regions";
 import { categoryIcon, MediaTypeChips, mediaTypeMeta } from "./MediaBadges";
 import { PhotoFallback } from "./AssetExplorer";
 import { PlannerMediaPicker } from "./PlannerMediaPicker";
+import { PointAudiencePanel } from "./PointAudiencePanel";
+import { CampaignAudienceSummary } from "./CampaignAudienceSummary";
 import { loadPlannerState, savePlannerState } from "@/lib/planner/storage";
+import {
+  clampSimInput,
+  getPointIntelligence,
+  rollupCampaignAudience,
+  SIM_LIMITS,
+  type CampaignSimInput,
+  type LedPointIntelligence,
+} from "@/lib/planner/audience";
 import { trackFunnel } from "@/lib/analytics/funnel";
 import { MEDIA_SELECT_TOKEN } from "@/lib/analytics/types";
 
@@ -219,6 +229,10 @@ export function CampaignPlanner({
     return available.length === 1 ? { [key]: available } : {};
   });
   const [mediaPicker, setMediaPicker] = useState<MediaPickerTarget | null>(null);
+  const [sim, setSim] = useState<CampaignSimInput>(() => ({
+    days: SIM_LIMITS.days.default,
+    insertionsPerDay: SIM_LIMITS.insertionsPerDay.default,
+  }));
   const hydratedRef = useRef(false);
 
   // --- Funil de jornada (compartilha anonymous_session_id + initial_point_slug) ---
@@ -318,6 +332,7 @@ export function CampaignPlanner({
       setStep(Math.max(0, Math.min(STEP_LABELS.length - 1, target)));
     }
     if (seedPicker) setMediaPicker(seedPicker);
+    if (stored?.sim) setSim(clampSimInput(stored.sim));
 
     hydratedRef.current = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -331,8 +346,9 @@ export function CampaignPlanner({
       midia,
       step,
       selections: Object.entries(selections).map(([key, media]) => ({ key, media })),
+      sim,
     });
-  }, [midia, step, selections]);
+  }, [midia, step, selections, sim]);
 
   const regionPointNames = useMemo(
     () => new Map(regionSummaries.map((r) => [r.region, new Set(r.pointNames)])),
@@ -378,6 +394,29 @@ export function CampaignPlanner({
         ),
     [selections],
   );
+
+  // Inteligência de audiência — SÓ para pontos com `Painel LED` selecionado
+  // que têm dados auditados (`point-audience-data.ts`). Trocar a mídia do
+  // ponto para Tela/WiFi remove o ponto daqui automaticamente.
+  const ledIntel = useMemo(() => {
+    const list: { slug: string; name: string; intelligence: LedPointIntelligence }[] = [];
+    for (const [key, media] of Object.entries(selections)) {
+      if (!media.includes("led")) continue;
+      const entry = findPoint(key);
+      if (!entry) continue;
+      const intelligence = getPointIntelligence(entry.point.slug, media);
+      if (intelligence) {
+        list.push({ slug: entry.point.slug, name: entry.point.nome, intelligence });
+      }
+    }
+    return list;
+  }, [selections]);
+
+  const ledBySlug = useMemo(
+    () => new Map(ledIntel.map((x) => [x.slug, x.intelligence])),
+    [ledIntel],
+  );
+  const ledRollup = useMemo(() => rollupCampaignAudience(ledIntel), [ledIntel]);
 
   const hasActiveFilters = regionFilter !== "all" || categoryFilter !== "all";
   const midiaLabel = midiaOptions.find((m) => m.value === midia)?.label ?? "";
@@ -732,6 +771,23 @@ export function CampaignPlanner({
                               </button>
                             )}
                           </div>
+                          {ledBySlug.has(entry.point.slug) && (
+                            <details data-audience-disclosure className="group mt-2">
+                              <summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-wider text-gold/80 transition-colors hover:text-gold">
+                                <span className="group-open:hidden">Ver audiência do ponto →</span>
+                                <span className="hidden group-open:inline">
+                                  Ocultar audiência ↑
+                                </span>
+                              </summary>
+                              <div className="mt-3">
+                                <PointAudiencePanel
+                                  dense
+                                  intelligence={ledBySlug.get(entry.point.slug)!}
+                                  pointName={entry.point.nome}
+                                />
+                              </div>
+                            </details>
+                          )}
                         </div>
                       );
                     })}
@@ -791,6 +847,30 @@ export function CampaignPlanner({
                 </ul>
               </div>
             </div>
+
+            {ledIntel.length > 0 && (
+              <div className="mt-12" data-led-intelligence>
+                <div className="mb-2 font-mono text-xs uppercase tracking-[0.3em] text-gold">
+                  Painel LED — inteligência de audiência
+                </div>
+                <p className="mb-6 max-w-2xl text-sm leading-relaxed text-white/55">
+                  O público que sua campanha pode alcançar em cada Painel LED selecionado e a
+                  dimensão aproximada da campanha conforme a duração e as inserções escolhidas.
+                </p>
+                <div className="grid gap-5 lg:grid-cols-2">
+                  {ledIntel.map((x) => (
+                    <PointAudiencePanel
+                      key={x.slug}
+                      intelligence={x.intelligence}
+                      pointName={x.name}
+                    />
+                  ))}
+                </div>
+                <div className="mt-6">
+                  <CampaignAudienceSummary rollup={ledRollup} sim={sim} onSimChange={setSim} />
+                </div>
+              </div>
+            )}
 
             <div className="mt-8 flex flex-wrap items-center gap-6">
               <a

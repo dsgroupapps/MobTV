@@ -20,10 +20,20 @@ export type PlannerSelection = {
   media: MediaTypeKey[];
 };
 
+/** Configuração do simulador de campanha (Painel LED) — ver src/lib/planner/audience. */
+export type PlannerSimConfig = {
+  /** duração da campanha em dias (inteiro) */
+  days: number;
+  /** inserções por dia (inteiro) */
+  insertionsPerDay: number;
+};
+
 /** Formato persistido em sessionStorage (ver src/lib/planner/storage.ts). */
 export type PlannerStoredState = {
   midia: MidiaOption | null;
   /** etapa atual (0-2) — para não cair na etapa 1 ao dar refresh na 2/3 */
   step?: number;
   selections: PlannerSelection[];
+  /** entradas do "Simule sua campanha" — ausente em estado antigo */
+  sim?: PlannerSimConfig;
 };

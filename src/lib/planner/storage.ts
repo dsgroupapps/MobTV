@@ -1,5 +1,10 @@
 import type { MediaTypeKey } from "@/data/network-points";
-import type { MidiaOption, PlannerSelection, PlannerStoredState } from "@/data/planner-options";
+import type {
+  MidiaOption,
+  PlannerSelection,
+  PlannerSimConfig,
+  PlannerStoredState,
+} from "@/data/planner-options";
 
 /**
  * Persistência do PLANEJADOR PÚBLICO (seleção comercial pré-proposta).
@@ -50,7 +55,17 @@ export function loadPlannerState(): PlannerStoredState | null {
       selections.push({ key: entry.key, media: [...new Set(media)] });
     }
 
-    return { midia, step, selections };
+    let sim: PlannerSimConfig | undefined;
+    if (record.sim && typeof record.sim === "object") {
+      const rawSim = record.sim as Record<string, unknown>;
+      const days = Number(rawSim.days);
+      const insertionsPerDay = Number(rawSim.insertionsPerDay);
+      if (Number.isFinite(days) && Number.isFinite(insertionsPerDay)) {
+        sim = { days: Math.trunc(days), insertionsPerDay: Math.trunc(insertionsPerDay) };
+      }
+    }
+
+    return { midia, step, selections, sim };
   } catch {
     return null;
   }
