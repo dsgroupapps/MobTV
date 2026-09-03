@@ -52,6 +52,16 @@ export function worstTier(
   return TIER_RANK[a] <= TIER_RANK[b] ? a : b;
 }
 
+/**
+ * Confiança de uma métrica MODELADA (impactos potenciais) a partir da
+ * confiança da métrica-base. O modelo sempre adiciona incerteza — nunca
+ * melhor que `derived` — mas se a base for só `estimated` (fonte C), o
+ * resultado herda `estimated`.
+ */
+export function modeledTier(baseTier: AudienceConfidenceTier): AudienceConfidenceTier {
+  return worstTier(baseTier, "derived");
+}
+
 /** Rótulo de ambiente para copy comercial. */
 const ENVIRONMENT_LABEL: Record<string, string> = {
   Metrô: "Metrô",

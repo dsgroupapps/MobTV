@@ -162,6 +162,14 @@ export type CampaignAudienceRollup = {
   income?: { min: number; max: number; type: IncomeType; label: string };
   /** true quando há pontos com renda mas de tipos diferentes (não combináveis). */
   incomeTypesMixed: boolean;
+  /**
+   * Σ dos potenciais de impacto/mês dos grupos `audited_impacts` +
+   * `modeled_impressions` — "potencial total da seleção". Combina medição e
+   * estimativa; a procedência de cada parcela fica preservada em `metricGroups`.
+   */
+  impactPotentialTotal?: number;
+  /** true quando a seleção mistura impacto MEDIDO (Datavision) e MODELADO. */
+  impactPotentialMixed: boolean;
 };
 
 export type CampaignSimInput = {
@@ -194,6 +202,15 @@ export type CampaignSimResult = {
   totalInsertions: number;
   /** Um bloco por grupo de métrica presente na seleção — nunca somados entre si. */
   potentialGroups: CampaignPotentialGroup[];
+  /**
+   * Σ do `windowPotential` dos grupos de impacto (`audited_impacts` +
+   * `modeled_impressions`) — "potencial total da seleção no período". Só é
+   * relevante exibir quando `combinesMeasuredAndModeled` (mistura de medido
+   * e estimado); caso contrário o bloco por grupo já cobre.
+   */
+  combinedImpactWindow: number | null;
+  /** true quando a seleção mistura impacto MEDIDO (Datavision) e MODELADO. */
+  combinesMeasuredAndModeled: boolean;
   /**
    * Impactos ESTIMADOS entregues pela campanha (após aplicar share de exibição).
    * Só é preenchido quando existe metodologia defensável. Nesta fase é sempre

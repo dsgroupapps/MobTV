@@ -7,6 +7,7 @@ import {
   metricConfidenceTier,
   metricMonthlyLabel,
   metricNoun,
+  modeledTier,
   parseConsumptionCategories,
   stripCategoryTag,
 } from "./metrics.ts";
@@ -141,15 +142,15 @@ export function getUpaScreenPointIntelligence(slug: string): PointIntelligence |
 
   const modeledValue = base ? estimateUpaScreenImpressions(base.value) : undefined;
   const monthly =
-    modeledValue != null && base
+    modeledValue != null && baseMetric
       ? {
           value: modeledValue,
           metricType: "modeled_impressions" as const,
           label: "impactos potenciais/mês",
           noun: "impactos potenciais",
-          period: base.period,
-          source: `Estimativa MOBTV (modelo Tela/UPA) sobre ${base.source}`,
-          tier: "derived" as const,
+          period: baseMetric.period,
+          source: `Estimativa MOBTV (modelo Tela/UPA) sobre ${baseMetric.source}`,
+          tier: modeledTier(baseMetric.tier),
           estimated: true,
         }
       : undefined;

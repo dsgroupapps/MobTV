@@ -2,6 +2,7 @@ import type { MediaTypeKey } from "../../../data/network-points.ts";
 import type { IncomeType } from "../../../data/point-audience-data.ts";
 import { estimateLedCampaignImpacts, getLedPointIntelligence, ledCampaignModels } from "./led.ts";
 import { getUpaScreenPointIntelligence } from "./screen.ts";
+import { getTerminalScreenPointIntelligence } from "./terminal-screen.ts";
 import { INCOME_LABEL, worstTier } from "./metrics.ts";
 import type {
   CampaignAudienceRollup,
@@ -32,14 +33,26 @@ export {
   UPA_SCREEN_MODEL,
   UPA_SCREEN_MULTIPLIER,
 } from "./screen.ts";
+export {
+  estimateTerminalScreenImpressions,
+  getTerminalScreenPointIntelligence,
+  TERMINAL_SCREEN_MODEL,
+  TERMINAL_SCREEN_MULTIPLIER,
+} from "./terminal-screen.ts";
+export { modeledTier } from "./metrics.ts";
+
+/** Tipos de métrica que representam impacto/oportunidade de exposição (medido ou modelado). */
+const IMPACT_METRIC_KINDS = new Set<MetricKind>(["audited_impacts", "modeled_impressions"]);
 
 /**
  * Dispatcher por tipo de mídia escolhido no ponto.
- *  - `led`    → estratégia Painel LED (impactos auditados Datavision).
- *  - `screen` → estratégia Tela/UPA (impactos potenciais modelados sobre procedimentos).
+ *  - `led`    → Painel LED (impactos auditados Datavision).
+ *  - `screen` → Tela: estratégia UPA (modelo sobre procedimentos) OU
+ *               terminal/rodoviária (impacto medido se houver, senão modelo
+ *               sobre fluxo de passageiros).
  *  - `wifi`   → ainda não implementada.
  *
- * Se o ponto tiver as duas mídias selecionadas, o Painel LED tem prioridade
+ * Se o ponto tiver `led` e `screen` selecionados, o Painel LED tem prioridade
  * (métrica medida). Trocar a mídia do ponto para `wifi` remove qualquer
  * inteligência (retorna `null`).
  */
@@ -52,7 +65,7 @@ export function getPointIntelligence(
     if (led) return led;
   }
   if (selectedMedia.includes("screen")) {
-    const screen = getUpaScreenPointIntelligence(slug);
+    const screen = getUpaScreenPointIntelligence(slug) ?? getTerminalScreenPointIntelligence(slug);
     if (screen) return screen;
   }
   // TODO(fase WiFi Ads): estratégia específica de `wifi`.
@@ -116,10 +129,14 @@ export function rollupCampaignAudience(
   const sameIncomeType = incomes.length > 0 && incomeTypes.size === 1;
   const incomeType = sameIncomeType ? incomes[0].type : undefined;
 
+  const metricGroups = [...groupsByType.values()];
+  const impactGroups = metricGroups.filter((g) => IMPACT_METRIC_KINDS.has(g.metricType));
+  const impactKinds = new Set(impactGroups.map((g) => g.metricType));
+
   return {
     ledPointCount: points.length,
     points,
-    metricGroups: [...groupsByType.values()],
+    metricGroups,
     environments,
     environmentsLabel: environments.join(" + "),
     averageAge: ages.length > 0 ? Math.round(mean(ages) * 10) / 10 : undefined,
@@ -140,6 +157,9 @@ export function rollupCampaignAudience(
           }
         : undefined,
     incomeTypesMixed: incomeTypes.size > 1,
+    impactPotentialTotal:
+      impactGroups.length > 0 ? impactGroups.reduce((sum, g) => sum + g.total, 0) : undefined,
+    impactPotentialMixed: impactKinds.size > 1,
   };
 }
 
@@ -203,6 +223,12 @@ export function simulateCampaign(
     windowPotential: Math.round(g.total * (days / 30)),
   }));
 
+  const impactWindowGroups = potentialGroups.filter((g) => IMPACT_METRIC_KINDS.has(g.metricType));
+  const combinedImpactWindow =
+    impactWindowGroups.length > 0
+      ? impactWindowGroups.reduce((sum, g) => sum + g.windowPotential, 0)
+      : null;
+
   let campaignImpacts: number | null = null;
   let missingVariable: string | null = null;
 
@@ -235,6 +261,8 @@ export function simulateCampaign(
     insertionsPerDay,
     totalInsertions,
     potentialGroups,
+    combinedImpactWindow,
+    combinesMeasuredAndModeled: rollup.impactPotentialMixed,
     campaignImpacts,
     missingVariable,
   };

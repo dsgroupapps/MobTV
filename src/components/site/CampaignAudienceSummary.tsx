@@ -172,10 +172,20 @@ export function CampaignAudienceSummary({
             />
           );
         })}
-        {rollup.metricGroups.length > 1 && (
+        {rollup.metricGroups.length > 1 && !rollup.impactPotentialMixed && (
           <p className="text-[11px] leading-snug text-white/40 sm:col-span-2">
             Métricas de tipos diferentes não são somadas — cada uma é apresentada separadamente.
           </p>
+        )}
+        {rollup.impactPotentialMixed && rollup.impactPotentialTotal != null && (
+          <div className="sm:col-span-2">
+            <Stat
+              strong
+              value={`≈ ${formatCompact(rollup.impactPotentialTotal)}`}
+              label="potencial total da seleção — impactos/mês"
+              hint="combina métricas medidas (Datavision) e estimativas modeladas conforme a disponibilidade de dados de cada ponto"
+            />
+          </div>
         )}
       </div>
 
@@ -279,6 +289,17 @@ export function CampaignAudienceSummary({
             </div>
           </div>
         ))}
+
+        {result.combinesMeasuredAndModeled && result.combinedImpactWindow != null && (
+          <div className="mt-6 border-t border-white/8 pt-5">
+            <Stat
+              strong
+              value={`≈ ${formatCompact(result.combinedImpactWindow)}`}
+              label={`potencial total da seleção em ${formatCount(safeSim.days)} dias`}
+              hint="soma o potencial medido (Datavision) e o estimado (modelado) dos pontos na janela — cada parcela mantém sua procedência acima"
+            />
+          </div>
+        )}
 
         {result.campaignImpacts != null ? (
           <div className="mt-5 rounded-xl bg-gold/10 p-4 ring-1 ring-gold/30">
