@@ -54,6 +54,18 @@ export type MonthlyAudienceMetric = {
   tier: AudienceConfidenceTier;
   /** true quando a própria fonte marcou o valor como estimativa, ou quando é modelado. */
   estimated: boolean;
+  /**
+   * Ressalva curta sobre a natureza/abrangência da métrica, quando a fonte
+   * deixa isso explícito (ex.: "indicador parcial — consultas ambulatoriais,
+   * não inclui emergência"). Ausente quando a métrica não tem ressalva.
+   */
+  caveat?: string;
+  /**
+   * Total ANUAL exato da fonte, quando a competência é um ano completo
+   * (ex.: InfoSaúde-DF/SIA-MS). `value` é sempre `Math.round(annualValue / 12)`
+   * calculado na própria estratégia — nunca um arredondamento manual à parte.
+   */
+  annualValue?: number;
 };
 
 /** Explicação "Como calculamos?" de uma métrica derivada por modelo. */

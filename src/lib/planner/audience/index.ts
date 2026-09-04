@@ -2,6 +2,7 @@ import type { MediaTypeKey } from "../../../data/network-points.ts";
 import type { IncomeType } from "../../../data/point-audience-data.ts";
 import { estimateLedCampaignImpacts, getLedPointIntelligence, ledCampaignModels } from "./led.ts";
 import { getUpaScreenPointIntelligence } from "./screen.ts";
+import { getHospitalScreenPointIntelligence } from "./hospital-screen.ts";
 import { getTerminalScreenPointIntelligence } from "./terminal-screen.ts";
 import { INCOME_LABEL, worstTier } from "./metrics.ts";
 import type {
@@ -39,6 +40,12 @@ export {
   TERMINAL_SCREEN_MODEL,
   TERMINAL_SCREEN_MULTIPLIER,
 } from "./terminal-screen.ts";
+export {
+  estimateHospitalScreenImpressions,
+  getHospitalScreenPointIntelligence,
+  HOSPITAL_SCREEN_MODEL,
+  HOSPITAL_SCREEN_MULTIPLIER,
+} from "./hospital-screen.ts";
 export { modeledTier } from "./metrics.ts";
 
 /** Tipos de métrica que representam impacto/oportunidade de exposição (medido ou modelado). */
@@ -47,9 +54,13 @@ const IMPACT_METRIC_KINDS = new Set<MetricKind>(["audited_impacts", "modeled_imp
 /**
  * Dispatcher por tipo de mídia escolhido no ponto.
  *  - `led`    → Painel LED (impactos auditados Datavision).
- *  - `screen` → Tela: estratégia UPA (modelo sobre procedimentos) OU
- *               terminal/rodoviária (impacto medido se houver, senão modelo
- *               sobre fluxo de passageiros).
+ *  - `screen` → Tela: estratégia UPA (modelo sobre procedimentos) ??
+ *               hospital (medido se houver, senão modelo sobre atendimentos/
+ *               procedimentos/consultas) ?? terminal/rodoviária (medido se
+ *               houver, senão modelo sobre fluxo de passageiros). As três
+ *               são mutuamente exclusivas por `researchCategory` (UPA /
+ *               Hospital / BRT+Terminal Rodoviário), então a ordem só importa
+ *               como fallback técnico.
  *  - `wifi`   → ainda não implementada.
  *
  * Se o ponto tiver `led` e `screen` selecionados, o Painel LED tem prioridade
@@ -65,7 +76,10 @@ export function getPointIntelligence(
     if (led) return led;
   }
   if (selectedMedia.includes("screen")) {
-    const screen = getUpaScreenPointIntelligence(slug) ?? getTerminalScreenPointIntelligence(slug);
+    const screen =
+      getUpaScreenPointIntelligence(slug) ??
+      getHospitalScreenPointIntelligence(slug) ??
+      getTerminalScreenPointIntelligence(slug);
     if (screen) return screen;
   }
   // TODO(fase WiFi Ads): estratégia específica de `wifi`.

@@ -52,7 +52,12 @@ export type MetricType =
 
 /** Categoria de pesquisa usada na planilha (distinta de `CategoryKey` de network-points.ts, que é a taxonomia do catálogo público). */
 export type ResearchCategory =
-  "Metrô" | "BRT" | "Terminal Rodoviário" | "UPA" | "Hospital" | "Feira";
+  | "Metrô"
+  | "BRT"
+  | "Terminal Rodoviário"
+  | "UPA"
+  | "Hospital"
+  | "Feira";
 
 /** Qualidade da fonte do dado em si (A = primária/oficial, B = imprensa/estimativa documentada, C = estimativa sem fonte). */
 export type SourceQuality = "A" | "B" | "C";
@@ -68,6 +73,7 @@ export type IncomeType = "domiciliar" | "familiar" | "per_capita";
 
 export type PointMetric = {
   type: MetricType;
+  /** Valor MENSAL — convenção de `value`/`unit` em todo este arquivo. */
   value: number;
   /** Unidade padronizada (ex.: "passageiros/mês", "procedimentos/mês"). */
   unit: string;
@@ -79,6 +85,13 @@ export type PointMetric = {
   sourceQuality: SourceQuality;
   /** true quando a planilha marcou o valor como estimativa (coluna "Estimado"). */
   estimated: boolean;
+  /**
+   * Total ANUAL exato, quando a fonte é uma competência de ano completo
+   * (ex.: painel InfoSaúde-DF/SIA-MS). `value` (mensal) é sempre derivado
+   * deste número por `Math.round(annualValue / 12)` no próprio arquivo —
+   * nunca um arredondamento manual digitado à parte.
+   */
+  annualValue?: number;
 };
 
 export type PointIncome = {
@@ -952,14 +965,38 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     metrics: [
       {
         type: "attendances",
-        value: 12746,
+        value: Math.round(188_106 / 12),
         unit: "atendimentos/mês",
-        raw: "12.746 atendimentos/mês (pronto-socorro, média calculada a partir de total anual)",
-        period: "2023 (ano completo)",
-        source:
-          "Jornal de Brasília — 'HRT completa 50 anos com ampliação da capacidade de atendimentos' (04/03/2024)",
-        sourceQuality: "B",
+        raw: '188.106 atendimentos/ano — painel "Emergências Hospitalares" (competência 2025, ano completo)',
+        period: "ano completo 2025",
+        source: 'InfoSaúde-DF / SES-DF — painel "Emergências Hospitalares" (SIA/MS)',
+        sourceQuality: "A",
         estimated: false,
+        annualValue: 188_106,
+      },
+      {
+        type: "outpatient_consultations",
+        value: Math.round(260_449 / 12),
+        unit: "procedimentos/mês",
+        raw: '260.449 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (competência 2025, ano completo). O filtro inclui códigos além de consulta convencional (acolhimento com classificação de risco, atendimento de urgência em atenção especializada, atendimento de urgência com observação, teleconsulta, consulta domiciliar etc.) — possível sobreposição com o painel de Emergências, ver notes.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 260_449,
+      },
+      {
+        type: "procedures",
+        value: Math.round(94_761 / 12),
+        unit: "procedimentos/mês",
+        raw: '94.761 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (competência 2025, ano completo). Procedimento ≠ visita (uma passagem pode gerar múltiplos exames) — indicador AUXILIAR de intensidade, não usado como base de circulação.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 94_761,
       },
     ],
     income: {
@@ -979,10 +1016,10 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     targetAudience: "Pacientes e acompanhantes (categoria)",
     consumptionProfile:
       "Planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros (categoria)",
-    publicationReadiness: "B",
-    historicalConfidence: "B",
+    publicationReadiness: "A",
+    historicalConfidence: "A",
     notes:
-      "REVISÃO (auditoria profunda): a faixa aproximada informada manualmente pelo usuário (10.000-11.000/mês, sem fonte documentada, ponto médio 10.500) foi SUBSTITUÍDA por um dado de imprensa datado e com número exato — reportagem do Jornal de Brasília (04/03/2024, aniversário de 50 anos do HRT) informa '152.947 pessoas atendidas no pronto-socorro em 2023' (ano completo), além de 237.329 consultas e mais de 500 mil procedimentos no mesmo ano (indicadores DIFERENTES, não somados aqui). 152.947 ÷ 12 = 12.745,6 ≈ 12.746/mês — uma MÉDIA CALCULADA a partir de um total anual claramente reportado, não mais uma estimativa derivada de uma faixa aproximada verbal (por isso estimated passa de true para false). O valor está DENTRO da faixa que o usuário havia indicado (10.000-11.000), ainda que um pouco acima — reforça a plausibilidade de ambos. Qualidade mantida em B (fonte de imprensa citando dados do hospital, não documento/painel oficial acessado diretamente), mas agora com fonte e URL verificáveis, o que é uma melhoria de defensabilidade em relação ao dado anterior (sem fonte alguma). Valor anterior (10.500/mês) preservado neste registro como alternativa descartada, para rastreabilidade. NÃO somar com consultas ambulatoriais (237.329/ano) ou procedimentos (500 mil+/ano) — mantém comparabilidade com o indicador de 'atendimentos' de pronto-socorro usado em outros hospitais/UPAs desta base. | [Renda] ATUALIZAÇÃO (integração ao site, pós-revisão): renda FAMILIAR média de R$ 6.072,92/mês informada pelo usuário para Taguatinga, preenchendo a lacuna desta RA. Tipo 'renda familiar' preservado distintamente de 'domiciliar' e de 'per capita' — não deve ser tratado como equivalente a nenhum dos dois. O relatório PDAD 2021 existe e menciona a Seção 3.7 'Rendimento' (Tabelas A.66/A.67), mas os valores de renda domiciliar/per capita não puderam ser extraídos do PDF nesta pesquisa (documento truncado na ferramenta de leitura antes da tabela); apenas a renda média do trabalho principal havia sido capturada anteriormente: R$ 3.223,31 (indicador PARCIAL, preservado aqui como contexto histórico, não é renda domiciliar nem familiar). | Valor de 2023 (pronto-socorro), fonte de imprensa datada e específica — melhoria de defensabilidade em relação à faixa aproximada anterior. Recomenda-se consultar o painel InfoSaúde para um número oficial atualizado (2024/2025) quando possível.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada, mesmo critério já usado para os procedimentos de UPA via InfoSaúde; a estimativa só começa quando essa atividade é transformada em impacto potencial pelo modelo, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (conflitava com o dado oficial 2025, mais recente e de fonte primária direta): 12.746 atendimentos/mês (Jornal de Brasília, 'HRT completa 50 anos...', 04/03/2024, sourceQuality B, calculado de 152.947 atendimentos de pronto-socorro em 2023 ÷ 12) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo. AUXILIAR (não alimenta o modelo de impacto): produção ambulatorial TOTAL do estabelecimento (soma de todos os filtros de produção) = 1.069.351 procedimentos/ano ≈ 89.113/mês (SIA/MS) — ainda menos representativa de pessoas do que os filtros individuais acima, mantida aqui só como contexto de intensidade. SOBREPOSIÇÃO: 'Consultas/atendimentos' (painel de produção ambulatorial) e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação. | [Renda] ATUALIZAÇÃO (integração ao site, pós-revisão): renda FAMILIAR média de R$ 6.072,92/mês informada pelo usuário para Taguatinga, preenchendo a lacuna desta RA. Tipo 'renda familiar' preservado distintamente de 'domiciliar' e de 'per capita' — não deve ser tratado como equivalente a nenhum dos dois. O relatório PDAD 2021 existe e menciona a Seção 3.7 'Rendimento' (Tabelas A.66/A.67), mas os valores de renda domiciliar/per capita não puderam ser extraídos do PDF nesta pesquisa (documento truncado na ferramenta de leitura antes da tabela); apenas a renda média do trabalho principal havia sido capturada anteriormente: R$ 3.223,31 (indicador PARCIAL, preservado aqui como contexto histórico, não é renda domiciliar nem familiar).",
   },
   "hospital-regional-de-ceilandia": {
     slug: "hospital-regional-de-ceilandia",
@@ -991,14 +1028,38 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     metrics: [
       {
         type: "attendances",
-        value: 7886,
+        value: Math.round(68_259 / 12),
         unit: "atendimentos/mês",
-        raw: "7.886 atendimentos de urgência e emergência/mês (média jan-jul/2025)",
-        period: "jan-jul/2025 (7 meses, ano corrente até a data da reportagem)",
-        source:
-          "Política Distrital — 'Hospital Regional de Ceilândia celebra 44 anos e se consolida como gigante da saúde do DF' (27/08/2025)",
-        sourceQuality: "B",
+        raw: '68.259 atendimentos/ano — painel "Emergências Hospitalares" (competência 2025, ano completo)',
+        period: "ano completo 2025",
+        source: 'InfoSaúde-DF / SES-DF — painel "Emergências Hospitalares" (SIA/MS)',
+        sourceQuality: "A",
         estimated: false,
+        annualValue: 68_259,
+      },
+      {
+        type: "outpatient_consultations",
+        value: Math.round(246_758 / 12),
+        unit: "procedimentos/mês",
+        raw: '246.758 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (competência 2025, ano completo). Inclui códigos além de consulta convencional (acolhimento com classificação de risco, atendimento de urgência em atenção especializada, atendimento de urgência com observação, teleconsulta, consulta domiciliar etc.) — possível sobreposição com o painel de Emergências, ver notes.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 246_758,
+      },
+      {
+        type: "procedures",
+        value: Math.round(87_589 / 12),
+        unit: "procedimentos/mês",
+        raw: '87.589 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (competência 2025, ano completo). Procedimento ≠ visita — indicador AUXILIAR de intensidade, não usado como base de circulação.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 87_589,
       },
     ],
     income: {
@@ -1017,10 +1078,10 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     targetAudience: "Pacientes e acompanhantes (categoria)",
     consumptionProfile:
       "Planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros (categoria)",
-    publicationReadiness: "B",
-    historicalConfidence: "B",
+    publicationReadiness: "A",
+    historicalConfidence: "A",
     notes:
-      "REVISÃO (auditoria profunda): o valor anterior (55.000, período impreciso, impossível calcular média mensal) foi ESCLARECIDO por uma segunda reportagem sobre o mesmo aniversário de 44 anos do HRC (Política Distrital, 27/08/2025) que dá o período e a métrica exatos: 'apenas neste ano, até julho, o hospital realizou mais de 55,2 mil atendimentos de urgência e emergência' — ou seja, janeiro-julho/2025 (7 meses), especificamente urgência e emergência (não ambulatório, não hospital como um todo). 55.200 ÷ 7 = 7.885,7 ≈ 7.886/mês — agora uma MÉDIA CALCULADA a partir de um total com período claro, ao invés de um número sem período definido. Isso resolve a principal limitação apontada nas rodadas anteriores. Qualidade elevada de C (dado com período incerto, não confiável para cálculo) para B (dado com período e métrica claros, fonte de imprensa específica e datada, ainda sem documento oficial primário diretamente acessado). | Valor esclarecido na auditoria profunda (rodada 4): período e métrica agora bem definidos (urgência e emergência, jan-jul/2025). Recomenda-se confirmar via painel InfoSaúde quando possível.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (conflitava com o dado oficial 2025): 7.886 atendimentos de urgência e emergência/mês (Política Distrital, 27/08/2025, sourceQuality B, calculado de 55.200 atendimentos em jan-jul/2025, 7 meses, ÷ 7) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo (a nova métrica de emergência cobre o ANO COMPLETO 2025, período mais amplo e consistente). AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRC (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação.",
   },
   "hospital-regional-do-gama": {
     slug: "hospital-regional-do-gama",
@@ -1029,14 +1090,38 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     metrics: [
       {
         type: "attendances",
-        value: 12500,
+        value: Math.round(248_615 / 12),
         unit: "atendimentos/mês",
-        raw: "12.500 atendimentos/mês (pronto-socorro, estimativa — ponto médio de faixa)",
-        period: "3ª rodada — faixa aproximada encontrada, sem ano-base confirmado",
+        raw: '248.615 atendimentos/ano — painel "Emergências Hospitalares" (competência 2025, ano completo)',
+        period: "ano completo 2025",
+        source: 'InfoSaúde-DF / SES-DF — painel "Emergências Hospitalares" (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 248_615,
+      },
+      {
+        type: "outpatient_consultations",
+        value: Math.round(280_027 / 12),
+        unit: "procedimentos/mês",
+        raw: '280.027 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (competência 2025, ano completo). Inclui códigos além de consulta convencional (acolhimento com classificação de risco, atendimento de urgência em atenção especializada, atendimento de urgência com observação, teleconsulta, consulta domiciliar etc.) — possível sobreposição com o painel de Emergências, ver notes.',
+        period: "ano completo 2025",
         source:
-          "Faixa aproximada encontrada manualmente pelo usuário (10.000-15.000 atendimentos/mês no pronto-socorro)",
-        sourceQuality: "B",
-        estimated: true,
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 280_027,
+      },
+      {
+        type: "procedures",
+        value: Math.round(117_839 / 12),
+        unit: "procedimentos/mês",
+        raw: '117.839 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (competência 2025, ano completo). Procedimento ≠ visita — indicador AUXILIAR de intensidade, não usado como base de circulação.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 117_839,
       },
     ],
     income: {
@@ -1055,10 +1140,10 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     targetAudience: "Pacientes e acompanhantes (categoria)",
     consumptionProfile:
       "Planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros (categoria)",
-    publicationReadiness: "B",
-    historicalConfidence: "D",
+    publicationReadiness: "A",
+    historicalConfidence: "A",
     notes:
-      "3ª RODADA: usuário encontrou manualmente uma faixa aproximada de 10.000 a 15.000 atendimentos/mês no PRONTO-SOCORRO do HRG. Cadastrado o PONTO MÉDIO da faixa (12.500/mês) como indicador padronizado, marcado como estimativa (estimated=true, qualidade B). O usuário não especificou a fonte exata (documento/URL) desta faixa. NÃO somar com consultas ambulatoriais, internações ou partos — mantém comparabilidade com o indicador de 'atendimentos' usado em outros hospitais/UPAs desta base. HISTÓRICO (rodadas 1-2): encontrada matéria da Agência Brasília sobre o aniversário de 57 anos do hospital (mar/2024), mas o link retornou erro 404; outras matérias tratam de ampliação de especialidades (oncologia, ortopedia), sem número de atendimentos/mês; o 'Relatório Anual de Saúde 2024' (InfoSaúde) trouxe apenas dados agregados por Região de Saúde; painel InfoSaúde (Atenção Hospitalar) permaneceu inacessível sem navegador conectado nas duas primeiras rodadas. REVISÃO (auditoria profunda, rodada 4): nova busca por ângulos diferentes (aniversários de 54/55/57 anos, fiscalização do TCDF sobre situação do pronto-socorro em 2021, notícias de ampliação) NÃO encontrou nenhum número de atendimentos/mês dedicado. A fiscalização do TCDF (23/09/2021, https://www2.tc.df.gov.br/tcdf-fiscaliza-suposta-situacao-precaria-no-hospital-regional-do-gama/) confirma uma denúncia de superlotação no pronto-socorro, mas sem números de atendimento. Mantido o valor de faixa aproximada do usuário (10.000-15.000/mês, ponto médio 12.500) por ser o melhor dado disponível após 4 rodadas de pesquisa. | Valor cadastrado como estimated=true, qualidade B (ponto médio de faixa aproximada, pronto-socorro). Recomenda-se consultar o painel InfoSaúde 'Atenção Hospitalar > Atendimento nas Emergências' com filtro por estabelecimento para um número oficial exato.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (era só uma faixa aproximada sem fonte documentada, agora substituída por dado oficial e datado): 12.500 atendimentos/mês (estimativa, ponto médio de uma faixa de 10.000-15.000 informada manualmente pelo usuário na 3ª rodada, sem URL/documento, sourceQuality B, estimated=true) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo. Coincidência: o novo valor oficial de emergências (≈20.718/mês) e o de consultas (≈23.336/mês) ficam ACIMA da faixa antiga (10.000-15.000) — reforça que a faixa aproximada anterior estava subestimando a atividade real do hospital. AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRG (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação.",
   },
   "hospital-regional-de-santa-maria": {
     slug: "hospital-regional-de-santa-maria",
@@ -1066,14 +1151,39 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     referenceArea: "Santa Maria",
     metrics: [
       {
-        type: "outpatient_consultations",
-        value: 5000,
-        unit: "consultas/mês",
-        raw: "5.000 consultas ambulatoriais/mês (indicador PARCIAL — apenas ambulatório, não inclui emergência)",
-        period: "outubro de 2024",
-        source: "Agência Brasília",
-        sourceQuality: "B",
+        type: "attendances",
+        value: Math.round(253_037 / 12),
+        unit: "atendimentos/mês",
+        raw: '253.037 atendimentos/ano — painel "Emergências Hospitalares" (competência 2025, ano completo)',
+        period: "ano completo 2025",
+        source: 'InfoSaúde-DF / SES-DF — painel "Emergências Hospitalares" (SIA/MS)',
+        sourceQuality: "A",
         estimated: false,
+        annualValue: 253_037,
+      },
+      {
+        type: "outpatient_consultations",
+        value: Math.round(364_745 / 12),
+        unit: "procedimentos/mês",
+        raw: '364.745 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (competência 2025, ano completo). Inclui códigos além de consulta convencional (acolhimento com classificação de risco, atendimento de urgência em atenção especializada, atendimento de urgência com observação, teleconsulta, consulta domiciliar etc.) — possível sobreposição com o painel de Emergências, ver notes.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Consultas/atendimentos (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 364_745,
+      },
+      {
+        type: "procedures",
+        value: Math.round(179_597 / 12),
+        unit: "procedimentos/mês",
+        raw: '179.597 procedimentos/ano — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (competência 2025, ano completo). Procedimento ≠ visita — indicador AUXILIAR de intensidade, não usado como base de circulação.',
+        period: "ano completo 2025",
+        source:
+          'InfoSaúde-DF / SES-DF — painel "Produção ambulatorial dos estabelecimentos da SES-DF", filtro Exames (SIA/MS)',
+        sourceQuality: "A",
+        estimated: false,
+        annualValue: 179_597,
       },
     ],
     income: {
@@ -1092,10 +1202,10 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     targetAudience: "Pacientes e acompanhantes (categoria)",
     consumptionProfile:
       "Planos de saúde, farmácias, seguros, alimentação saudável, serviços financeiros (categoria)",
-    publicationReadiness: "B",
-    historicalConfidence: "B",
+    publicationReadiness: "A",
+    historicalConfidence: "A",
     notes:
-      "Refere-se especificamente ao AMBULATÓRIO do hospital em um único mês (outubro/2024), NÃO ao volume total do hospital (que inclui também emergência/pronto-socorro, não coberto por este número). Não deve ser apresentado como 'fluxo total do hospital'. REVISÃO (auditoria profunda, rodada 4): busca adicional encontrou um SEGUNDO indicador parcial, também não comparável a este: '32.385 atendimentos no Pronto-Socorro Infantil (PSI) em 2025' (ano completo, ≈2.699/mês), Jornal de Brasília, 09/02/2026 (https://jornaldebrasilia.com.br/brasilia/hospital-de-santa-maria-reforca-equipes-para-enfrentar-doencas-respiratorias-em-criancas/) — mas este é PRONTO-SOCORRO PEDIÁTRICO apenas (não adulto, não hospital como um todo). NÃO SOMADO ao valor de 5.000 consultas ambulatoriais/mês (indicadores de naturezas e públicos diferentes — ambulatório geral vs. emergência pediátrica — somar geraria dupla contagem parcial sem base metodológica). Mantido o indicador ambulatorial (5.000/mês) como principal por ser mensal (mais granular) e por já estar em uso nesta base; o dado do PSI é registrado aqui apenas como contexto adicional. NENHUM indicador de pronto-socorro GERAL (adulto) nem de fluxo TOTAL do hospital foi localizado para o HRSM em 4 rodadas de pesquisa — permanece uma lacuna real da base.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). Isso RESOLVE a lacuna histórica registrada abaixo: agora existe indicador de emergência/pronto-socorro GERAL (adulto) para o HRSM, algo que 4 rodadas de pesquisa anteriores não haviam localizado. VALOR ANTERIOR DESCARTADO (indicador PARCIAL, só ambulatório, não comparável ao volume total do hospital): 5.000 consultas ambulatoriais/mês (Agência Brasília, outubro/2024, sourceQuality B) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo; o novo valor de consultas/atendimentos oficial (≈30.395/mês) é ~6× maior porque cobre um filtro mais amplo do painel de produção ambulatorial, não porque o hospital mudou de porte. HISTÓRICO (preservado): também havia sido localizado um indicador de '32.385 atendimentos no Pronto-Socorro Infantil (PSI) em 2025' (≈2.699/mês), Jornal de Brasília, 09/02/2026 — PRONTO-SOCORRO PEDIÁTRICO apenas, não comparável ao indicador geral de emergências agora disponível; não usado nesta atualização. AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRSM (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação.",
   },
   "feira-do-guara": {
     slug: "feira-do-guara",

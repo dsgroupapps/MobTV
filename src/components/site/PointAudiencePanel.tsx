@@ -123,10 +123,17 @@ export function PointAudiencePanel({
               {formatCount(baseMetric.value)}
             </span>{" "}
             {baseMetric.label}
+            {baseMetric.annualValue != null && (
+              <span className="text-white/40"> ({formatCount(baseMetric.annualValue)}/ano)</span>
+            )}
           </div>
           <div className="mt-0.5 text-[11px] text-white/35">
             {baseMetric.tier === "measured" ? "Medido" : "Fonte com ressalva"} · {baseMetric.source}
+            {baseMetric.period ? ` · ${baseMetric.period}` : ""}
           </div>
+          {baseMetric.caveat && (
+            <div className="mt-1 text-[11px] leading-relaxed text-gold/70">{baseMetric.caveat}</div>
+          )}
         </div>
       )}
 
