@@ -50,7 +50,7 @@ test("1. UPA + Tela mostra inteligência: impacto potencial modelado + base medi
   assert.ok(intel.monthly);
   assert.equal(intel.monthly.metricType, "modeled_impressions");
   assert.equal(intel.monthly.noun, "impactos potenciais");
-  assert.equal(intel.monthly.label, "impactos potenciais/mês");
+  assert.equal(intel.monthly.label, "Impactos potenciais estimados/mês");
   assert.equal(intel.monthly.tier, "derived");
   assert.equal(intel.monthly.value, 142_680);
   assert.equal(intel.dailyReference?.value, Math.round(142_680 / 30));

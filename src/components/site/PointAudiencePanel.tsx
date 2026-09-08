@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import {
+  pointAudienceState,
   formatCompact,
   formatCount,
   formatCurrency,
@@ -61,7 +62,10 @@ export function PointAudiencePanel({
     demographics?.income != null ||
     behavior?.dwellTime != null;
 
+  const isPartial = pointAudienceState(intelligence) === "partial";
   const isModeled = monthly?.metricType === "modeled_impressions";
+  const isHealthcare =
+    intelligence.researchCategory === "UPA" || intelligence.researchCategory === "Hospital";
   const categoryTag = profileIsCategoryLevel ? " · perfil do ambiente" : "";
 
   return (
@@ -96,9 +100,19 @@ export function PointAudiencePanel({
           </div>
           <div className="mt-1.5 text-sm text-white/70">{monthly.label}</div>
           <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-off-white/40">
-            {TIER_NOTE[monthly.tier]}
+            {isModeled
+              ? methodology?.modelConfidence === "preliminary"
+                ? "Estimativa preliminar MOBTV"
+                : "Estimativa modelada"
+              : TIER_NOTE[monthly.tier]}
             {monthly.period ? ` · ${monthly.period}` : ""}
           </div>
+          {monthly.metricType === "audited_impacts" && (
+            <p className="mt-1 text-[11px] text-white/45">{monthly.source}</p>
+          )}
+          {monthly.caveat && (
+            <p className="mt-2 text-[11px] leading-relaxed text-white/55">{monthly.caveat}</p>
+          )}
           {isModeled && (
             <div className="mt-0.5 text-[11px] text-white/35">
               {formatCount(monthly.value)} impactos potenciais — oportunidades de exposição, não
@@ -106,17 +120,17 @@ export function PointAudiencePanel({
             </div>
           )}
         </div>
-      ) : (
+      ) : !baseMetric ? (
         <div className="mt-5 text-sm text-white/45">
           Dados de audiência detalhados em atualização.
         </div>
-      )}
+      ) : null}
 
-      {/* Base de circulação medida (só quando o destaque é derivado) */}
+      {/* Base observada (só quando o destaque é derivado) */}
       {baseMetric && (
         <div className="mt-3 rounded-xl bg-white/[0.04] px-3 py-2 ring-1 ring-white/10">
           <div className="font-mono text-[10px] uppercase tracking-wider text-off-white/45">
-            Base de circulação
+            {isHealthcare ? "Atividade assistencial de referência" : "Audiência de referência"}
           </div>
           <div className="mt-0.5 text-sm text-white/80">
             <span className="font-display font-semibold text-white">
@@ -128,7 +142,12 @@ export function PointAudiencePanel({
             )}
           </div>
           <div className="mt-0.5 text-[11px] text-white/35">
-            {baseMetric.tier === "measured" ? "Medido" : "Fonte com ressalva"} · {baseMetric.source}
+            {isPartial
+              ? "Referência estimada de fluxo"
+              : baseMetric.tier === "measured"
+                ? "Base observada"
+                : "Fonte com ressalva"}{" "}
+            · {baseMetric.source}
             {baseMetric.period ? ` · ${baseMetric.period}` : ""}
           </div>
           {baseMetric.caveat && (
@@ -186,6 +205,7 @@ export function PointAudiencePanel({
                 </div>
                 <div className="text-[11px] text-white/50">
                   {demographics.income.label} — entorno do ponto
+                  <span className="block text-white/40">{demographics.income.typeLabel}</span>
                 </div>
               </div>
             )}
@@ -217,9 +237,11 @@ export function PointAudiencePanel({
       )}
 
       <p className="mt-5 border-t border-white/8 pt-3 text-[10px] leading-relaxed text-white/30">
-        {isModeled
-          ? "Estimativa baseada no volume médio de atendimentos, circulação e características de permanência do ambiente. Impactos representam oportunidades de exposição e não pessoas únicas. Os resultados reais podem variar."
-          : "Estimativas baseadas em dados históricos de audiência e nas características dos pontos selecionados. Os resultados reais podem variar."}
+        {isPartial
+          ? "Fluxo de referência estimado, sem conversão em impactos ou pessoas únicas."
+          : isModeled
+            ? "Impactos potenciais estimados representam oportunidades de exposição, não pessoas únicas. Os resultados reais podem variar."
+            : "Referência histórica de impactos do ponto, não pessoas únicas nem entrega garantida da campanha."}
         {monthly && dailyReference
           ? ` Referência diária ≈ ${formatCount(dailyReference.value)} ${monthly.noun}/dia.`
           : ""}

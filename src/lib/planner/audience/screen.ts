@@ -13,60 +13,17 @@ import {
 } from "./metrics.ts";
 import type { MethodologyNote, PointIntelligence } from "./types.ts";
 
+import { HEALTHCARE_SCREEN_MODELS, healthcareMethodology } from "./healthcare-model.ts";
+
 /**
- * Estratégia de inteligência de audiência para a mídia `Tela` em UPAs.
- *
- * DIFERENÇA para o Painel LED: aqui NÃO existe métrica de impacto auditada.
- * A base MEDIDA é `procedures` (procedimentos/mês, painel InfoSaúde/SES-DF,
- * média jan–jun/2026 — já armazenada em `point-audience-data.ts`, não
- * duplicada aqui). O número de destaque ("impactos potenciais/mês") é
- * DERIVADO por um modelo de mídia e fica sempre com `tier: "derived"`.
- *
- * ─────────────────────────────────────────────────────────────────────────
- * MODELO DE IMPACTOS — ANÁLISE E DECISÃO
- * ─────────────────────────────────────────────────────────────────────────
- * Proposta inicial do produto:
- *   impactos potenciais/mês
- *     = procedimentos/mês
- *     × presenceFactor (1,25)              — circulação > nº de procedimentos: parte dos
- *                                            atendimentos leva acompanhante
- *     × exposureFactor (0,80)              — nem todos ficam posicionados para ver a tela
- *     × effectiveExposureFrequency (2,0)   — permanência longa (1h+) gera mais de uma
- *                                            oportunidade de exposição
- *   ⇒ multiplicador efetivo = 1,25 × 0,80 × 2,0 = 2,0
- *
- * O que o projeto tem para calibrar isto:
- *   - `averageDwellTime` das UPAs = "1 hora ou mais" (Mídia Kit, nível categoria)
- *     → sustenta `effectiveExposureFrequency ≥ 1`; um valor de 2,0 para espera de 1h+
- *       é plausível e conservador.
- *   - `targetAudience` = "Pacientes e acompanhantes" (Mídia Kit, nível categoria)
- *     → confirma que há acompanhante ⇒ `presenceFactor > 1`. Literatura de pronto-
- *       atendimento costuma citar taxas de acompanhamento de 30–50%; 1,25 (≈25%)
- *       fica na faixa BAIXA/segura.
- *   - Telas: todas as UPAs têm exatamente 1 monitor 49" (`produtos` em
- *     `network-points.ts`) → não há ajuste por nº de telas.
- *   - NÃO há no projeto: duração do spot, duração do loop, nº de anunciantes no
- *     loop, share of voice, total de inserções/dia, horário de funcionamento,
- *     estudo de OTS/atenção. (Mesma lacuna já registrada para o Painel LED.)
- *
- * DECISÃO: manter 1,25 / 0,80 / 2,0 exatamente como proposto. Nenhum dado do
- * projeto permite derivar coeficientes melhores; os sinais qualitativos
- * disponíveis (acompanhante confirmado, permanência longa, 1 tela) são
- * CONSISTENTES com esses fatores e não os contradizem. Os fatores NÃO foram
- * mexidos para inflar ou reduzir o resultado — ficam no modelo `expected`,
- * único usado pelo site. Cenários `conservative`/`potential` não são
- * implementados agora (evita números fabricados); o seam para adicioná-los
- * depois é o parâmetro de `estimateUpaScreenImpressions`.
- * ─────────────────────────────────────────────────────────────────────────
+ * Modelo preliminar MOBTV sobre atividade assistencial observada no InfoSaúde.
+ * Os parâmetros são hipóteses, não dados medidos de presença ou circulação.
+ * A qualidade oficial da base permanece independente da confiança do modelo.
+ * UPA utiliza procedimentos, sem equipará-los a visitas ou pessoas.
+ * Impactos são oportunidades estimadas, não uma medição.
+ * Exames e produção ambulatorial total não são convertidos em visitantes.
  */
-export const UPA_SCREEN_MODEL = {
-  /** circulação física / nº de procedimentos (acompanhantes). */
-  presenceFactor: 1.25,
-  /** fração dos presentes com oportunidade real de ver a tela. */
-  exposureFactor: 0.8,
-  /** oportunidades efetivas de exposição durante a permanência (1h+). */
-  effectiveExposureFrequency: 2.0,
-} as const;
+export const UPA_SCREEN_MODEL = HEALTHCARE_SCREEN_MODELS.upa;
 
 /** Multiplicador efetivo do modelo `expected` (= 1,25 × 0,80 × 2,0 = 2,0). */
 export const UPA_SCREEN_MULTIPLIER =
@@ -82,16 +39,7 @@ export function estimateUpaScreenImpressions(monthlyProcedures: number): number 
   return Math.round(monthlyProcedures * UPA_SCREEN_MULTIPLIER);
 }
 
-const UPA_SCREEN_METHODOLOGY: MethodologyNote = {
-  summary:
-    "A estimativa utiliza o volume médio mensal de atendimentos do local e fatores de " +
-    "circulação, exposição e permanência associados ao ambiente. O resultado representa " +
-    "oportunidades potenciais de exposição à mídia e não pessoas únicas.",
-  formula:
-    "impactos potenciais/mês = procedimentos/mês × 1,25 (circulação com acompanhante) " +
-    "× 0,80 (oportunidade de visualização da tela) × 2,00 (frequência efetiva de " +
-    "exposição na permanência de 1h+) = procedimentos/mês × 2,00",
-};
+const UPA_SCREEN_METHODOLOGY = healthcareMethodology("upa");
 
 /**
  * Monta a inteligência de audiência de um ponto para a mídia `Tela` em UPA.
@@ -109,8 +57,7 @@ export function getUpaScreenPointIntelligence(slug: string): PointIntelligence |
 
   const data = getPointAudienceData(slug);
   if (!data) return null;
-  // Modelo calibrado para UPA (acompanhante + permanência 1h+). Hospitais têm
-  // Tela e `attendances` (métrica-base diferente) e ficam para uma fase futura.
+  // Estratégia exclusiva de UPA; hospitais usam sua própria proxy de atividade.
   if (data.researchCategory !== "UPA") return null;
 
   const base: PointMetric | undefined = data.metrics.find((metric) => metric.type === "procedures");
@@ -137,6 +84,7 @@ export function getUpaScreenPointIntelligence(slug: string): PointIntelligence |
         source: base.source,
         tier: metricConfidenceTier(base),
         estimated: base.estimated,
+        sourceQuality: base.sourceQuality,
       }
     : undefined;
 
@@ -146,7 +94,7 @@ export function getUpaScreenPointIntelligence(slug: string): PointIntelligence |
       ? {
           value: modeledValue,
           metricType: "modeled_impressions" as const,
-          label: "impactos potenciais/mês",
+          label: "Impactos potenciais estimados/mês",
           noun: "impactos potenciais",
           period: baseMetric.period,
           source: `Estimativa MOBTV (modelo Tela/UPA) sobre ${baseMetric.source}`,

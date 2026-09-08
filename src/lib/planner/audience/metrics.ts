@@ -1,4 +1,4 @@
-import type { PointMetric } from "../../../data/point-audience-data.ts";
+import type { MeasurementScope, PointMetric } from "../../../data/point-audience-data.ts";
 import type { AudienceConfidenceTier, MetricKind } from "./types.ts";
 
 /**
@@ -12,7 +12,7 @@ const METRIC_NOUN: Record<MetricKind, string> = {
   passengers: "passageiros",
   attendances: "atendimentos",
   procedures: "procedimentos",
-  outpatient_consultations: "consultas",
+  outpatient_consultations: "consultas/atendimentos",
   estimated_visitors: "visitantes",
   modeled_impressions: "impactos potenciais",
 };
@@ -98,3 +98,14 @@ export const INCOME_LABEL: Record<string, string> = {
   familiar: "Renda média familiar",
   per_capita: "Renda per capita",
 };
+
+/** A MOBTV adota a medição dos BRTs como referência comum às mídias DOOH do ponto. */
+export const ENVIRONMENT_REFERENCE_NOTE =
+  "Medição Datavision do ponto BRT, usada pela MOBTV como referência para Painel LED e Tela. " +
+  "Não representa uma auditoria individual do monitor. A mesma referência é contada uma única vez por ponto.";
+
+export function measuredImpactLabel(scope?: MeasurementScope): string {
+  return scope === "environment_reference"
+    ? "Impactos mensais de referência do ponto"
+    : "Impactos mensais medidos";
+}

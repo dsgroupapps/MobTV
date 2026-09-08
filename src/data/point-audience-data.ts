@@ -71,7 +71,11 @@ export type PublicationReadiness = "A" | "B" | "C";
 /** Domiciliar, familiar e per capita são métricas DISTINTAS — nunca tratadas como equivalentes. */
 export type IncomeType = "domiciliar" | "familiar" | "per_capita";
 
+/** Escopo de publicação da medição; referência de ambiente não é auditoria individual de cada mídia. */
+export type MeasurementScope = "asset_specific" | "environment_reference";
+
 export type PointMetric = {
+  measurementScope?: MeasurementScope;
   type: MetricType;
   /** Valor MENSAL — convenção de `value`/`unit` em todo este arquivo. */
   value: number;
@@ -159,6 +163,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 2167660,
         unit: "impactos/mês",
         raw: "2.167.660 (impactos/mês (Datavision, soma de 2 painéis))",
+        period: "2024",
+        measurementScope: "asset_specific",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -207,6 +213,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 732239,
         unit: "impactos/mês",
         raw: "732.239 (impactos/mês (Datavision))",
+        period: "2024",
+        measurementScope: "asset_specific",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -254,6 +262,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 1000000,
         unit: "impactos/mês",
         raw: "1.000.000 (impactos/mês (Datavision, conforme tabela consolidada))",
+        period: "2024",
+        measurementScope: "asset_specific",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -300,6 +310,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 1128365,
         unit: "impactos/mês",
         raw: "1.128.365 (impactos/mês (Datavision))",
+        period: "2024",
+        measurementScope: "asset_specific",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -346,6 +358,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 1063504,
         unit: "impactos/mês",
         raw: "1.063.504 (impactos/mês (Datavision))",
+        period: "2024",
+        measurementScope: "asset_specific",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -393,6 +407,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 2149173,
         unit: "impactos/mês",
         raw: "2.149.173 (impactos/mês (Datavision, soma de 2 painéis))",
+        period: "2024",
+        measurementScope: "environment_reference",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -439,6 +455,8 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
         value: 3745600,
         unit: "impactos/mês",
         raw: "3.745.600 (impactos/mês (Datavision, soma de 2 painéis))",
+        period: "2024",
+        measurementScope: "environment_reference",
         source: "Datavision / Mídia Kit MOBTV",
         sourceQuality: "A",
         estimated: false,
@@ -1019,7 +1037,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada, mesmo critério já usado para os procedimentos de UPA via InfoSaúde; a estimativa só começa quando essa atividade é transformada em impacto potencial pelo modelo, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (conflitava com o dado oficial 2025, mais recente e de fonte primária direta): 12.746 atendimentos/mês (Jornal de Brasília, 'HRT completa 50 anos...', 04/03/2024, sourceQuality B, calculado de 152.947 atendimentos de pronto-socorro em 2023 ÷ 12) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo. AUXILIAR (não alimenta o modelo de impacto): produção ambulatorial TOTAL do estabelecimento (soma de todos os filtros de produção) = 1.069.351 procedimentos/ano ≈ 89.113/mês (SIA/MS) — ainda menos representativa de pessoas do que os filtros individuais acima, mantida aqui só como contexto de intensidade. SOBREPOSIÇÃO: 'Consultas/atendimentos' (painel de produção ambulatorial) e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação. | [Renda] ATUALIZAÇÃO (integração ao site, pós-revisão): renda FAMILIAR média de R$ 6.072,92/mês informada pelo usuário para Taguatinga, preenchendo a lacuna desta RA. Tipo 'renda familiar' preservado distintamente de 'domiciliar' e de 'per capita' — não deve ser tratado como equivalente a nenhum dos dois. O relatório PDAD 2021 existe e menciona a Seção 3.7 'Rendimento' (Tabelas A.66/A.67), mas os valores de renda domiciliar/per capita não puderam ser extraídos do PDF nesta pesquisa (documento truncado na ferramenta de leitura antes da tabela); apenas a renda média do trabalho principal havia sido capturada anteriormente: R$ 3.223,31 (indicador PARCIAL, preservado aqui como contexto histórico, não é renda domiciliar nem familiar).",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada, mesmo critério já usado para os procedimentos de UPA via InfoSaúde; a estimativa só começa quando essa atividade é transformada em impacto potencial pelo modelo, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (conflitava com o dado oficial 2025, mais recente e de fonte primária direta): 12.746 atendimentos/mês (Jornal de Brasília, 'HRT completa 50 anos...', 04/03/2024, sourceQuality B, calculado de 152.947 atendimentos de pronto-socorro em 2023 ÷ 12) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo. AUXILIAR (não alimenta o modelo de impacto): produção ambulatorial TOTAL do estabelecimento (soma de todos os filtros de produção) = 1.069.351 procedimentos/ano ≈ 89.113/mês (SIA/MS) — ainda menos representativa de pessoas do que os filtros individuais acima, mantida aqui só como contexto de intensidade. SOBREPOSIÇÃO: 'Consultas/atendimentos' (painel de produção ambulatorial) e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como proxy de atividade no modelo preliminar, sem comprovar circulação física. | [Renda] ATUALIZAÇÃO (integração ao site, pós-revisão): renda FAMILIAR média de R$ 6.072,92/mês informada pelo usuário para Taguatinga, preenchendo a lacuna desta RA. Tipo 'renda familiar' preservado distintamente de 'domiciliar' e de 'per capita' — não deve ser tratado como equivalente a nenhum dos dois. O relatório PDAD 2021 existe e menciona a Seção 3.7 'Rendimento' (Tabelas A.66/A.67), mas os valores de renda domiciliar/per capita não puderam ser extraídos do PDF nesta pesquisa (documento truncado na ferramenta de leitura antes da tabela); apenas a renda média do trabalho principal havia sido capturada anteriormente: R$ 3.223,31 (indicador PARCIAL, preservado aqui como contexto histórico, não é renda domiciliar nem familiar).",
   },
   "hospital-regional-de-ceilandia": {
     slug: "hospital-regional-de-ceilandia",
@@ -1081,7 +1099,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (conflitava com o dado oficial 2025): 7.886 atendimentos de urgência e emergência/mês (Política Distrital, 27/08/2025, sourceQuality B, calculado de 55.200 atendimentos em jan-jul/2025, 7 meses, ÷ 7) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo (a nova métrica de emergência cobre o ANO COMPLETO 2025, período mais amplo e consistente). AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRC (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (conflitava com o dado oficial 2025): 7.886 atendimentos de urgência e emergência/mês (Política Distrital, 27/08/2025, sourceQuality B, calculado de 55.200 atendimentos em jan-jul/2025, 7 meses, ÷ 7) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo (a nova métrica de emergência cobre o ANO COMPLETO 2025, período mais amplo e consistente). AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRC (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como proxy de atividade no modelo preliminar, sem comprovar circulação física.",
   },
   "hospital-regional-do-gama": {
     slug: "hospital-regional-do-gama",
@@ -1143,7 +1161,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (era só uma faixa aproximada sem fonte documentada, agora substituída por dado oficial e datado): 12.500 atendimentos/mês (estimativa, ponto médio de uma faixa de 10.000-15.000 informada manualmente pelo usuário na 3ª rodada, sem URL/documento, sourceQuality B, estimated=true) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo. Coincidência: o novo valor oficial de emergências (≈20.718/mês) e o de consultas (≈23.336/mês) ficam ACIMA da faixa antiga (10.000-15.000) — reforça que a faixa aproximada anterior estava subestimando a atividade real do hospital. AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRG (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). VALOR ANTERIOR DESCARTADO (era só uma faixa aproximada sem fonte documentada, agora substituída por dado oficial e datado): 12.500 atendimentos/mês (estimativa, ponto médio de uma faixa de 10.000-15.000 informada manualmente pelo usuário na 3ª rodada, sem URL/documento, sourceQuality B, estimated=true) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo. Coincidência: o novo valor oficial de emergências (≈20.718/mês) e o de consultas (≈23.336/mês) ficam ACIMA da faixa antiga (10.000-15.000) — reforça que a faixa aproximada anterior estava subestimando a atividade real do hospital. AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRG (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como proxy de atividade no modelo preliminar, sem comprovar circulação física.",
   },
   "hospital-regional-de-santa-maria": {
     slug: "hospital-regional-de-santa-maria",
@@ -1205,7 +1223,7 @@ export const pointAudienceData: Record<string, PointAudienceData> = {
     publicationReadiness: "A",
     historicalConfidence: "A",
     notes:
-      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). Isso RESOLVE a lacuna histórica registrada abaixo: agora existe indicador de emergência/pronto-socorro GERAL (adulto) para o HRSM, algo que 4 rodadas de pesquisa anteriores não haviam localizado. VALOR ANTERIOR DESCARTADO (indicador PARCIAL, só ambulatório, não comparável ao volume total do hospital): 5.000 consultas ambulatoriais/mês (Agência Brasília, outubro/2024, sourceQuality B) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo; o novo valor de consultas/atendimentos oficial (≈30.395/mês) é ~6× maior porque cobre um filtro mais amplo do painel de produção ambulatorial, não porque o hospital mudou de porte. HISTÓRICO (preservado): também havia sido localizado um indicador de '32.385 atendimentos no Pronto-Socorro Infantil (PSI) em 2025' (≈2.699/mês), Jornal de Brasília, 09/02/2026 — PRONTO-SOCORRO PEDIÁTRICO apenas, não comparável ao indicador geral de emergências agora disponível; não usado nesta atualização. AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRSM (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como piso conservador da circulação.",
+      "ATUALIZAÇÃO (dados oficiais 2025): as 3 métricas de atividade hospitalar foram SUBSTITUÍDAS pelos números oficiais do InfoSaúde-DF/SIA-MS, competência ano completo 2025, coletados manualmente pelo cliente diretamente nos painéis com o estabelecimento selecionado — reclassificadas sourceQuality A / estimated false (dado oficial observado da atividade registrada; a estimativa só começa na conversão para impacto potencial, em hospital-screen.ts). Isso RESOLVE a lacuna histórica registrada abaixo: agora existe indicador de emergência/pronto-socorro GERAL (adulto) para o HRSM, algo que 4 rodadas de pesquisa anteriores não haviam localizado. VALOR ANTERIOR DESCARTADO (indicador PARCIAL, só ambulatório, não comparável ao volume total do hospital): 5.000 consultas ambulatoriais/mês (Agência Brasília, outubro/2024, sourceQuality B) — preservado aqui só para rastreabilidade histórica, não é mais o indicador ativo; o novo valor de consultas/atendimentos oficial (≈30.395/mês) é ~6× maior porque cobre um filtro mais amplo do painel de produção ambulatorial, não porque o hospital mudou de porte. HISTÓRICO (preservado): também havia sido localizado um indicador de '32.385 atendimentos no Pronto-Socorro Infantil (PSI) em 2025' (≈2.699/mês), Jornal de Brasília, 09/02/2026 — PRONTO-SOCORRO PEDIÁTRICO apenas, não comparável ao indicador geral de emergências agora disponível; não usado nesta atualização. AUXILIAR (não alimenta o modelo de impacto): a fonte desta atualização não trouxe produção ambulatorial TOTAL para o HRSM (só os dois filtros individuais acima). SOBREPOSIÇÃO: 'Consultas/atendimentos' e 'Emergências Hospitalares' são painéis distintos do SIA/MS, mas o filtro de consultas inclui códigos que também podem ocorrer na emergência (ex.: acolhimento com classificação de risco) — por isso NÃO são somados; a camada de cálculo usa o maior dos dois como proxy de atividade no modelo preliminar, sem comprovar circulação física.",
   },
   "feira-do-guara": {
     slug: "feira-do-guara",
@@ -1279,7 +1297,7 @@ const METRIC_TYPE_LABELS: Record<MetricType, string> = {
   passengers: "Passageiros/mês",
   attendances: "Atendimentos/mês",
   procedures: "Procedimentos/mês",
-  outpatient_consultations: "Consultas/mês",
+  outpatient_consultations: "Consultas/atendimentos por mês",
   estimated_visitors: "Pessoas/mês (estimado)",
 };
 

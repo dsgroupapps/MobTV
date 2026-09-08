@@ -3,6 +3,8 @@ import { getPointAudienceData, type PointMetric } from "../../../data/point-audi
 import { findPointBySlug } from "../../point-slug.ts";
 import {
   environmentLabelFor,
+  ENVIRONMENT_REFERENCE_NOTE,
+  measuredImpactLabel,
   INCOME_LABEL,
   metricConfidenceTier,
   metricMonthlyLabel,
@@ -27,6 +29,8 @@ import type { MethodologyNote, PointIntelligence } from "./types.ts";
  *      (Terminal BRT Gama ≈ 2.149.173/mês, Terminal BRT Santa Maria ≈
  *      3.745.600/mês — permanecem medidos, independentemente de a mídia
  *      escolhida ser `Tela` ou `Painel LED`.)
+ *      Decisão MOBTV: referência medida do ambiente, não auditoria individual
+ *      do monitor. Compartilha escopo e competência com o LED do mesmo ponto.
  *   2. sem impacto medido, mas com fluxo de passageiros → modelo DERIVADO
  *      (abaixo).
  *   3. sem nenhum dos dois → sem estimativa de impacto; só perfil/demografia.
@@ -144,12 +148,18 @@ export function getTerminalScreenPointIntelligence(slug: string): PointIntellige
     monthly = {
       value: measured.value,
       metricType: measured.type,
-      label: metricMonthlyLabel(measured.type),
+      label: measuredImpactLabel(measured.measurementScope),
       noun: metricNoun(measured.type),
       period: measured.period,
       source: measured.source,
       tier: metricConfidenceTier(measured),
       estimated: measured.estimated,
+      sourceQuality: measured.sourceQuality,
+      measurementScope: measured.measurementScope,
+      caveat:
+        measured.measurementScope === "environment_reference"
+          ? ENVIRONMENT_REFERENCE_NOTE
+          : undefined,
     };
   } else if (flow) {
     // 2. fluxo de passageiros → modelo derivado.

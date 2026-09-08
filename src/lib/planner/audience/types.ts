@@ -1,5 +1,7 @@
 import type {
   IncomeType,
+  MeasurementScope,
+  SourceQuality,
   MetricType,
   ResearchCategory,
 } from "../../../data/point-audience-data.ts";
@@ -17,7 +19,8 @@ import type { MediaTypeKey } from "../../../data/network-points.ts";
  *  - `Painel LED`  → `led.ts`    (métrica principal = impactos auditados Datavision, medida)
  *  - `Tela` (UPAs) → `screen.ts` (métrica principal = impactos potenciais MODELADOS
  *                                 sobre procedimentos/mês; a base medida fica em `baseMetric`)
- *  - `WiFi Ads`    → ainda não implementada (dispatcher retorna `null`)
+ *  - `Tela` (Feira) → feira-screen.ts (base parcial, sem modelo de impacto)
+ *  - `WiFi Ads`    → contrato específico em wifi.ts (sem métricas individuais cadastradas)
  *
  * REGRA: nada aqui inventa número. Campo ausente na fonte → ausente aqui
  * (`undefined`), nunca `0` nem um valor derivado sem base.
@@ -41,6 +44,9 @@ export type MetricKind = MetricType | "modeled_impressions";
 
 /** Métrica mensal de um ponto, já normalizada para exibição comercial. */
 export type MonthlyAudienceMetric = {
+  measurementScope?: MeasurementScope;
+  /** Qualidade da fonte observada, independente da confiança do modelo. */
+  sourceQuality?: SourceQuality;
   value: number;
   /** Tipo preservado da fonte, ou `"modeled_impressions"` quando é derivado por modelo. Nunca "pessoas". */
   metricType: MetricKind;
@@ -70,6 +76,8 @@ export type MonthlyAudienceMetric = {
 
 /** Explicação "Como calculamos?" de uma métrica derivada por modelo. */
 export type MethodologyNote = {
+  /** Validação da conversão para impactos; não altera a qualidade da fonte-base. */
+  modelConfidence?: "preliminary";
   /** Texto curto para tooltip/nota na UI — sem expor os coeficientes. */
   summary: string;
   /** Fórmula completa, com coeficientes — para transparência (código + tooltip avançado). */
@@ -97,9 +105,9 @@ export type PointIntelligence = {
    */
   monthly?: MonthlyAudienceMetric;
   /**
-   * Métrica MEDIDA que embasa `monthly` quando `monthly` é derivado
-   * (ex.: procedimentos/mês para a Tela). Ausente para `Painel LED`
-   * (lá `monthly` já é a medição).
+   * Base observada ou estimada que embasa `monthly` quando existe modelo
+   * (ex.: procedimentos/mês para a Tela). Também representa uma base parcial
+   * sem `monthly`, como o fluxo de visitantes da Feira, sem conversão em impacto.
    */
   baseMetric?: MonthlyAudienceMetric;
   /** Média diária de REFERÊNCIA: `monthly.value / 30`. Referência de ordem de grandeza — não é entrega diária. */
@@ -162,6 +170,8 @@ export type CampaignAudienceRollup = {
    * procedimentos) NUNCA são somados: aparecem como grupos separados.
    */
   metricGroups: CampaignMetricGroup[];
+  /** Bases parciais, sem impacto: não entram no simulador nem no total de impactos. */
+  referenceGroups: CampaignMetricGroup[];
   /** Ambientes distintos presentes na seleção, na ordem de entrada. */
   environments: string[];
   /** "Metrô + UPA" */

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, ExternalLink, MapPin, Send, Sparkles, Users } from "lucide-react";
+import { CheckCircle2, ExternalLink, MapPin, Send, Users } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -19,19 +19,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { pointMediaTypes, type Category, type NetworkPoint } from "@/data/network-points";
 import { regionSummaries } from "@/data/df-regions";
 import type { PointInsights } from "@/data/point-insights";
-import {
-  getIncomeLabel,
-  getMetricLabel,
-  getPointAudienceData,
-  getPrimaryMetric,
-} from "@/data/point-audience-data";
+import { publicPointProfile } from "@/data/public-point-profile";
+import { ENVIRONMENT_REFERENCE_NOTE, measuredImpactLabel } from "@/lib/planner/audience/metrics";
+import { getIncomeLabel, getMetricLabel, getPointAudienceData } from "@/data/point-audience-data";
 import { createPointTracker, type PointTracker } from "@/lib/analytics/client";
 import { trackFunnel } from "@/lib/analytics/funnel";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
 import type { PointContext } from "@/lib/analytics/types";
 import { submitPointLead } from "@/lib/leads/point-lead";
 
-/** "85000" → "85 mil"; valores abaixo de 1000 aparecem por extenso. Usado só no fallback de dados demonstrativos (point-insights.ts). */
+/** "85000" → "85 mil"; valores abaixo de 1000 aparecem por extenso. Usado em indicadores complementares reais (point-insights.ts). */
 function formatAudience(value: number) {
   return value >= 1000 ? `${Math.round(value / 1000)} mil` : value.toLocaleString("pt-BR");
 }
@@ -64,18 +61,6 @@ type PointLeadFormValues = z.infer<typeof pointLeadSchema>;
 
 const fieldClass =
   "bg-white/5 border-white/15 text-off-white placeholder:text-off-white/40 focus-visible:ring-gold";
-
-/** Aviso "dados demonstrativos" — reutilizado nos pontos onde números fictícios aparecem. */
-function DemoBadge({ className = "" }: { className?: string }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full bg-gold/15 px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-gold ring-1 ring-gold/30 ${className}`}
-    >
-      <Sparkles className="h-3 w-3" strokeWidth={2.2} />
-      Dados demonstrativos
-    </span>
-  );
-}
 
 /** Card de indicador principal — fundo navy sólido, borda sutil, sem glow/gradiente/ícone. */
 function StatCard({ value, label }: { value: string; label: string }) {
@@ -376,33 +361,35 @@ export function PointProfile({
   const mediaTypes = pointMediaTypes(point);
   const photo = point.images?.[0];
   const audienceData = getPointAudienceData(slug);
-  // Dado real (planilha revisada, Fase 7) sempre tem prioridade sobre o
-  // protótipo demonstrativo — o badge "dados demonstrativos" só aparece
-  // quando não há audienceData para o ponto.
-  const isDemo = !audienceData && (insights?.isDemo ?? false);
-  const audience = insights?.audience;
+  const published = publicPointProfile(audienceData, insights);
+  const audience = published.audience;
 
   // Card principal: impactos Datavision/Mídia Kit > passageiros > primeira
   // métrica disponível (ver getPrimaryMetric) — nunca rotulado genericamente
   // como "Pessoas/mês" quando o dado real é outra coisa (impactos,
   // atendimentos, procedimentos, consultas, estimativa de visitantes).
-  const primaryMetric = audienceData ? getPrimaryMetric(audienceData) : undefined;
+  const primaryMetric = published.primaryMetric;
   const monthlyAudienceValue = primaryMetric
     ? formatMetricValue(primaryMetric.value)
-    : insights?.monthlyAudience != null
-      ? formatAudience(insights.monthlyAudience)
+    : published.monthlyAudience != null
+      ? formatAudience(published.monthlyAudience)
       : "—";
-  const monthlyAudienceLabel = primaryMetric ? getMetricLabel(primaryMetric.type) : "Pessoas/mês";
+  const monthlyAudienceLabel =
+    primaryMetric?.type === "audited_impacts"
+      ? measuredImpactLabel(primaryMetric.measurementScope)
+      : primaryMetric
+        ? getMetricLabel(primaryMetric.type)
+        : "Audiência de referência";
 
   // Card de renda: tipo (domiciliar/familiar/per capita) vem do dado real —
   // nunca rotulado como "familiar" quando o dado é domiciliar ou per capita.
-  const averageFamilyIncomeValue = audienceData?.income
-    ? formatCurrency(audienceData.income.value)
-    : insights?.averageFamilyIncome != null
-      ? formatCurrency(insights.averageFamilyIncome)
+  const averageFamilyIncomeValue = published.income
+    ? formatCurrency(published.income.value)
+    : published.averageFamilyIncome != null
+      ? formatCurrency(published.averageFamilyIncome)
       : "R$ —";
-  const averageIncomeLabel = audienceData?.income
-    ? getIncomeLabel(audienceData.income.type)
+  const averageIncomeLabel = published.income
+    ? getIncomeLabel(published.income.type)
     : "Renda média familiar";
 
   const hasAgeBrackets = audience?.ageBrackets && audience.ageBrackets.length > 0;
@@ -446,7 +433,6 @@ export function PointProfile({
             <p className="mt-4 max-w-xl text-base leading-relaxed text-off-white/75">
               Conheça o público e o potencial de mídia deste ponto.
             </p>
-            {isDemo && <DemoBadge className="mt-5" />}
 
             {photo && (
               <div className="mt-8 overflow-hidden rounded-2xl ring-1 ring-white/10">
@@ -469,9 +455,11 @@ export function PointProfile({
               <StatCard value={monthlyAudienceValue} label={monthlyAudienceLabel} />
               <StatCard value={averageFamilyIncomeValue} label={averageIncomeLabel} />
             </div>
-            {isDemo && (
-              <p className="mt-4 text-xs leading-relaxed text-off-white/40">
-                Protótipo — indicadores acima são ilustrativos, para visualização do formato final.
+            {primaryMetric?.type === "audited_impacts" && (
+              <p className="mt-4 text-xs leading-relaxed text-off-white/50">
+                Medido e auditado · {primaryMetric.source} · {primaryMetric.period}
+                {primaryMetric.measurementScope === "environment_reference" &&
+                  ` — ${ENVIRONMENT_REFERENCE_NOTE}`}
               </p>
             )}
           </div>

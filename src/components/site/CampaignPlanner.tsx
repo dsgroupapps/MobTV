@@ -9,20 +9,15 @@ import {
 } from "@/data/network-points";
 import { midiaOptions, type MidiaOption } from "@/data/planner-options";
 import { regionSummaries } from "@/data/df-regions";
-import { categoryIcon, MediaTypeChips, mediaTypeMeta } from "./MediaBadges";
+import { categoryIcon, MediaTypeChips } from "./MediaBadges";
 import { PhotoFallback } from "./AssetExplorer";
 import { PlannerMediaPicker } from "./PlannerMediaPicker";
-import { PointAudiencePanel } from "./PointAudiencePanel";
-import { CampaignAudienceSummary } from "./CampaignAudienceSummary";
+import { PlannerPointAudience } from "./PlannerPointAudience";
+import { PlannerCampaignReview } from "./PlannerCampaignReview";
+import { getPlannerSelectionDetails } from "@/lib/planner/selection";
+import { buildPlannerProposal } from "@/lib/planner/proposal";
 import { loadPlannerState, savePlannerState } from "@/lib/planner/storage";
-import {
-  clampSimInput,
-  getPointIntelligence,
-  rollupCampaignAudience,
-  SIM_LIMITS,
-  type CampaignSimInput,
-  type PointIntelligence,
-} from "@/lib/planner/audience";
+import { clampSimInput, SIM_LIMITS, type CampaignSimInput } from "@/lib/planner/audience";
 import { trackFunnel } from "@/lib/analytics/funnel";
 import { MEDIA_SELECT_TOKEN } from "@/lib/analytics/types";
 
@@ -51,10 +46,6 @@ const mediaIntentCopy: Record<
   },
 };
 
-function pointKey(categoria: CategoryKey, nome: string) {
-  return `${categoria}::${nome}`;
-}
-
 function hasDooh(types: MediaTypeKey[]) {
   return types.includes("screen") || types.includes("led");
 }
@@ -66,7 +57,7 @@ function mediaEligible(point: NetworkPoint, midia: MidiaOption) {
   return hasDooh(types) || types.includes("wifi");
 }
 
-/** key do ponto (`${categoria}::${nome}`) -> mídias escolhidas nele (nunca vazio). */
+/** Slug estável do ponto -> mídias escolhidas nele (nunca vazio). */
 type SelectionMap = Record<string, MediaTypeKey[]>;
 
 type PointEntry = { point: NetworkPoint; categoryKey: CategoryKey; categoryLabel: string };
@@ -81,15 +72,10 @@ type MediaPickerTarget = {
   mode: "add" | "edit";
 };
 
-/** "Tela + WiFi Ads" — para o resumo e a mensagem de proposta. */
-function mediaLabelList(media: MediaTypeKey[]) {
-  return media.map((m) => mediaTypeMeta[m].label).join(" + ");
-}
-
 function findPoint(key: string): PointEntry | undefined {
   for (const cat of networkPoints) {
     for (const p of cat.points) {
-      if (pointKey(cat.key, p.nome) === key) {
+      if (p.slug === key) {
         return { point: p, categoryKey: cat.key, categoryLabel: cat.label };
       }
     }
@@ -224,7 +210,7 @@ export function CampaignPlanner({
     // Seed vindo de /rede (?ponto=&categoria=): ponto de mídia única entra
     // direto; ponto multimídia fica de fora até o usuário escolher no picker
     // (aberto pelo efeito de hidratação abaixo).
-    const key = pointKey(seeded.cat.key, seeded.point.nome);
+    const key = seeded.point.slug;
     const available = pointMediaTypes(seeded.point);
     return available.length === 1 ? { [key]: available } : {};
   });
@@ -233,7 +219,7 @@ export function CampaignPlanner({
     days: SIM_LIMITS.days.default,
     insertionsPerDay: SIM_LIMITS.insertionsPerDay.default,
   }));
-  const hydratedRef = useRef(false);
+  const [hydrated, setHydrated] = useState(false);
 
   // --- Funil de jornada (compartilha anonymous_session_id + initial_point_slug) ---
   const plannerStartedRef = useRef(false);
@@ -289,7 +275,7 @@ export function CampaignPlanner({
     const restored: SelectionMap = {};
     if (stored) {
       for (const sel of stored.selections) {
-        const found = findPoint(sel.key);
+        const found = findPoint(sel.slug);
         if (!found) continue;
         const offered = pointMediaTypes(found.point);
         let media = sel.media.filter((m) => offered.includes(m));
@@ -298,13 +284,13 @@ export function CampaignPlanner({
             media = offered; // única opção → seguro
           else continue; // multimídia sem escolha salva → pede de novo ao voltar
         }
-        restored[sel.key] = media;
+        restored[sel.slug] = media;
       }
     }
 
     let seedPicker: MediaPickerTarget | null = null;
     if (seeded) {
-      const key = pointKey(seeded.cat.key, seeded.point.nome);
+      const key = seeded.point.slug;
       const available = pointMediaTypes(seeded.point);
       if (!restored[key] && available.length > 1) {
         seedPicker = {
@@ -334,21 +320,21 @@ export function CampaignPlanner({
     if (seedPicker) setMediaPicker(seedPicker);
     if (stored?.sim) setSim(clampSimInput(stored.sim));
 
-    hydratedRef.current = true;
+    setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persiste (sessionStorage) — só depois da hidratação, para não sobrescrever
   // a sessão restaurada com o estado inicial.
   useEffect(() => {
-    if (!hydratedRef.current) return;
+    if (!hydrated) return;
     savePlannerState({
       midia,
       step,
-      selections: Object.entries(selections).map(([key, media]) => ({ key, media })),
+      selections: Object.entries(selections).map(([slug, media]) => ({ slug, media })),
       sim,
     });
-  }, [midia, step, selections, sim]);
+  }, [hydrated, midia, step, selections, sim]);
 
   const regionPointNames = useMemo(
     () => new Map(regionSummaries.map((r) => [r.region, new Set(r.pointNames)])),
@@ -395,32 +381,19 @@ export function CampaignPlanner({
     [selections],
   );
 
-  // Inteligência de audiência — para pontos com `Painel LED` (impactos
-  // auditados Datavision) ou `Tela` em UPA (impactos potenciais modelados
-  // sobre procedimentos) selecionados. O dispatcher decide por mídia; trocar
-  // a mídia do ponto (ex.: para WiFi) remove o ponto daqui automaticamente.
-  const audienceIntel = useMemo(() => {
-    const list: { slug: string; name: string; intelligence: PointIntelligence }[] = [];
-    for (const [key, media] of Object.entries(selections)) {
-      if (!media.includes("led") && !media.includes("screen")) continue;
-      const entry = findPoint(key);
-      if (!entry) continue;
-      const intelligence = getPointIntelligence(entry.point.slug, media);
-      if (intelligence) {
-        list.push({ slug: entry.point.slug, name: entry.point.nome, intelligence });
-      }
-    }
-    return list;
-  }, [selections]);
-
-  const audienceBySlug = useMemo(
-    () => new Map(audienceIntel.map((x) => [x.slug, x.intelligence])),
-    [audienceIntel],
+  const selectionDetails = useMemo(
+    () =>
+      getPlannerSelectionDetails(
+        Object.entries(selections).map(([slug, media]) => ({ slug, media })),
+      ),
+    [selections],
   );
-  const audienceRollup = useMemo(() => rollupCampaignAudience(audienceIntel), [audienceIntel]);
+  const detailsBySlug = useMemo(
+    () => new Map(selectionDetails.map((point) => [point.slug, point])),
+    [selectionDetails],
+  );
 
   const hasActiveFilters = regionFilter !== "all" || categoryFilter !== "all";
-  const midiaLabel = midiaOptions.find((m) => m.value === midia)?.label ?? "";
 
   const selectMedia = (value: MidiaOption) => {
     firePlannerStart(value);
@@ -452,7 +425,7 @@ export function CampaignPlanner({
   // Clique no card da etapa 2: já selecionado -> remove; mídia única -> adiciona
   // direto; 2+ mídias -> abre o picker.
   const handlePointClick = (entry: PointEntry) => {
-    const key = pointKey(entry.categoryKey, entry.point.nome);
+    const key = entry.point.slug;
     if (selections[key]) {
       removePoint(key);
       return;
@@ -479,6 +452,7 @@ export function CampaignPlanner({
   const commitMediaPicker = (media: MediaTypeKey[]) => {
     if (!mediaPicker || media.length === 0) return;
     const chosen = mediaPicker.available.filter((m) => media.includes(m));
+    if (chosen.length === 0) return;
     const isNewPoint = mediaPicker.mode === "add";
     setSelections((prev) => ({ ...prev, [mediaPicker.key]: chosen }));
     if (isNewPoint) {
@@ -503,16 +477,7 @@ export function CampaignPlanner({
   };
 
   function buildProposalUrl() {
-    const lines = [
-      "Olá! Montei uma campanha no site da MOBTV.",
-      "",
-      `Mídia: ${midiaLabel}`,
-      `Pontos (${selectedEntries.length}):`,
-      ...selectedEntries.map((s) => `• ${s.entry.point.nome} — ${mediaLabelList(s.media)}`),
-      "",
-      "Gostaria de receber uma proposta comercial.",
-    ];
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(lines.join("\n"))}`;
+    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildPlannerProposal(selectionDetails, sim))}`;
   }
 
   const canNext = (step === 0 && midia != null) || (step === 1 && selectedEntries.length > 0);
@@ -654,7 +619,7 @@ export function CampaignPlanner({
                 {visiblePoints.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {visiblePoints.map((entry) => {
-                      const key = pointKey(entry.categoryKey, entry.point.nome);
+                      const key = entry.point.slug;
                       const selectedMedia = selections[key];
                       const isSelected = selectedMedia != null;
                       const Icon = categoryIcon[entry.categoryKey];
@@ -772,7 +737,7 @@ export function CampaignPlanner({
                               </button>
                             )}
                           </div>
-                          {audienceBySlug.has(entry.point.slug) && (
+                          {detailsBySlug.has(entry.point.slug) && (
                             <details data-audience-disclosure className="group mt-2">
                               <summary className="cursor-pointer list-none font-mono text-[10px] uppercase tracking-wider text-gold/80 transition-colors hover:text-gold">
                                 <span className="group-open:hidden">Ver audiência do ponto →</span>
@@ -781,10 +746,9 @@ export function CampaignPlanner({
                                 </span>
                               </summary>
                               <div className="mt-3">
-                                <PointAudiencePanel
+                                <PlannerPointAudience
                                   dense
-                                  intelligence={audienceBySlug.get(entry.point.slug)!}
-                                  pointName={entry.point.nome}
+                                  point={detailsBySlug.get(entry.point.slug)!}
                                 />
                               </div>
                             </details>
@@ -805,74 +769,7 @@ export function CampaignPlanner({
             title="Resumo da campanha"
             subtitle="Revise os pontos selecionados e envie sua solicitação para a equipe comercial."
           >
-            <div className="grid gap-5 md:grid-cols-2">
-              <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
-                <dl className="space-y-4 text-sm">
-                  <div>
-                    <dt className="font-mono text-[11px] uppercase tracking-wider text-gold/80">
-                      Mídia
-                    </dt>
-                    <dd className="mt-1 text-white/85">{midiaLabel}</dd>
-                  </div>
-                  <div>
-                    <dt className="font-mono text-[11px] uppercase tracking-wider text-gold/80">
-                      Pontos selecionados
-                    </dt>
-                    <dd className="mt-1 text-white/85">{selectedEntries.length}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div className="rounded-2xl bg-white/[0.03] p-6 ring-1 ring-white/10">
-                <div className="mb-3 font-mono text-[11px] uppercase tracking-wider text-gold/80">
-                  Locais
-                </div>
-                <ul className="max-h-64 space-y-3 overflow-y-auto pr-1">
-                  {selectedEntries.map(({ key, entry, media }) => (
-                    <li
-                      key={key}
-                      data-summary-item
-                      data-point-name={entry.point.nome}
-                      data-selected-media={media.join(",")}
-                      className="flex items-start gap-2 text-sm text-white/85"
-                    >
-                      <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-teal" />
-                      <div className="min-w-0">
-                        <div>{entry.point.nome}</div>
-                        <div className="mt-1">
-                          <MediaTypeChips types={media} />
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {audienceIntel.length > 0 && (
-              <div className="mt-12" data-audience-intelligence>
-                <div className="mb-2 font-mono text-xs uppercase tracking-[0.3em] text-gold">
-                  Inteligência de audiência
-                </div>
-                <p className="mb-6 max-w-2xl text-sm leading-relaxed text-white/55">
-                  O público que sua campanha pode alcançar em cada ponto selecionado (Painel LED e
-                  Telas) e a dimensão aproximada da campanha conforme a duração e as inserções
-                  escolhidas.
-                </p>
-                <div className="grid gap-5 lg:grid-cols-2">
-                  {audienceIntel.map((x) => (
-                    <PointAudiencePanel
-                      key={x.slug}
-                      intelligence={x.intelligence}
-                      pointName={x.name}
-                    />
-                  ))}
-                </div>
-                <div className="mt-6">
-                  <CampaignAudienceSummary rollup={audienceRollup} sim={sim} onSimChange={setSim} />
-                </div>
-              </div>
-            )}
+            <PlannerCampaignReview points={selectionDetails} sim={sim} onSimChange={setSim} />
 
             <div className="mt-8 flex flex-wrap items-center gap-6">
               <a

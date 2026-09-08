@@ -1,19 +1,16 @@
-import { useEffect, useState } from "react";
 import {
   clampSimInput,
   formatCompact,
   formatCount,
   formatCurrency,
-  SIM_LIMITS,
   simulateCampaign,
   type CampaignAudienceRollup,
   type CampaignSimInput,
 } from "@/lib/planner/audience";
 
 /**
- * "Sua campanha" (agregado dos pontos com inteligência de audiência — Painel
- * LED e/ou Tela) + "Simule sua campanha" (duração × inserções/dia,
- * atualização instantânea).
+ * Audiência agregada da seleção e potencial dos pontos no período escolhido.
+ * A configuração comercial vive em CampaignConfiguration, mesmo sem audiência.
  *
  * Regras respeitadas aqui:
  *  - métricas de tipos diferentes NÃO são somadas — cada grupo aparece sozinho
@@ -55,81 +52,22 @@ function Stat({
   );
 }
 
-function NumberField({
-  id,
-  label,
-  suffix,
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  suffix: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (next: number) => void;
-}) {
-  const [text, setText] = useState(String(value));
-
-  // Reflete mudanças externas (ex.: estado restaurado da sessão).
-  useEffect(() => {
-    setText(String(value));
-  }, [value]);
-
-  return (
-    <label htmlFor={id} className="flex flex-col gap-2">
-      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-off-white/45">
-        {label}
-      </span>
-      <span className="flex items-center gap-2">
-        <input
-          id={id}
-          type="number"
-          inputMode="numeric"
-          min={min}
-          max={max}
-          step={1}
-          value={text}
-          onChange={(event) => {
-            const raw = event.target.value;
-            setText(raw);
-            if (raw.trim() === "") return;
-            onChange(clampInt(raw, min, max));
-          }}
-          onBlur={() => {
-            const next = clampInt(text, min, max);
-            setText(String(next));
-            onChange(next);
-          }}
-          className="h-11 w-24 rounded-lg border border-white/10 bg-navy px-3 font-display text-lg font-semibold text-white outline-none transition-colors hover:border-white/20 focus:border-gold"
-        />
-        <span className="text-sm text-white/50">{suffix}</span>
-      </span>
-    </label>
-  );
-}
-
-function clampInt(raw: string, min: number, max: number): number {
-  const n = Number(raw);
-  if (!Number.isFinite(n)) return min;
-  return Math.max(min, Math.min(max, Math.trunc(n)));
-}
-
 export function CampaignAudienceSummary({
   rollup,
   sim,
-  onSimChange,
 }: {
   rollup: CampaignAudienceRollup;
   sim: CampaignSimInput;
-  onSimChange: (next: CampaignSimInput) => void;
 }) {
   const safeSim = clampSimInput(sim);
   const result = simulateCampaign(rollup, safeSim);
   const multi = rollup.ledPointCount > 1;
+  const hasEnvironmentReference = rollup.points.some(
+    (p) => p.intelligence.monthly?.measurementScope === "environment_reference",
+  );
+  const hasPreliminaryModel = rollup.points.some(
+    (p) => p.intelligence.methodology?.modelConfidence === "preliminary",
+  );
   const hasModeled = rollup.metricGroups.some((g) => g.metricType === "modeled_impressions");
 
   return (
@@ -138,7 +76,7 @@ export function CampaignAudienceSummary({
       className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 md:p-7"
     >
       <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-gold">
-        Sua campanha
+        Resumo de audiência da seleção
       </div>
       <div className="mt-1 text-sm text-white/60">
         {rollup.ledPointCount} ponto{rollup.ledPointCount === 1 ? "" : "s"} com inteligência de
@@ -156,6 +94,18 @@ export function CampaignAudienceSummary({
         ))}
       </div>
 
+      {hasEnvironmentReference && (
+        <p className="mt-3 text-[11px] text-white/55">
+          Nos BRTs, a medição Datavision de 2024 é referência do ambiente para LED e Tela, não uma
+          auditoria individual do monitor. Cada ponto é contado uma única vez.
+        </p>
+      )}
+      {hasPreliminaryModel && (
+        <p className="mt-3 text-[11px] text-white/55">
+          Nas UPAs e hospitais, os impactos são estimativas preliminares MOBTV sobre atividade
+          assistencial oficial. Os fatores de exposição ainda estão em validação.
+        </p>
+      )}
       {/* Agregados — um bloco por tipo de métrica, nunca somados entre si */}
       <div className="mt-6 grid gap-5 sm:grid-cols-2">
         {rollup.metricGroups.map((group) => {
@@ -165,7 +115,15 @@ export function CampaignAudienceSummary({
               key={group.metricType}
               strong
               value={modeled ? `≈ ${formatCompact(group.total)}` : formatCount(group.total)}
-              label={`${group.label} — ${modeled ? "potencial de exposição" : "audiência potencial"}`}
+              label={
+                modeled
+                  ? "Impactos potenciais estimados/mês"
+                  : group.metricType === "audited_impacts"
+                    ? hasEnvironmentReference
+                      ? "Impactos mensais medidos e de referência dos pontos"
+                      : "Impactos mensais medidos"
+                    : group.label
+              }
               hint={`${group.pointCount} ponto${group.pointCount === 1 ? "" : "s"} · ${
                 TIER_NOTE[group.tier]
               }`}
@@ -188,6 +146,16 @@ export function CampaignAudienceSummary({
           </div>
         )}
       </div>
+
+      {rollup.referenceGroups.map((group) => (
+        <div key={group.metricType} className="mt-6 border-t border-white/8 pt-5">
+          <Stat
+            value={`≈ ${formatCount(group.total)}`}
+            label={group.label}
+            hint="Base parcial estimada de fluxo, sem conversão para impactos ou pessoas únicas."
+          />
+        </div>
+      ))}
 
       {multi &&
         (rollup.averageAge != null || rollup.gender != null || rollup.environmentsLabel) && (
@@ -226,44 +194,8 @@ export function CampaignAudienceSummary({
           </div>
         )}
 
-      {/* Simulador */}
+      {/* Potencial dos pontos no período; independente do volume desejado. */}
       <div className="mt-7 border-t border-white/8 pt-6">
-        <div className="font-mono text-[11px] uppercase tracking-[0.22em] text-gold">
-          Simule sua campanha
-        </div>
-
-        <div className="mt-4 flex flex-wrap gap-6">
-          <NumberField
-            id="sim-days"
-            label="Duração"
-            suffix="dias"
-            value={safeSim.days}
-            min={SIM_LIMITS.days.min}
-            max={SIM_LIMITS.days.max}
-            onChange={(days) => onSimChange({ ...safeSim, days })}
-          />
-          <NumberField
-            id="sim-insertions"
-            label="Inserções por dia"
-            suffix="/ dia"
-            value={safeSim.insertionsPerDay}
-            min={SIM_LIMITS.insertionsPerDay.min}
-            max={SIM_LIMITS.insertionsPerDay.max}
-            onChange={(insertionsPerDay) => onSimChange({ ...safeSim, insertionsPerDay })}
-          />
-        </div>
-
-        <div className="mt-6">
-          <Stat
-            strong
-            value={formatCount(result.totalInsertions)}
-            label="inserções programadas"
-            hint={`${formatCount(safeSim.days)} dias × ${formatCount(
-              safeSim.insertionsPerDay,
-            )} inserções/dia`}
-          />
-        </div>
-
         {result.potentialGroups.map((group) => (
           <div key={group.metricType} className="mt-6 border-t border-white/8 pt-5">
             <div className="font-mono text-[10px] uppercase tracking-wider text-off-white/45">
@@ -315,12 +247,9 @@ export function CampaignAudienceSummary({
                 Impactos estimados da campanha
               </div>
               <p className="mt-1.5 text-sm leading-relaxed text-white/60">
-                A parcela desses impactos que pertence especificamente ao seu anúncio depende do
-                share de exibição (quantas inserções por dia o loop da tela/painel executa). Esse
-                dado não é publicado no material comercial — a MOBTV o calcula na proposta. Aqui
-                mostramos o potencial do ambiente e a programação (
-                {formatCount(result.totalInsertions)} inserções), sem fingir saber quanto do total
-                pertence ao anúncio.
+                O potencial dos pontos no período não representa a entrega do anúncio. O volume
+                desejado e sua distribuição serão avaliados pela equipe comercial; as inserções não
+                multiplicam a audiência apresentada.
               </p>
             </div>
           )

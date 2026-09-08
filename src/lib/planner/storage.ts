@@ -1,10 +1,11 @@
-import type { MediaTypeKey } from "@/data/network-points";
+import { networkPoints, pointMediaTypes, type MediaTypeKey } from "../../data/network-points.ts";
+import { findPointBySlug } from "../point-slug.ts";
 import type {
   MidiaOption,
   PlannerSelection,
   PlannerSimConfig,
   PlannerStoredState,
-} from "@/data/planner-options";
+} from "../../data/planner-options.ts";
 
 /**
  * Persistência do PLANEJADOR PÚBLICO (seleção comercial pré-proposta).
@@ -14,14 +15,17 @@ import type {
  * panels/quotes/orders. Usa `sessionStorage` — a seleção sobrevive a refresh
  * e à navegação entre etapas, mas não vaza entre sessões/abas.
  */
-const STORAGE_KEY = "mobtv:planner:selection:v1";
+export const STORAGE_KEY = "mobtv:planner:selection:v2";
+export const LEGACY_STORAGE_KEY = "mobtv:planner:selection:v1";
 const VALID_MEDIA: MediaTypeKey[] = ["screen", "led", "wifi"];
 const VALID_MIDIA: MidiaOption[] = ["dooh", "wifi", "both"];
 
 export function loadPlannerState(): PlannerStoredState | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
+    const raw =
+      window.sessionStorage.getItem(STORAGE_KEY) ??
+      window.sessionStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as unknown;
     if (!parsed || typeof parsed !== "object") return null;
@@ -42,17 +46,34 @@ export function loadPlannerState(): PlannerStoredState | null {
     for (const item of rawSelections) {
       if (!item || typeof item !== "object") continue;
       const entry = item as Record<string, unknown>;
-      if (typeof entry.key !== "string") continue;
+      const slug =
+        typeof entry.slug === "string"
+          ? entry.slug
+          : typeof entry.key === "string"
+            ? networkPoints.flatMap((category) =>
+                category.points.filter((point) => `${category.key}::${point.nome}` === entry.key),
+              )[0]?.slug
+            : undefined;
+      const found = slug ? findPointBySlug(slug) : undefined;
+      if (!found) continue;
+      const offered = pointMediaTypes(found.point);
       const media = Array.isArray(entry.media)
-        ? (entry.media.filter(
-            (m): m is MediaTypeKey =>
-              typeof m === "string" && VALID_MEDIA.includes(m as MediaTypeKey),
-          ) as MediaTypeKey[])
-        : [];
-      // Compat: estado antigo pode não ter `media` — mantemos a `key` com
-      // lista vazia; o componente decide (auto-seleciona se o ponto só tem 1
-      // mídia, senão pede a escolha ao usuário — nunca escolhe arbitrária).
-      selections.push({ key: entry.key, media: [...new Set(media)] });
+        ? [
+            ...new Set(
+              entry.media.filter(
+                (m): m is MediaTypeKey => VALID_MEDIA.includes(m) && offered.includes(m),
+              ),
+            ),
+          ]
+        : offered.length === 1
+          ? offered
+          : [];
+      // Nunca expande uma escolha salva para todo o inventário do ponto.
+      if (media.length === 0) continue;
+      const selection = { slug: found.point.slug, media };
+      const previous = selections.findIndex((item) => item.slug === selection.slug);
+      if (previous >= 0) selections[previous] = selection;
+      else selections.push(selection);
     }
 
     let sim: PlannerSimConfig | undefined;
@@ -75,6 +96,7 @@ export function savePlannerState(state: PlannerStoredState): void {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.sessionStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     // sessionStorage indisponível (modo privado restrito etc.) — segue sem persistir.
   }
@@ -84,6 +106,7 @@ export function clearPlannerState(): void {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.removeItem(STORAGE_KEY);
+    window.sessionStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch {
     // ignore
   }

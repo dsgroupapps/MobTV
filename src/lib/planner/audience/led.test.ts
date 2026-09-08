@@ -62,7 +62,7 @@ test("2. ponto LED com dados expõe métrica, demografia e comportamento reais",
   assert.equal(intel.mediaType, "led");
   assert.equal(intel.monthly.value, 2_167_660);
   assert.equal(intel.monthly.metricType, "audited_impacts");
-  assert.equal(intel.monthly.label, "impactos/mês");
+  assert.equal(intel.monthly.label, "Impactos mensais medidos");
   assert.equal(intel.monthly.noun, "impactos");
   assert.equal(intel.monthly.tier, "measured");
   assert.equal(intel.baseMetric, undefined); // LED: `monthly` já é a medição

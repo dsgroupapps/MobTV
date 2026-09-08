@@ -3,6 +3,8 @@ import { getPointAudienceData } from "../../../data/point-audience-data.ts";
 import { findPointBySlug } from "../../point-slug.ts";
 import {
   environmentLabelFor,
+  ENVIRONMENT_REFERENCE_NOTE,
+  measuredImpactLabel,
   INCOME_LABEL,
   metricConfidenceTier,
   metricMonthlyLabel,
@@ -53,12 +55,18 @@ export function getLedPointIntelligence(slug: string): PointIntelligence | null 
     monthly: {
       value: monthly.value,
       metricType: monthly.type,
-      label: metricMonthlyLabel(monthly.type),
+      label: measuredImpactLabel(monthly.measurementScope),
       noun: metricNoun(monthly.type),
       period: monthly.period,
       source: monthly.source,
       tier: metricConfidenceTier(monthly),
       estimated: monthly.estimated,
+      sourceQuality: monthly.sourceQuality,
+      measurementScope: monthly.measurementScope,
+      caveat:
+        monthly.measurementScope === "environment_reference"
+          ? ENVIRONMENT_REFERENCE_NOTE
+          : undefined,
     },
     dailyReference: { value: Math.round(monthly.value / 30) },
     demographics: hasDemographics

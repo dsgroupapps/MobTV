@@ -4,6 +4,7 @@ import { estimateLedCampaignImpacts, getLedPointIntelligence, ledCampaignModels 
 import { getUpaScreenPointIntelligence } from "./screen.ts";
 import { getHospitalScreenPointIntelligence } from "./hospital-screen.ts";
 import { getTerminalScreenPointIntelligence } from "./terminal-screen.ts";
+import { getFeiraScreenPointIntelligence } from "./feira-screen.ts";
 import { INCOME_LABEL, worstTier } from "./metrics.ts";
 import type {
   CampaignAudienceRollup,
@@ -16,6 +17,16 @@ import type {
 } from "./types.ts";
 
 export * from "./types.ts";
+export * from "./wifi.ts";
+export { getFeiraScreenPointIntelligence } from "./feira-screen.ts";
+
+export function pointAudienceState(
+  intelligence: PointIntelligence,
+): "measured" | "modeled" | "partial" | "missing" {
+  if (intelligence.monthly?.metricType === "audited_impacts") return "measured";
+  if (intelligence.monthly?.metricType === "modeled_impressions") return "modeled";
+  return intelligence.monthly || intelligence.baseMetric ? "partial" : "missing";
+}
 export {
   metricConfidenceTier,
   metricMonthlyLabel,
@@ -57,15 +68,14 @@ const IMPACT_METRIC_KINDS = new Set<MetricKind>(["audited_impacts", "modeled_imp
  *  - `screen` → Tela: estratégia UPA (modelo sobre procedimentos) ??
  *               hospital (medido se houver, senão modelo sobre atendimentos/
  *               procedimentos/consultas) ?? terminal/rodoviária (medido se
- *               houver, senão modelo sobre fluxo de passageiros). As três
- *               são mutuamente exclusivas por `researchCategory` (UPA /
- *               Hospital / BRT+Terminal Rodoviário), então a ordem só importa
- *               como fallback técnico.
- *  - `wifi`   → ainda não implementada.
+ *               houver, senão modelo sobre fluxo de passageiros) ?? Feira
+ *               (base parcial de visitantes, sem conversão em impactos).
+ *               As estratégias são exclusivas por categoria de pesquisa.
+ *  - `wifi`   → contrato separado: getWifiPointIntelligence (wifi.ts).
  *
  * Se o ponto tiver `led` e `screen` selecionados, o Painel LED tem prioridade
  * (métrica medida). Trocar a mídia do ponto para `wifi` remove qualquer
- * inteligência (retorna `null`).
+ * inteligência DOOH (retorna `null`); o serviço WiFi permanece na seleção.
  */
 export function getPointIntelligence(
   slug: string,
@@ -79,10 +89,11 @@ export function getPointIntelligence(
     const screen =
       getUpaScreenPointIntelligence(slug) ??
       getHospitalScreenPointIntelligence(slug) ??
-      getTerminalScreenPointIntelligence(slug);
+      getTerminalScreenPointIntelligence(slug) ??
+      getFeiraScreenPointIntelligence(slug);
     if (screen) return screen;
   }
-  // TODO(fase WiFi Ads): estratégia específica de `wifi`.
+  // WiFi possui contrato próprio em wifi.ts; não recebe audiência DOOH.
   return null;
 }
 
@@ -97,7 +108,19 @@ export function getPointIntelligence(
 export function rollupCampaignAudience(
   points: { slug: string; name: string; intelligence: PointIntelligence }[],
 ): CampaignAudienceRollup {
+  // Uma referência ambiental pode chegar por LED e Tela; não é audiência adicional.
+  // A seleção comercial fica no planner, independente desta lista analítica.
+  const seenReferences = new Set<string>();
+  points = points.filter(({ slug, intelligence }) => {
+    const metric = intelligence.monthly;
+    if (metric?.measurementScope !== "environment_reference") return true;
+    const key = JSON.stringify([slug, metric.metricType, metric.source, metric.period]);
+    if (seenReferences.has(key)) return false;
+    seenReferences.add(key);
+    return true;
+  });
   const groupsByType = new Map<MetricKind, CampaignMetricGroup>();
+  const referencesByType = new Map<MetricKind, CampaignMetricGroup>();
   const environments: string[] = [];
   const ages: number[] = [];
   const female: number[] = [];
@@ -105,16 +128,17 @@ export function rollupCampaignAudience(
   const incomes: { value: number; type: IncomeType }[] = [];
 
   for (const { name, intelligence } of points) {
-    const m = intelligence.monthly;
+    const m = intelligence.monthly ?? intelligence.baseMetric;
+    const targetGroups = intelligence.monthly ? groupsByType : referencesByType;
     if (m) {
-      const existing = groupsByType.get(m.metricType);
+      const existing = targetGroups.get(m.metricType);
       if (existing) {
         existing.total += m.value;
         existing.tier = worstTier(existing.tier, m.tier);
         existing.pointCount += 1;
         existing.pointNames.push(name);
       } else {
-        groupsByType.set(m.metricType, {
+        targetGroups.set(m.metricType, {
           metricType: m.metricType,
           label: m.label,
           noun: m.noun,
@@ -151,6 +175,7 @@ export function rollupCampaignAudience(
     ledPointCount: points.length,
     points,
     metricGroups,
+    referenceGroups: [...referencesByType.values()],
     environments,
     environmentsLabel: environments.join(" + "),
     averageAge: ages.length > 0 ? Math.round(mean(ages) * 10) / 10 : undefined,

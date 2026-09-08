@@ -8,23 +8,17 @@ export const midiaOptions: { value: MidiaOption; label: string; hint: string }[]
   { value: "both", label: "DOOH + WiFi Ads", hint: "Inventário combinado" },
 ];
 
-/**
- * Um ponto adicionado ao planejador + os tipos de mídia escolhidos naquele
- * local. `media` nunca fica vazio depois de confirmado — um ponto sem mídia
- * simplesmente não está na seleção. A `key` é a mesma chave estável já usada
- * no resto do planejador (`${categoria}::${nome}`), então um ponto aparece
- * uma única vez, com a lista de mídias, nunca duplicado por mídia.
- */
+/** Seleção comercial identificada pelo slug estável, com mídias explicitamente escolhidas. */
 export type PlannerSelection = {
-  key: string;
+  slug: string;
   media: MediaTypeKey[];
 };
 
-/** Configuração do simulador de campanha (Painel LED) — ver src/lib/planner/audience. */
+/** Configuração comercial independente da disponibilidade de audiência. */
 export type PlannerSimConfig = {
   /** duração da campanha em dias (inteiro) */
   days: number;
-  /** inserções por dia (inteiro) */
+  /** Volume diário de referência da campanha DOOH; não por ponto nem acessos WiFi. */
   insertionsPerDay: number;
 };
 
