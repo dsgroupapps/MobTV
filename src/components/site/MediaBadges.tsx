@@ -26,6 +26,8 @@ export const categoryIcon: Record<CategoryKey, LucideIcon> = {
   hospitais: Stethoscope,
   feiras: Store,
   servicos: Building2,
+  bibliotecas: Building2,
+  ubs: HeartPulse,
 };
 
 // TELA = preenchimento sólido gold; PAINEL LED = contorno gold-deep sobre

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useReveal } from "@/hooks/useReveal";
+import { activeRegionCount } from "@/data/df-regions";
 import transportesImg from "@/assets/network-transportes.jpg";
 import saudeImg from "@/assets/network-saude.jpg";
 import feirasImg from "@/assets/network-feiras.jpg";
@@ -23,6 +24,8 @@ const categoryFallbackImage: Record<CategoryKey, string> = {
   hospitais: saudeImg,
   feiras: feirasImg,
   servicos: servicosImg,
+  bibliotecas: servicosImg,
+  ubs: saudeImg,
 };
 
 const categoryTabs: { key: CategoryKey | "todos"; label: string }[] = [
@@ -42,7 +45,9 @@ export function Gallery() {
 
   const filtered = useMemo(() => {
     const cats =
-      activeCategory === "todos" ? networkPoints : networkPoints.filter((c) => c.key === activeCategory);
+      activeCategory === "todos"
+        ? networkPoints
+        : networkPoints.filter((c) => c.key === activeCategory);
     const out: { point: NetworkPoint; category: Category }[] = [];
     for (const cat of cats) {
       for (const point of cat.points) {
@@ -65,7 +70,8 @@ export function Gallery() {
             Conheça nossos pontos
           </h2>
           <p className="reveal reveal-3 mt-5 text-ink-soft text-base md:text-lg leading-relaxed">
-            Cobertura WiFi ADS e DOOH em 16 cidades do Distrito Federal — a maior rede da região.
+            Cobertura WiFi ADS e DOOH em {activeRegionCount} regiões do Distrito Federal — a maior
+            rede da região.
           </p>
         </div>
 

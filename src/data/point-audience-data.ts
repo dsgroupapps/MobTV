@@ -15,7 +15,7 @@ import { findPointBySlug, type PointWithCategory } from "../lib/point-slug.ts";
  * (ver .gitignore) e não é lida em runtime; os dados abaixo são a
  * transcrição tipada e definitiva dela.
  *
- * ESCOPO (25 de 44 pontos): esta camada só existe para pontos com Tela
+ * ESCOPO (25 de 51 pontos): esta camada só existe para pontos com Tela
  * (monitor) e/ou Painel LED em `network-points.ts` — são esses os locais
  * com QR Code físico apontando para /ponto/$slug. Pontos só-WiFi (sem
  * `produtos`) não recebem entrada aqui; o cálculo do conjunto elegível

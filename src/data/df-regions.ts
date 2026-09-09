@@ -26,7 +26,7 @@
  * distância a partir de coordenadas reais.
  */
 
-import { networkPoints, pointMediaTypes, type MediaTypeKey } from "./network-points";
+import { networkPoints, pointMediaTypes, type MediaTypeKey } from "./network-points.ts";
 
 // Nomes reais de Região Administrativa do DF que aparecem (direta ou
 // geograficamente) entre os pontos atuais. "Águas Claras" foi incluída além
@@ -210,3 +210,15 @@ export const regionSummaries: RegionSummary[] = computeRegionSummaries();
 
 /** Total de regiões com pelo menos 1 ponto ativo — não hardcodar "16". */
 export const activeRegionCount = regionSummaries.length;
+
+/** Contagem derivada por RA para os próximos blocos de apresentação. */
+export const pointsByRegion = Object.fromEntries(
+  regionSummaries.map((summary) => [summary.region, summary.count]),
+) as Record<string, number>;
+
+const pointsWithDerivedRegion = new Set(regionSummaries.flatMap((summary) => summary.pointNames));
+
+/** Pontos sem RA derivável de nome ou coordenada; não recebem RA inferida. */
+export const pointsWithoutDerivedRegion = networkPoints
+  .flatMap((category) => category.points)
+  .filter((point) => !pointsWithDerivedRegion.has(point.nome));

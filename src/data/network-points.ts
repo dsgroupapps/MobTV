@@ -2,20 +2,15 @@
  * Locais da rede MOBTV, enriquecidos com o rate card 2026 (`rate-card-2026.ts`)
  * onde foi possível associar o nome do local com segurança.
  *
- * REGRA DEFINITIVA DE ACERVO (reauditoria completa, substitui critérios
- * anteriores): a existência de um ponto e o tipo de mídia que ele exibe
- * (Tela / Painel LED / WiFi Ads) são determinados EXCLUSIVAMENTE por dois
- * inventários nominais do Media Kit:
+ * A existência física e as mídias DOOH deste catálogo preservam o acervo
+ * anterior. A lista operacional recebida em 2026-09 atualiza exclusivamente
+ * a infraestrutura e a disponibilidade comercial de WiFi: ela não remove
+ * pontos, Tela, LED, audiência, impacto, foto ou localização já existentes.
  *
- *   - p.28 "Monitores e Painéis LED"  → confirma Tela (monitor) e/ou Painel LED
- *   - p.52 "Wifi ADS — Locais com Wifi da MOBTV" → confirma WiFi Ads
- *
- * Um ponto só existe no catálogo se aparecer nominalmente em pelo menos uma
- * das duas páginas. Categoria genérica, ícone de mapa, foto em public/ ou
- * presença no site antigo NUNCA justificam manter um ponto — só a
- * página 28 e/ou 52. Preço, fluxo e impacto auditado continuam vindo de
- * outras tabelas do Media Kit (p.39, p.60-62), associados apenas quando há
- * correspondência inequívoca com um ponto já confirmado por p.28/p.52.
+ * O inventário histórico de DOOH continua documentado pelo Media Kit (p.28),
+ * e preço, fluxo e impacto por suas fontes específicas. A lista operacional
+ * de WiFi substitui a p.52 apenas para `wifi.status`: ponto sem ela não é
+ * removido e WiFi histórico ausente fica `unconfirmed`, nunca ativo.
  *
  * Normalização permitida ao cruzar as duas listas: acento/maiúscula, artigo
  * (da/de/do), parêntese, e variações óbvias de escrita da mesma entidade
@@ -24,25 +19,30 @@
  * Sobradinho"). Nomes genuinamente diferentes (ex.: "Feira de Samambaia" vs.
  * "Feira Samambaia 2") são tratados como pontos distintos, nunca fundidos.
  *
- * Nesta reauditoria, comparado ao levantamento anterior (que usava a tabela
- * de preços p.60-62 e páginas de fluxo como fonte de existência):
- *   - REMOVIDOS por não constarem em p.28 nem p.52: Terminal Interestadual de
- *     Brasília; os 6 Restaurantes Comunitários; Biblioteca da Ceilândia.
- *   - ADICIONADO: Feira Samambaia 2 (p.52, item 14 — distinta de "Feira de
- *     Samambaia", item 13; ver investigação no comentário do ponto).
- *   - CORRIGIDOS (existiam, badge errada): Estação Águas Claras e Estação
- *     Arniqueiras perdem WiFi Ads (não estão nas 8 estações de metrô da p.52);
- *     Rodoviária do Plano Piloto, Hospital Regional de Sobradinho, Feira de
- *     Samambaia e Na Hora Brazlândia ganham WiFi Ads (estão na p.52 e não
- *     tinham sido associados antes).
- *
- * `connectivity` (dual = DOOH+WiFi, wifi = só WiFi Social) é a mesma
- * classificação por categoria já usada no projeto — não alterada aqui.
+ * Os novos locais desta atualização trazem somente a informação confirmada:
+ * nome, categoria e WiFi. Coordenadas, DOOH, preço e audiência permanecem
+ * ausentes até haver fonte própria.
  */
 
 export type Connectivity = "dual" | "wifi";
 
-export type CategoryKey = "metro" | "terminais" | "upas" | "hospitais" | "feiras" | "servicos";
+export type CategoryKey =
+  | "metro"
+  | "terminais"
+  | "upas"
+  | "hospitais"
+  | "feiras"
+  | "servicos"
+  | "bibliotecas"
+  | "ubs";
+
+/** Situação comercial atual da infraestrutura WiFi no ponto. */
+export type WifiCampaignStatus = "active" | "temporarily_unavailable" | "unconfirmed";
+
+export type WifiService = {
+  /** A infraestrutura WiFi MOBTV existe neste ponto. */
+  status: WifiCampaignStatus;
+};
 
 /** Um formato de mídia DOOH disponível no ponto (pode haver mais de um por local). */
 export type DoohProduct = {
@@ -73,8 +73,14 @@ export type NetworkPoint = {
   slug: string;
   /** Formatos DOOH com preço — ausente quando o rate card não lista o ponto. */
   produtos?: DoohProduct[];
-  /** WiFi Ads — custo por engajamento (CPE), quando o ponto está na lista de WiFi Ads (p.52). */
+  /** CPE histórico do rate card quando havia correspondência individual; não define disponibilidade. */
   valorPorCpe?: number;
+  /**
+   * Infraestrutura e disponibilidade operacional de WiFi. Ausente significa
+   * que o ponto não tem WiFi confirmado no catálogo atual; `unconfirmed`
+   * preserva uma instalação histórica que não aparece na lista operacional.
+   */
+  wifi?: WifiService;
   /** Fluxo mensal de passageiros — só existe para as 5 estações de Metrô com painel de LED. */
   fluxoMensal?: number;
   /** Impactos auditados/mês (Datavisiooh, 2024) — só nos pontos com entrada individual na auditoria. */
@@ -105,8 +111,8 @@ export type Category = {
  * Taxonomia de mídia exibida ao anunciante — mais específica que o rótulo
  * comercial amplo "DOOH". Derivada diretamente do `tipo` de cada produto
  * (que já vem do rate card: strings como 'Monitor 49"' vs "LED 2x1m") e da
- * presença de `valorPorCpe` — não é um campo novo armazenado, é calculada a
- * partir do mesmo dado já sourced do Media Kit, então não há como divergir.
+ * infraestrutura `wifi` do ponto. A disponibilidade para campanha é exposta
+ * separadamente por `wifi.status`.
  */
 export type MediaTypeKey = "screen" | "led" | "wifi";
 
@@ -114,11 +120,19 @@ export function pointMediaTypes(point: NetworkPoint): MediaTypeKey[] {
   const types: MediaTypeKey[] = [];
   if (point.produtos?.some((p) => p.tipo.includes("Monitor"))) types.push("screen");
   if (point.produtos?.some((p) => p.tipo.includes("LED"))) types.push("led");
-  if (point.valorPorCpe != null) types.push("wifi");
+  if (point.wifi) types.push("wifi");
   return types;
 }
 
-const WIFI_CPE = 8.0; // valor único do rate card (Media Kit p.62) — mesmo para todos os pontos WiFi Ads
+export function wifiCampaignStatus(point: NetworkPoint): WifiCampaignStatus | undefined {
+  return point.wifi?.status;
+}
+
+export function isWifiCampaignAvailable(point: NetworkPoint): boolean {
+  return point.wifi?.status === "active";
+}
+
+const WIFI_CPE = 8.0; // valor único do rate card histórico (Media Kit p.62); não atribuir a pontos novos neste bloco
 
 export const networkPoints: Category[] = [
   {
@@ -133,6 +147,7 @@ export const networkPoints: Category[] = [
         // rate-card-2026 tem 2 painéis para "Estação Central" (entrada+saída),
         // mesmo fluxo mensal reportado nos dois — não somado.
         produtos: [{ tipo: "LED 4x1,2m / 3x1,2m", telas: 2, custoInsercao15s: 4.9 }],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         fluxoMensal: 478_000,
         // Auditoria (p.39) tem 2 linhas para Central (Entrada 1.025.704 + Escada
@@ -152,6 +167,7 @@ export const networkPoints: Category[] = [
         slug: "estacao-shopping",
         // p.28: "Metrô Estação Shopping — 1 Painel de LED". p.52 item 2: WiFi.
         produtos: [{ tipo: "LED 3x2m", telas: 1, custoInsercao15s: 3.2 }],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         fluxoMensal: 263_000,
         // Auditoria (p.39) lista "Metrô Shopping" — mesmo painel, nome abreviado.
@@ -169,6 +185,7 @@ export const networkPoints: Category[] = [
         // Não aparece em p.28 (sem LED/monitor confirmado).
         nome: "Estação Feira",
         slug: "estacao-feira",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_feira_guara.jpg"],
         location: {
@@ -180,6 +197,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Guará",
         slug: "estacao-guara",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_guara.png"],
         location: {
@@ -191,6 +209,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Ceilândia Centro",
         slug: "estacao-ceilandia-centro",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_metro_ceilandia_centro.png"],
         location: {
@@ -202,6 +221,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Ceilândia Sul",
         slug: "estacao-ceilandia-sul",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_sul.png"],
         location: {
@@ -213,6 +233,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Ceilândia Norte",
         slug: "estacao-ceilandia-norte",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_ceilandia_norte.webp"],
         location: {
@@ -224,6 +245,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Guariroba",
         slug: "estacao-guariroba",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/estacao_guariroba.jpg"],
         location: {
@@ -235,10 +257,9 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Águas Claras",
         slug: "estacao-aguas-claras",
-        // p.28: "Metrô Estação Águas Claras — 1 Painel de LED". NÃO está entre
-        // as 8 estações de metrô da p.52 — sem valorPorCpe (removido nesta
-        // reauditoria; a versão anterior herdava WiFi de uma tabela de preços
-        // que não é mais a fonte de existência/mídia).
+        // WiFi ativo confirmado pela lista operacional de 2026-09. O CPE não
+        // é inserido aqui: a atualização não altera pricing.
+        wifi: { status: "active" },
         produtos: [{ tipo: "LED 3x1m", telas: 1, custoInsercao15s: 3.2 }],
         fluxoMensal: 269_000,
         // Auditoria (p.39): "Metrô Águas Claras".
@@ -253,8 +274,8 @@ export const networkPoints: Category[] = [
       {
         nome: "Estação Arniqueiras",
         slug: "estacao-arniqueiras",
-        // p.28: "Metrô Estação Arniqueiras — 1 Painel de LED". Mesma situação
-        // de Águas Claras: não está na p.52, sem valorPorCpe.
+        // WiFi ativo confirmado pela lista operacional de 2026-09.
+        wifi: { status: "active" },
         produtos: [{ tipo: "LED 3x1m", telas: 1, custoInsercao15s: 3.2 }],
         fluxoMensal: 275_000,
         // Auditoria (p.39): "Metrô Arniqueiras".
@@ -294,6 +315,10 @@ export const networkPoints: Category[] = [
         // ambiguidade. Não está em p.28 (sem Tela/LED confirmado).
         nome: "Rodoviária do Plano Piloto",
         slug: "rodoviaria-do-plano-piloto",
+        // A infraestrutura histórica é preservada, mas este ponto não consta
+        // na nova lista operacional de WiFi e não fica disponível sem nova
+        // confirmação.
+        wifi: { status: "unconfirmed" },
         valorPorCpe: WIFI_CPE,
         images: ["/rodoviaria_plano_piloto.webp"],
         location: {
@@ -310,6 +335,7 @@ export const networkPoints: Category[] = [
         // ambiguidade. p.28: 2 monitores (sem preço de inserção publicado,
         // mesmo padrão da UPA Ceilândia Setor O). p.52: WiFi Ads.
         produtos: [{ tipo: 'Monitor 49"', telas: 2 }],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/rodoviaria_sobradinho.webp"],
         location: {
@@ -332,6 +358,7 @@ export const networkPoints: Category[] = [
           { tipo: "LED 2x1m", telas: 3, custoInsercao15s: 3.2, custoInsercao30s: 5.81 },
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         // Auditoria (p.39): "BRT Santa Maria 1" 2.985.180 + "BRT Santa Maria 2"
         // 760.420 — 2 painéis distintos, somados (mesmo critério do impacto de
@@ -354,6 +381,7 @@ export const networkPoints: Category[] = [
           { tipo: "LED 2x1m", telas: 3, custoInsercao15s: 3.2, custoInsercao30s: 5.81 },
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         // Auditoria (p.39): "BRT Gama 1" 789.953 + "BRT Gama 2" 1.359.220.
         impactosAuditadosMes: 2_149_173,
@@ -372,6 +400,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 3, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/terminal_setor_o.jpg"],
         location: {
@@ -380,13 +409,20 @@ export const networkPoints: Category[] = [
           mapsUrl: "https://maps.app.goo.gl/amHD6CKYhvpdG7veA",
         },
       },
-      // REMOVIDO nesta reauditoria: "Terminal Interestadual de Brasília" não
-      // aparece em p.28 nem em p.52. A versão anterior do dataset associava
-      // WiFi Ads a este ponto via "Rodoviária Interestadual" (tabela de
-      // preços p.62), mas essa tabela deixou de ser a fonte de existência —
-      // sem suporte nominal nas duas páginas de referência, o ponto foi
-      // removido do catálogo. Imagem /terminal_interestadual_brasilia.jpg
-      // removida de public/ junto com a entrada.
+      {
+        // Novo ponto físico confirmado exclusivamente pela lista operacional
+        // WiFi. Não há nesta fonte confirmação de DOOH, preço, foto ou mapa.
+        nome: "Rodoviária Interestadual",
+        slug: "rodoviaria-interestadual",
+        wifi: { status: "active" },
+      },
+      {
+        // Distinto da Rodoviária de Sobradinho (I), por constar separadamente
+        // como "Terminal de Sobradinho 2" na lista operacional.
+        nome: "Terminal de Sobradinho II",
+        slug: "terminal-de-sobradinho-ii",
+        wifi: { status: "temporarily_unavailable" },
+      },
     ],
   },
   {
@@ -401,6 +437,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_ceilandia.jpeg"],
         location: {
@@ -415,6 +452,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_samambaia.png"],
         location: {
@@ -444,6 +482,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_sobradinho_2.jpg"],
         // O link fornecido para "UPA Sobradinho II" resolve para "UBS 1 -
@@ -461,6 +500,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_gama.jpg"],
         location: {
@@ -475,6 +515,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_recanto_emas.webp"],
         location: {
@@ -492,6 +533,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_riachofundo.jpg", "/upa_riacho_2.jpg"],
         location: {
@@ -507,6 +549,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_planaltina.jpg"],
         location: {
@@ -521,6 +564,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_vicentepires.jpg"],
         location: {
@@ -535,6 +579,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_brazlandia.jpeg"],
         location: {
@@ -550,6 +595,7 @@ export const networkPoints: Category[] = [
         // publicado em nenhuma tabela. p.52 item 31: 'UPA Ceilândia II "Setor
         // O"' — WiFi.
         produtos: [{ tipo: 'Monitor 49"', telas: 1 }],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/upa_ceilandia_ii_setor_o.png"],
         location: {
@@ -571,6 +617,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_taguatinga.png"],
         location: {
@@ -585,6 +632,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_ceilandia.jpeg"],
         location: {
@@ -599,6 +647,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 1, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_gama.png"],
         location: {
@@ -615,6 +664,7 @@ export const networkPoints: Category[] = [
         // versão anterior deixava sem preço por seguir só a tabela de preços
         // p.62, que não lista Sobradinho entre os 4 hospitais — mas a p.52 é
         // agora a fonte de existência/mídia, e ela confirma).
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_sobradinho.jpg"],
         location: {
@@ -629,6 +679,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/hospital_regional_santa_maria.jpg"],
         location: {
@@ -636,6 +687,13 @@ export const networkPoints: Category[] = [
           lng: -48.0362123,
           mapsUrl: "https://maps.app.goo.gl/FHQXYRg9z3DiS1Co7",
         },
+      },
+      {
+        // Novo ponto físico WiFi; nenhum dado de Tela, LED, preço, audiência,
+        // impacto, foto ou coordenada foi fornecido para este bloco.
+        nome: "Hospital Sol Nascente",
+        slug: "hospital-sol-nascente",
+        wifi: { status: "active" },
       },
     ],
   },
@@ -650,6 +708,7 @@ export const networkPoints: Category[] = [
         produtos: [
           { tipo: 'Monitor 49"', telas: 2, custoInsercao15s: 1.9, custoInsercao30s: 3.32 },
         ],
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/feira_guara.png"],
         location: {
@@ -661,6 +720,9 @@ export const networkPoints: Category[] = [
       {
         nome: "Feira dos Goianos",
         slug: "feira-dos-goianos",
+        // Infraestrutura histórica preservada, sem disponibilidade ativa
+        // confirmada pela nova lista operacional.
+        wifi: { status: "unconfirmed" },
         valorPorCpe: WIFI_CPE,
         images: ["/feira_goianos.jpg"],
         location: {
@@ -672,6 +734,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Feira Modelo de Sobradinho I",
         slug: "feira-modelo-de-sobradinho-i",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/feira_modelo.jpeg", "/feira_sobradinho1.jpg"],
         location: {
@@ -684,6 +747,7 @@ export const networkPoints: Category[] = [
         // p.52 item 9: "Feira Central da Ceilândia".
         nome: "Feira da Ceilândia",
         slug: "feira-da-ceilandia",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/feira_central_ceilandia.jpeg"],
         location: {
@@ -705,6 +769,7 @@ export const networkPoints: Category[] = [
         // adicionado a este ponto (não tinha nenhuma mídia antes).
         nome: "Feira de Samambaia",
         slug: "feira-de-samambaia",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/feira_samambaia.webp"],
         location: {
@@ -724,6 +789,7 @@ export const networkPoints: Category[] = [
         // já usada em outro lugar do site para a categoria.
         nome: "Feira Samambaia 2",
         slug: "feira-samambaia-2",
+        wifi: { status: "temporarily_unavailable" },
         valorPorCpe: WIFI_CPE,
         images: ["/feira_samambaia_2.jpg"],
         location: {
@@ -742,6 +808,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Na Hora Ceilândia",
         slug: "na-hora-ceilandia",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_ceilandia.jpg"],
         location: {
@@ -753,6 +820,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Na Hora Taguatinga",
         slug: "na-hora-taguatinga",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_taguatinga.jpg"],
         location: {
@@ -765,6 +833,7 @@ export const networkPoints: Category[] = [
         // p.52 item 21: "Na Hora - Rodoviária Plano Piloto".
         nome: "Na Hora Rodoviária Plano Piloto",
         slug: "na-hora-rodoviaria-plano-piloto",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/na_hora_rodoviaria_plano.png"],
         location: {
@@ -776,6 +845,7 @@ export const networkPoints: Category[] = [
       {
         nome: "Na Hora Gama",
         slug: "na-hora-gama",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_gama.jpeg"],
         location: {
@@ -791,6 +861,7 @@ export const networkPoints: Category[] = [
         // de Na Hora — mas a p.52 confirma).
         nome: "Na Hora Brazlândia",
         slug: "na-hora-brazlandia",
+        wifi: { status: "temporarily_unavailable" },
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_brazlandia.jpg"],
         location: {
@@ -802,16 +873,44 @@ export const networkPoints: Category[] = [
       {
         nome: "Na Hora Sobradinho",
         slug: "na-hora-sobradinho",
+        wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_sobradinho.jpeg"],
       },
-      // REMOVIDOS nesta reauditoria por não constarem em p.28 nem p.52:
-      // categoria "Restaurantes Comunitários" inteira (6 pontos: Brazlândia,
-      // Sobradinho II, Ceilândia, São Sebastião, Gama, Recanto) e "Biblioteca
-      // da Ceilândia". Ambos só apareciam como ícone genérico no mapa de
-      // cobertura, nunca nomeados individualmente em nenhuma das 63 páginas
-      // do Media Kit — não atendem mais à regra de acervo. Imagens
-      // correspondentes removidas de public/ junto com as entradas.
+      {
+        nome: "Na Hora Samambaia",
+        slug: "na-hora-samambaia",
+        wifi: { status: "active" },
+      },
+    ],
+  },
+  {
+    key: "bibliotecas",
+    label: "Bibliotecas",
+    connectivity: "wifi",
+    points: [
+      {
+        nome: "Biblioteca de Ceilândia",
+        slug: "biblioteca-de-ceilandia",
+        wifi: { status: "temporarily_unavailable" },
+      },
+    ],
+  },
+  {
+    key: "ubs",
+    label: "UBSs",
+    connectivity: "wifi",
+    points: [
+      {
+        nome: "UBS 05 Arapoanga",
+        slug: "ubs-05-arapoanga",
+        wifi: { status: "temporarily_unavailable" },
+      },
+      {
+        nome: "UBS 06 Arapoanga",
+        slug: "ubs-06-arapoanga",
+        wifi: { status: "temporarily_unavailable" },
+      },
     ],
   },
 ];
@@ -824,3 +923,21 @@ export const networkPoints: Category[] = [
  * não a contagem de itens individualmente nomeados/detalhados aqui.
  */
 export const totalPointsCount = networkPoints.reduce((sum, cat) => sum + cat.points.length, 0);
+
+export const allNetworkPoints = networkPoints.flatMap((category) => category.points);
+
+export const pointsByCategory = Object.fromEntries(
+  networkPoints.map((category) => [category.key, category.points.length]),
+) as Record<CategoryKey, number>;
+
+export const wifiPointsCount = allNetworkPoints.filter((point) => point.wifi).length;
+export const wifiActivePointsCount = allNetworkPoints.filter(isWifiCampaignAvailable).length;
+export const wifiTemporarilyUnavailablePointsCount = allNetworkPoints.filter(
+  (point) => point.wifi?.status === "temporarily_unavailable",
+).length;
+export const wifiUnconfirmedPointsCount = allNetworkPoints.filter(
+  (point) => point.wifi?.status === "unconfirmed",
+).length;
+
+/** Pontos confirmados no catálogo sem coordenada confiável ainda. */
+export const pointsWithoutCoordinates = allNetworkPoints.filter((point) => !point.location);

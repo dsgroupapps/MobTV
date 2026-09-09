@@ -50,11 +50,13 @@ const slugsBeforeFreeze = [
   ["Na Hora Sobradinho", "na-hora-sobradinho"],
 ] as const;
 
-test("mantém os 44 slugs públicos idênticos ao snapshot anterior", () => {
+test("preserva os 44 slugs públicos existentes e adiciona somente slugs novos únicos", () => {
   const current = networkPoints.flatMap((category) =>
     category.points.map((point) => [point.nome, point.slug] as const),
   );
 
-  assert.deepEqual(current, slugsBeforeFreeze);
-  assert.equal(new Set(current.map(([, slug]) => slug)).size, 44);
+  const currentByName = new Map(current);
+  for (const [name, slug] of slugsBeforeFreeze) assert.equal(currentByName.get(name), slug, name);
+  assert.equal(new Set(current.map(([, slug]) => slug)).size, current.length);
+  assert.equal(current.length, 51);
 });

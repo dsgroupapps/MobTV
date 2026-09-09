@@ -17,9 +17,9 @@ const eligibleSlugs = new Set(
     .map((point) => point.slug),
 );
 
-test("catálogo público mantém 44 pontos e 44 slugs únicos", () => {
-  assert.equal(allPoints.length, 44);
-  assert.equal(allSlugs.size, 44);
+test("catálogo público mantém 51 pontos e 51 slugs únicos", () => {
+  assert.equal(allPoints.length, 51);
+  assert.equal(allSlugs.size, 51);
 });
 
 test("todo slug de pointAudienceData existe em networkPoints", () => {
@@ -48,9 +48,9 @@ test("25 registros da planilha == 25 pontos elegíveis (Tela/LED) == 25 associad
   assert.equal(associated, 25);
 });
 
-test("19 pontos elegíveis-negativos (só WiFi) permanecem sem audienceData", () => {
+test("26 pontos sem Tela/LED permanecem sem audienceData", () => {
   const withoutData = allPoints.filter((point) => !(point.slug in pointAudienceData));
-  assert.equal(withoutData.length, 44 - 25);
+  assert.equal(withoutData.length, 51 - 25);
   for (const point of withoutData) {
     assert.ok(
       !eligibleSlugs.has(point.slug),

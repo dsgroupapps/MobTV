@@ -1,4 +1,5 @@
 import { totalPointsCount } from "./network-points";
+import { activeRegionCount } from "./df-regions";
 
 /**
  * Dados institucionais da MOBTV — fonte única de verdade.
@@ -30,13 +31,13 @@ export const auditedImpacts = {
 /**
  * Pegada física exibida nas seções institucionais atuais. A contagem de
  * pontos vem do catálogo nominal usado por /rede (`network-points.ts`), para
- * não divergir do acervo atual. A quantidade de cidades permanece o número
- * institucional do Media Kit.
+ * não divergir do acervo atual. A quantidade de RAs também é derivada do
+ * catálogo, sem manter uma contagem manual.
  */
 export const networkFootprint = {
   points: totalPointsCount,
-  cities: 16,
-  source: "Pontos: catálogo nominal atual (`network-points.ts`). Cidades: Media Kit p.33 e p.47.",
+  cities: activeRegionCount,
+  source: "Pontos e RAs: catálogo nominal atual (`network-points.ts` + `df-regions.ts`).",
 };
 
 /**

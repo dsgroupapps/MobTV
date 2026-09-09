@@ -11,6 +11,8 @@ const VALID_CATEGORIES: CategoryKey[] = [
   "hospitais",
   "feiras",
   "servicos",
+  "bibliotecas",
+  "ubs",
 ];
 
 type PlanejadorSearch = {

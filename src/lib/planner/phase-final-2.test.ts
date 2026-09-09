@@ -33,19 +33,19 @@ const review = (selections: PlannerSelection[]) =>
     }),
   );
 
-test("inventário preserva 44 slugs, 7 LED, 20 Tela e 40 WiFi", () => {
-  assert.equal(catalog.length, 44);
-  assert.equal(new Set(catalog.map((point) => point.slug)).size, 44);
+test("inventário atualizado preserva DOOH: 51 slugs, 7 LED, 20 Tela e 49 WiFi", () => {
+  assert.equal(catalog.length, 51);
+  assert.equal(new Set(catalog.map((point) => point.slug)).size, 51);
   for (const [media, count] of [
     ["led", 7],
     ["screen", 20],
-    ["wifi", 40],
+    ["wifi", 49],
   ] as const) {
     assert.equal(catalog.filter((point) => pointMediaTypes(point).includes(media)).length, count);
   }
 });
 
-test("todos os 40 WiFi têm estado explícito sem valor fabricado; mídia inexistente é recusada", () => {
+test("todos os 49 WiFi têm inteligência sem valor fabricado; mídia inexistente é recusada", () => {
   for (const point of catalog) {
     const intel = getWifiPointIntelligence(point.slug);
     if (pointMediaTypes(point).includes("wifi")) {
@@ -268,7 +268,7 @@ test("regressão: todos os impactos medidos e modelos existentes mantêm totais"
   );
   assert.equal(rollup.impactPotentialTotal, 14786021);
   assert.equal(rollup.referenceGroups[0].total, 120000);
-  assert.equal(points.length, 44);
+  assert.equal(points.length, 51);
 });
 
 // sessionStorage realista, sem DOM: testa serialização, reload e migração.
