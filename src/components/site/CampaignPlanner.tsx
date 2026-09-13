@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Check, ImageOff, X } from "lucide-react";
 import {
   networkPoints,
-  pointMediaTypes,
+  campaignAvailableMediaTypes,
+  isWifiTemporarilyUnavailable,
   type CategoryKey,
   type MediaTypeKey,
   type NetworkPoint,
@@ -51,7 +52,7 @@ function hasDooh(types: MediaTypeKey[]) {
 }
 
 function mediaEligible(point: NetworkPoint, midia: MidiaOption) {
-  const types = pointMediaTypes(point);
+  const types = campaignAvailableMediaTypes(point);
   if (midia === "dooh") return hasDooh(types);
   if (midia === "wifi") return types.includes("wifi");
   return hasDooh(types) || types.includes("wifi");
@@ -84,7 +85,7 @@ function findPoint(key: string): PointEntry | undefined {
 }
 
 function initialMediaForPoint(point: NetworkPoint): MidiaOption {
-  const types = pointMediaTypes(point);
+  const types = campaignAvailableMediaTypes(point);
   if (hasDooh(types) && types.includes("wifi")) return "both";
   if (hasDooh(types)) return "dooh";
   return "wifi";
@@ -211,7 +212,7 @@ export function CampaignPlanner({
     // direto; ponto multimídia fica de fora até o usuário escolher no picker
     // (aberto pelo efeito de hidratação abaixo).
     const key = seeded.point.slug;
-    const available = pointMediaTypes(seeded.point);
+    const available = campaignAvailableMediaTypes(seeded.point);
     return available.length === 1 ? { [key]: available } : {};
   });
   const [mediaPicker, setMediaPicker] = useState<MediaPickerTarget | null>(null);
@@ -277,7 +278,7 @@ export function CampaignPlanner({
       for (const sel of stored.selections) {
         const found = findPoint(sel.slug);
         if (!found) continue;
-        const offered = pointMediaTypes(found.point);
+        const offered = campaignAvailableMediaTypes(found.point);
         let media = sel.media.filter((m) => offered.includes(m));
         if (media.length === 0) {
           if (offered.length === 1)
@@ -291,7 +292,7 @@ export function CampaignPlanner({
     let seedPicker: MediaPickerTarget | null = null;
     if (seeded) {
       const key = seeded.point.slug;
-      const available = pointMediaTypes(seeded.point);
+      const available = campaignAvailableMediaTypes(seeded.point);
       if (!restored[key] && available.length > 1) {
         seedPicker = {
           key,
@@ -405,7 +406,7 @@ export function CampaignPlanner({
         if (!entry || !mediaEligible(entry.point, value)) continue;
         // Mantém só mídias que o ponto realmente oferece (validação — a
         // intenção dooh/wifi/both é lente de descoberta, não filtro de chip).
-        const offered = pointMediaTypes(entry.point);
+        const offered = campaignAvailableMediaTypes(entry.point);
         const kept = media.filter((m) => offered.includes(m));
         if (kept.length > 0) next[key] = kept;
       }
@@ -430,7 +431,7 @@ export function CampaignPlanner({
       removePoint(key);
       return;
     }
-    const available = pointMediaTypes(entry.point);
+    const available = campaignAvailableMediaTypes(entry.point);
     if (available.length <= 1) {
       setSelections((prev) => ({ ...prev, [key]: available }));
       firePointAdd(entry, available);
@@ -443,7 +444,7 @@ export function CampaignPlanner({
     setMediaPicker({
       key,
       entry,
-      available: pointMediaTypes(entry.point),
+      available: campaignAvailableMediaTypes(entry.point),
       initial: selections[key] ?? [],
       mode: "edit",
     });
@@ -663,13 +664,18 @@ export function CampaignPlanner({
                             <div className="mt-1.5 font-display text-[15px] font-semibold leading-snug text-white">
                               {entry.point.nome}
                             </div>
-                            <div className="mt-2">
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
                               <MediaTypeChips
-                                types={pointMediaTypes(entry.point)}
+                                types={campaignAvailableMediaTypes(entry.point)}
                                 selected={isSelected ? selectedMedia : undefined}
                               />
+                              {isWifiTemporarilyUnavailable(entry.point) && (
+                                <span className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-off-white/45 ring-1 ring-white/12">
+                                  WiFi indisponível no momento
+                                </span>
+                              )}
                             </div>
-                            {isSelected && pointMediaTypes(entry.point).length > 1 && (
+                            {isSelected && campaignAvailableMediaTypes(entry.point).length > 1 && (
                               <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-gold/70">
                                 Editar mídia em “Sua seleção” →
                               </div>
@@ -696,7 +702,7 @@ export function CampaignPlanner({
                 ) : (
                   <div className="flex max-h-[60vh] flex-col gap-3 overflow-y-auto pr-1">
                     {selectedEntries.map(({ key, entry, media }) => {
-                      const offered = pointMediaTypes(entry.point);
+                      const offered = campaignAvailableMediaTypes(entry.point);
                       const canEditMedia = offered.length > 1;
                       return (
                         <div

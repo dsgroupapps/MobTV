@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, ImageOff, MapPin, ExternalLink } from "lucide-react";
+import { X, ImageOff, MapPin, ExternalLink, WifiOff } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 import { CoverageMap } from "./CoverageMap";
@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/sheet";
 import {
   networkPoints,
-  pointMediaTypes,
+  publicMediaTypes,
+  isWifiTemporarilyUnavailable,
   totalPointsCount,
   type Category,
   type CategoryKey,
@@ -38,14 +39,11 @@ const regionPointNames = new Map(regionSummaries.map((r) => [r.region, new Set(r
 // — a fonte real agora é MediaBadges.tsx, compartilhada com CoverageMap.tsx.
 export { categoryIcon, MediaTypeChips };
 
+// Derivado do catálogo — todas as categorias existentes (hoje 8: inclui
+// Bibliotecas e UBSs), na ordem de `networkPoints`. Não manter lista fixa.
 const tabs: { key: CategoryKey | "todos"; label: string }[] = [
   { key: "todos", label: "Todos" },
-  { key: "metro", label: "Estações de Metrô" },
-  { key: "terminais", label: "Terminais Rodoviários" },
-  { key: "upas", label: "UPAs" },
-  { key: "hospitais", label: "Hospitais" },
-  { key: "feiras", label: "Feiras" },
-  { key: "servicos", label: "Serviços" },
+  ...networkPoints.map((c) => ({ key: c.key, label: c.label })),
 ];
 
 export const mediaTabs: { key: MediaTypeKey | "todos"; label: string }[] = [
@@ -86,6 +84,18 @@ export function hasCommercialData(point: NetworkPoint) {
     point.valorPorCpe ||
     point.fluxoMensal ||
     point.impactosAuditadosMes,
+  );
+}
+
+// Selo discreto para pontos com WiFi instalado mas fora de disponibilidade
+// comercial no momento (`wifi.status === "temporarily_unavailable"`). Estado
+// secundário — nunca a palavra técnica "unconfirmed", nunca "em breve".
+function WifiUnavailableBadge() {
+  return (
+    <span className="inline-flex items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-off-white/45 ring-1 ring-white/12">
+      <WifiOff className="h-3 w-3" strokeWidth={2.4} />
+      WiFi indisponível no momento
+    </span>
   );
 }
 
@@ -162,7 +172,7 @@ function AssetCard({
   revealClass: string;
 }) {
   const Icon = categoryIcon[category.key];
-  const mediaTypes = pointMediaTypes(point);
+  const mediaTypes = publicMediaTypes(point);
   return (
     <button
       type="button"
@@ -190,7 +200,8 @@ function AssetCard({
         <div className="font-display text-base md:text-lg font-semibold leading-snug text-white">
           {point.nome}
         </div>
-        <MediaTypeChips types={mediaTypes} />
+        {mediaTypes.length > 0 && <MediaTypeChips types={mediaTypes} />}
+        {isWifiTemporarilyUnavailable(point) && <WifiUnavailableBadge />}
         {point.impactosAuditadosMes != null && (
           <div className="font-mono text-xs text-off-white/60">
             {formatNumber(point.impactosAuditadosMes)} impactos/mês
@@ -235,7 +246,7 @@ function MapPreview({
     return (
       <div className="flex items-center gap-3 rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-5 text-sm text-off-white/45">
         <MapPin className="h-5 w-5 shrink-0 text-off-white/30" strokeWidth={1.6} />
-        Localização no mapa em breve.
+        Localização no mapa ainda não disponível.
       </div>
     );
   }
@@ -269,7 +280,8 @@ function MapPreview({
 function PointDetail({ point, category }: { point: NetworkPoint; category: Category }) {
   const Icon = categoryIcon[category.key];
   const hasData = hasCommercialData(point);
-  const mediaTypes = pointMediaTypes(point);
+  const mediaTypes = publicMediaTypes(point);
+  const wifiUnavailable = isWifiTemporarilyUnavailable(point);
 
   return (
     <div className="flex h-full flex-col">
@@ -317,9 +329,13 @@ function PointDetail({ point, category }: { point: NetworkPoint; category: Categ
             <div className="font-mono text-[11px] uppercase tracking-[0.2em] text-off-white/45 mb-2.5">
               Mídia disponível
             </div>
-            {mediaTypes.length > 0 ? (
-              <MediaTypeChips types={mediaTypes} />
-            ) : (
+            {mediaTypes.length > 0 && <MediaTypeChips types={mediaTypes} />}
+            {wifiUnavailable && (
+              <p className={`text-sm text-off-white/55 ${mediaTypes.length > 0 ? "mt-2.5" : ""}`}>
+                WiFi indisponível no momento para novas campanhas.
+              </p>
+            )}
+            {mediaTypes.length === 0 && !wifiUnavailable && (
               <p className="text-sm text-off-white/50">
                 Modalidade ainda não publicada individualmente no rate card.
               </p>
@@ -422,7 +438,7 @@ export function AssetExplorer() {
     for (const cat of cats) {
       for (const point of cat.points) {
         if (regionSet && !regionSet.has(point.nome)) continue;
-        if (mediaFilter !== "todos" && !pointMediaTypes(point).includes(mediaFilter)) continue;
+        if (mediaFilter !== "todos" && !publicMediaTypes(point).includes(mediaFilter)) continue;
         out.push({ point, category: cat });
       }
     }

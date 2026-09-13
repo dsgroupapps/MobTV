@@ -1,4 +1,8 @@
-import { pointMediaTypes, type MediaTypeKey } from "../../data/network-points.ts";
+import {
+  campaignAvailableMediaTypes,
+  resolveWifiCpe,
+  type MediaTypeKey,
+} from "../../data/network-points.ts";
 import { regionSummaries } from "../../data/df-regions.ts";
 import type { PlannerSelection } from "../../data/planner-options.ts";
 import { findPointBySlug } from "../point-slug.ts";
@@ -19,7 +23,10 @@ export function getPlannerSelectionDetails(selections: PlannerSelection[]) {
   return selections.flatMap((selection) => {
     const found = findPointBySlug(selection.slug);
     if (!found) return [];
-    const offered = pointMediaTypes(found.point);
+    // Só mídias comercialmente contratáveis: WiFi temporarily_unavailable /
+    // unconfirmed nunca entra numa seleção do fluxo comercial, mesmo se
+    // persistida antes.
+    const offered = campaignAvailableMediaTypes(found.point);
     const media = [...new Set(selection.media.filter((m) => offered.includes(m)))];
     if (media.length === 0) return [];
     return [
@@ -31,6 +38,7 @@ export function getPlannerSelectionDetails(selections: PlannerSelection[]) {
         media,
         dooh: getPointIntelligence(selection.slug, media),
         wifi: media.includes("wifi") ? getWifiPointIntelligence(selection.slug) : null,
+        wifiCpe: media.includes("wifi") ? resolveWifiCpe(found.point) : undefined,
       },
     ];
   });

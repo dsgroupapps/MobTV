@@ -157,6 +157,16 @@ test("WiFi histórico fora da lista não é tratado como campanha ativa", () => 
   }
 });
 
+// Novos pontos cuja identidade física a MOBTV validou no Google Maps no
+// fechamento geográfico de 2026-09 — só estes recebem `location`. Os demais
+// seguem sem coordenada até haver POI confiável.
+const newPointsWithConfirmedLocation = new Set([
+  "rodoviaria-interestadual",
+  "hospital-sol-nascente",
+  "na-hora-samambaia",
+  "biblioteca-de-ceilandia",
+]);
+
 test("novos pontos são físicos, têm somente WiFi confirmado e não ganham dados inventados", () => {
   for (const [slug, categoryKey] of newPoints) {
     const point = bySlug.get(slug);
@@ -167,10 +177,17 @@ test("novos pontos são físicos, têm somente WiFi confirmado e não ganham dad
     assert.equal(point!.produtos, undefined);
     assert.equal(point!.impactosAuditadosMes, undefined);
     assert.equal(point!.fluxoMensal, undefined);
-    assert.equal(point!.location, undefined);
     assert.equal(pointAudienceData[slug], undefined);
+    if (newPointsWithConfirmedLocation.has(slug)) {
+      assert.equal(typeof point!.location?.lat, "number", slug);
+      assert.equal(typeof point!.location?.lng, "number", slug);
+      assert.match(point!.location!.mapsUrl, /^https:\/\/www\.google\.com\/maps\?q=/, slug);
+    } else {
+      assert.equal(point!.location, undefined, slug);
+    }
   }
   assert.equal(newPoints.size, 7);
+  assert.equal(newPointsWithConfirmedLocation.size, 4);
 });
 
 test("DOOH, impactos e audience dos pontos anteriores permanecem intactos", () => {
@@ -198,12 +215,10 @@ test("contagens derivadas refletem a fonte atual e as novas categorias", () => {
   assert.equal(wifiActivePointsCount, 41);
   assert.equal(wifiTemporarilyUnavailablePointsCount, 6);
   assert.equal(wifiUnconfirmedPointsCount, 2);
+  // Fechamento geográfico de 2026-09: 5 dos 7 novos pontos + "Na Hora
+  // Sobradinho" receberam coordenada validada. Seguem sem POI confiável só
+  // o Terminal de Sobradinho II e as duas UBS de Arapoanga.
   assert.deepEqual(pointsWithoutCoordinates.map((point) => point.slug).sort(), [
-    "biblioteca-de-ceilandia",
-    "hospital-sol-nascente",
-    "na-hora-samambaia",
-    "na-hora-sobradinho",
-    "rodoviaria-interestadual",
     "terminal-de-sobradinho-ii",
     "ubs-05-arapoanga",
     "ubs-06-arapoanga",
@@ -211,14 +226,20 @@ test("contagens derivadas refletem a fonte atual e as novas categorias", () => {
 });
 
 test("RAs são derivadas sem atribuir região aos pontos sem base confiável", () => {
+  // Fechamento geográfico de 2026-09: Hospital Sol Nascente cai em Ceilândia
+  // pela coordenada (11 → 12); a Rodoviária Interestadual entra no Plano
+  // Piloto por override manual de RA (3 → 4), já que o SPO fica encostado no
+  // Guará e o centróide o classificaria errado; e UBS 05/06 Arapoanga são
+  // agrupadas em Planaltina por override manual (1 → 3), mesmo Arapoanga sendo
+  // RA própria administrativamente.
   assert.deepEqual(pointsByRegion, {
     "Águas Claras": 2,
     Brazlândia: 2,
-    Ceilândia: 11,
+    Ceilândia: 12,
     Gama: 4,
     Guará: 4,
-    Planaltina: 1,
-    "Plano Piloto": 3,
+    Planaltina: 3,
+    "Plano Piloto": 4,
     "Recanto das Emas": 1,
     "Riacho Fundo II": 1,
     Samambaia: 4,
@@ -229,10 +250,9 @@ test("RAs são derivadas sem atribuir região aos pontos sem base confiável", (
     Taguatinga: 4,
     "Vicente Pires": 1,
   });
-  assert.deepEqual(pointsWithoutDerivedRegion.map((point) => point.slug).sort(), [
-    "hospital-sol-nascente",
-    "rodoviaria-interestadual",
-    "ubs-05-arapoanga",
-    "ubs-06-arapoanga",
-  ]);
+  // Todos os pontos têm RA derivável (nome, coordenada ou override manual).
+  assert.deepEqual(
+    pointsWithoutDerivedRegion.map((point) => point.slug).sort(),
+    [],
+  );
 });

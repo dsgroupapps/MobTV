@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { CheckCircle2, ExternalLink, MapPin, Send, Users } from "lucide-react";
+import { CheckCircle2, ExternalLink, MapPin, Send, Users, WifiOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -16,7 +16,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { pointMediaTypes, type Category, type NetworkPoint } from "@/data/network-points";
+import {
+  publicMediaTypes,
+  isWifiTemporarilyUnavailable,
+  type Category,
+  type NetworkPoint,
+} from "@/data/network-points";
 import { regionSummaries } from "@/data/df-regions";
 import type { PointInsights } from "@/data/point-insights";
 import { publicPointProfile } from "@/data/public-point-profile";
@@ -122,7 +127,7 @@ function MapPreview({ point, tracker }: { point: NetworkPoint; tracker: PointTra
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-4 py-5 text-sm text-off-white/45">
         <MapPin className="h-5 w-5 shrink-0 text-off-white/30" strokeWidth={1.6} />
-        Localização no mapa em breve.
+        Localização no mapa ainda não disponível.
       </div>
     );
   }
@@ -358,7 +363,8 @@ export function PointProfile({
   };
 
   const region = regionForPoint(point.nome);
-  const mediaTypes = pointMediaTypes(point);
+  const mediaTypes = publicMediaTypes(point);
+  const wifiUnavailable = isWifiTemporarilyUnavailable(point);
   const photo = point.images?.[0];
   const audienceData = getPointAudienceData(slug);
   const published = publicPointProfile(audienceData, insights);
@@ -502,12 +508,24 @@ export function PointProfile({
           </section>
         )}
 
-        {/* MÍDIA DISPONÍVEL — dado real do networkPoints, nunca inventado aqui. */}
-        {mediaTypes.length > 0 && (
+        {/* MÍDIA DISPONÍVEL — dado real do networkPoints, nunca inventado aqui.
+            WiFi só entra como disponível quando a campanha está ativa
+            (publicMediaTypes); infra temporariamente indisponível vira nota. */}
+        {(mediaTypes.length > 0 || wifiUnavailable) && (
           <section className="px-6 py-8">
             <div className="mx-auto max-w-3xl">
               <SectionLabel>Mídia disponível</SectionLabel>
-              <MediaTypeChips types={mediaTypes} />
+              {mediaTypes.length > 0 && <MediaTypeChips types={mediaTypes} />}
+              {wifiUnavailable && (
+                <p
+                  className={`flex items-center gap-2 text-sm text-off-white/55 ${
+                    mediaTypes.length > 0 ? "mt-3" : ""
+                  }`}
+                >
+                  <WifiOff className="h-4 w-4 shrink-0 text-off-white/40" strokeWidth={1.8} />
+                  WiFi indisponível no momento para novas campanhas.
+                </p>
+              )}
             </div>
           </section>
         )}

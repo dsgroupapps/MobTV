@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { networkPoints, pointMediaTypes, type MediaTypeKey } from "../../data/network-points.ts";
+import {
+  networkPoints,
+  pointMediaTypes,
+  campaignAvailableMediaTypes,
+  type MediaTypeKey,
+} from "../../data/network-points.ts";
 import type { PlannerSelection, PlannerStoredState } from "../../data/planner-options.ts";
 import {
   getPointIntelligence,
@@ -21,7 +26,10 @@ const { PlannerCampaignReview } = await import("../../components/site/PlannerCam
 const sim = { days: 15, insertionsPerDay: 120 };
 const selection = (slug: string, media: MediaTypeKey[]): PlannerSelection => ({ slug, media });
 const catalog = networkPoints.flatMap((category) => category.points);
-const wifiOnly = catalog.filter((point) => pointMediaTypes(point).join() === "wifi");
+// "WiFi exclusivo" no sentido COMERCIAL: único serviço contratável é WiFi Ads
+// (status active). Pontos cujo WiFi está temporarily_unavailable/unconfirmed
+// não entram no fluxo comercial e são cobertos por wifi-availability.test.ts.
+const wifiOnly = catalog.filter((point) => campaignAvailableMediaTypes(point).join() === "wifi");
 const detail = (slug: string, media: MediaTypeKey[]) =>
   getPlannerSelectionDetails([selection(slug, media)])[0];
 const review = (selections: PlannerSelection[]) =>
@@ -255,7 +263,7 @@ test("proposta preserva todos os pontos, RA, mídias exatas, bases e configuraç
 
 test("regressão: todos os impactos medidos e modelos existentes mantêm totais", () => {
   const points = getPlannerSelectionDetails(
-    catalog.map((point) => selection(point.slug, pointMediaTypes(point))),
+    catalog.map((point) => selection(point.slug, campaignAvailableMediaTypes(point))),
   );
   const rollup = rollupPlannerSelection(points);
   assert.equal(
@@ -268,7 +276,13 @@ test("regressão: todos os impactos medidos e modelos existentes mantêm totais"
   );
   assert.equal(rollup.impactPotentialTotal, 14786021);
   assert.equal(rollup.referenceGroups[0].total, 120000);
-  assert.equal(points.length, 51);
+  // 51 pontos − 8 sem nenhuma mídia contratável (6 WiFi temporarily_unavailable
+  // + 2 unconfirmed, todos WiFi-exclusivos) = 43 no fluxo comercial.
+  assert.equal(
+    points.length,
+    catalog.filter((point) => campaignAvailableMediaTypes(point).length > 0).length,
+  );
+  assert.equal(points.length, 43);
 });
 
 // sessionStorage realista, sem DOM: testa serialização, reload e migração.
@@ -347,7 +361,7 @@ test("legado sem mídia só recupera ponto com uma única opção", () =>
     const result = loadPlannerState()!;
     assert.equal(
       result.selections.length,
-      catalog.filter((point) => pointMediaTypes(point).length === 1).length,
+      catalog.filter((point) => campaignAvailableMediaTypes(point).length === 1).length,
     );
     assert.ok(result.selections.every((point) => point.media.length === 1));
   }));

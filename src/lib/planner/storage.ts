@@ -1,4 +1,8 @@
-import { networkPoints, pointMediaTypes, type MediaTypeKey } from "../../data/network-points.ts";
+import {
+  networkPoints,
+  campaignAvailableMediaTypes,
+  type MediaTypeKey,
+} from "../../data/network-points.ts";
 import { findPointBySlug } from "../point-slug.ts";
 import type {
   MidiaOption,
@@ -56,7 +60,10 @@ export function loadPlannerState(): PlannerStoredState | null {
             : undefined;
       const found = slug ? findPointBySlug(slug) : undefined;
       if (!found) continue;
-      const offered = pointMediaTypes(found.point);
+      // Só mídia comercialmente contratável hoje: uma seleção salva de WiFi
+      // num ponto que deixou de ser `active` é descartada (não recriada
+      // silenciosamente). DOOH e outras mídias do ponto seguem preservadas.
+      const offered = campaignAvailableMediaTypes(found.point);
       const media = Array.isArray(entry.media)
         ? [
             ...new Set(

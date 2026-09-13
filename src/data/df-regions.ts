@@ -33,6 +33,10 @@ import { networkPoints, pointMediaTypes, type MediaTypeKey } from "./network-poi
 // das 16 cidades já usadas no Planejador (`planner-options.ts`) porque há
 // pontos reais lá (Estação Águas Claras, Arniqueiras) sem equivalente nas
 // 16 originais — ver `regionSummaries` para o total realmente ativo.
+//
+// Arapoanga NÃO entra aqui: embora seja RA própria administrativamente, a
+// organização geográfica da rede MOBTV agrupa "UBS 05/06 Arapoanga" em
+// Planaltina (ver `MANUAL_REGION_BY_SLUG`).
 const REGION_NAMES = [
   "Sobradinho II",
   "Riacho Fundo II",
@@ -59,6 +63,21 @@ function findDirectRegion(nome: string): string | null {
   }
   return null;
 }
+
+// Exceção ao "nada hardcoded por ponto": RA fixada por slug, para os poucos
+// casos em que nem o nome nem o vizinho mais próximo por centróide dão a RA
+// que a MOBTV quer usar no site. O ponto entra na contagem da RA sem
+// coordenada própria, então não desloca o centróide/pin da região.
+const MANUAL_REGION_BY_SLUG: Record<string, string> = {
+  // Rodoviária Interestadual de Brasília — SPO Conj. 6/5, Asa Sul: pertence ao
+  // Plano Piloto (RA I), mas o Setor Policial Sul fica geograficamente
+  // encostado no Guará, que o vizinho mais próximo escolheria por engano.
+  "rodoviaria-interestadual": "Plano Piloto",
+  // UBS 05/06 Arapoanga — Arapoanga é RA própria administrativamente, mas a
+  // organização geográfica da rede MOBTV agrupa as duas unidades em Planaltina.
+  "ubs-05-arapoanga": "Planaltina",
+  "ubs-06-arapoanga": "Planaltina",
+};
 
 export type RegionSummary = {
   region: string;
@@ -130,6 +149,12 @@ function computeRegionSummaries(): RegionSummary[] {
   const direct: { nome: string; region: string; lat?: number; lng?: number }[] = [];
   const unmatched: { nome: string; lat: number; lng: number }[] = [];
   for (const point of allPoints) {
+    const manualRegion = MANUAL_REGION_BY_SLUG[point.slug];
+    if (manualRegion) {
+      // Sem lat/lng: conta na RA confirmada, sem puxar o centróide da região.
+      direct.push({ nome: point.nome, region: manualRegion });
+      continue;
+    }
     const region = findDirectRegion(point.nome);
     if (region) {
       direct.push({ nome: point.nome, region, lat: point.location?.lat, lng: point.location?.lng });
@@ -178,7 +203,10 @@ function computeRegionSummaries(): RegionSummary[] {
     return byRegion.get(region)!;
   };
   for (const point of allPoints) {
-    const region = findDirectRegion(point.nome) ?? nnAssignment.get(point.nome);
+    const region =
+      MANUAL_REGION_BY_SLUG[point.slug] ??
+      findDirectRegion(point.nome) ??
+      nnAssignment.get(point.nome);
     if (!region) continue;
     const entry = ensure(region);
     entry.pointNames.push(point.nome);

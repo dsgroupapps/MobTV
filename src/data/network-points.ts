@@ -20,8 +20,11 @@
  * "Feira Samambaia 2") são tratados como pontos distintos, nunca fundidos.
  *
  * Os novos locais desta atualização trazem somente a informação confirmada:
- * nome, categoria e WiFi. Coordenadas, DOOH, preço e audiência permanecem
- * ausentes até haver fonte própria.
+ * nome, categoria e WiFi. DOOH, preço e audiência permanecem ausentes até
+ * haver fonte própria. Coordenadas são preenchidas em lote conforme a MOBTV
+ * valida a identidade física de cada ponto no Google Maps (fechamento
+ * geográfico de 2026-09 localizou 5 dos 7 novos pontos + o "Na Hora
+ * Sobradinho"; ver `pointsWithoutCoordinates`).
  */
 
 export type Connectivity = "dual" | "wifi";
@@ -132,7 +135,50 @@ export function isWifiCampaignAvailable(point: NetworkPoint): boolean {
   return point.wifi?.status === "active";
 }
 
-const WIFI_CPE = 8.0; // valor único do rate card histórico (Media Kit p.62); não atribuir a pontos novos neste bloco
+export function isWifiTemporarilyUnavailable(point: NetworkPoint): boolean {
+  return point.wifi?.status === "temporarily_unavailable";
+}
+
+/**
+ * Mídias comercialmente CONTRATÁVEIS neste ponto hoje — o que o planejador
+ * pode oferecer para seleção e o que as vitrines públicas apresentam como
+ * disponível. Igual a `pointMediaTypes`, mas o WiFi só entra quando a
+ * campanha está de fato disponível (`wifi.status === "active"`):
+ * infraestrutura `temporarily_unavailable` ou `unconfirmed` é estado interno
+ * e não é oferta comercial. `pointMediaTypes` continua sendo a verdade
+ * ESTRUTURAL (a infra existe) usada pelo inventário/rollup de audiência —
+ * não trocar um pelo outro.
+ */
+export function campaignAvailableMediaTypes(point: NetworkPoint): MediaTypeKey[] {
+  return pointMediaTypes(point).filter(
+    (type) => type !== "wifi" || point.wifi?.status === "active",
+  );
+}
+
+/**
+ * Alias de `campaignAvailableMediaTypes` para as vitrines públicas (Bloco 2):
+ * "o que o site mostra como disponível" é exatamente "o que dá para
+ * contratar". Mantido como nome próprio para não reescrever os componentes.
+ */
+export const publicMediaTypes = campaignAvailableMediaTypes;
+
+/**
+ * CPE (Custo Por Engajamento) padrão do WiFi Ads — fonte runtime única do
+ * número. Documental: rate card 2026 (Media Kit p.62), R$ 8,00 fixo em todos
+ * os pontos. Não reescrever "8" em outro lugar; importar esta constante.
+ */
+export const WIFI_CPE = 8.0;
+
+/**
+ * CPE do WiFi Ads contratável neste ponto. Regra de cadastro: todo ponto com
+ * WiFi `active` herda `WIFI_CPE`; `point.valorPorCpe` é a exceção explícita
+ * por ponto (hoje nenhum ponto diverge do padrão). `temporarily_unavailable`
+ * e `unconfirmed` não são contratáveis → sem CPE.
+ */
+export function resolveWifiCpe(point: NetworkPoint): number | undefined {
+  if (point.wifi?.status !== "active") return undefined;
+  return point.valorPorCpe ?? WIFI_CPE;
+}
 
 export const networkPoints: Category[] = [
   {
@@ -411,14 +457,28 @@ export const networkPoints: Category[] = [
       },
       {
         // Novo ponto físico confirmado exclusivamente pela lista operacional
-        // WiFi. Não há nesta fonte confirmação de DOOH, preço, foto ou mapa.
+        // WiFi. Não há nesta fonte confirmação de DOOH, preço ou foto.
+        // Identidade confirmada pela MOBTV no Google Maps: "Rodoviária
+        // Interestadual de Brasília", SPO Conj. 6/5, Asa Sul — equipamento
+        // distinto da "Rodoviária do Plano Piloto" (mantidos separados). RA
+        // Plano Piloto (o Setor Policial Sul fica encostado no Guará, por isso
+        // a RA vai por override em df-regions.ts, não pelo centróide).
         nome: "Rodoviária Interestadual",
         slug: "rodoviaria-interestadual",
         wifi: { status: "active" },
+        location: {
+          lat: -15.8304203,
+          lng: -47.949557,
+          mapsUrl: "https://www.google.com/maps?q=-15.8304203,-47.9495570",
+        },
       },
       {
         // Distinto da Rodoviária de Sobradinho (I), por constar separadamente
-        // como "Terminal de Sobradinho 2" na lista operacional.
+        // como "Terminal de Sobradinho 2" na lista operacional. Identidade
+        // confirmada pela MOBTV no Google Maps ("Terminal de Ônibus Sobradinho
+        // II", região da AR 25 / DF-420, Sobradinho II) — RA Sobradinho II
+        // (derivada pelo nome). Coordenada do POI ainda não obtida com
+        // segurança; não reutilizar a da Rodoviária de Sobradinho I.
         nome: "Terminal de Sobradinho II",
         slug: "terminal-de-sobradinho-ii",
         wifi: { status: "temporarily_unavailable" },
@@ -690,10 +750,19 @@ export const networkPoints: Category[] = [
       },
       {
         // Novo ponto físico WiFi; nenhum dado de Tela, LED, preço, audiência,
-        // impacto, foto ou coordenada foi fornecido para este bloco.
+        // impacto ou foto foi fornecido para este bloco. Nome público mantido
+        // como "Hospital Sol Nascente"; identidade oficial confirmada pela
+        // MOBTV no Google Maps é o "Hospital Cidade do Sol" (St. N QNN 27,
+        // Ceilândia, próximo à Feira do Produtor). RA física: Ceilândia — não
+        // Sol Nascente/Pôr do Sol. Coordenadas do POI validadas manualmente.
         nome: "Hospital Sol Nascente",
         slug: "hospital-sol-nascente",
         wifi: { status: "active" },
+        location: {
+          lat: -15.8242395,
+          lng: -48.121463,
+          mapsUrl: "https://www.google.com/maps?q=-15.8242395,-48.1214630",
+        },
       },
     ],
   },
@@ -871,16 +940,32 @@ export const networkPoints: Category[] = [
         },
       },
       {
+        // Identidade confirmada pela MOBTV no Google Maps: "Na Hora -
+        // Sobradinho", Quadra 6 Área Especial 08, Sobradinho. RA Sobradinho.
         nome: "Na Hora Sobradinho",
         slug: "na-hora-sobradinho",
         wifi: { status: "active" },
         valorPorCpe: WIFI_CPE,
         images: ["/nahora_sobradinho.jpeg"],
+        location: {
+          lat: -15.649888,
+          lng: -47.79551,
+          mapsUrl: "https://www.google.com/maps?q=-15.6498880,-47.7955100",
+        },
       },
       {
+        // Identidade confirmada pela MOBTV no Google Maps: "Na Hora -
+        // Samambaia", QN 122, no complexo do Samambaia Shopping. RA Samambaia.
+        // A coordenada é a do prédio (precisão suficiente para o mapa MOBTV),
+        // não a porta exata da unidade.
         nome: "Na Hora Samambaia",
         slug: "na-hora-samambaia",
         wifi: { status: "active" },
+        location: {
+          lat: -15.8648828,
+          lng: -48.0579356,
+          mapsUrl: "https://www.google.com/maps?q=-15.8648828,-48.0579356",
+        },
       },
     ],
   },
@@ -890,9 +975,17 @@ export const networkPoints: Category[] = [
     connectivity: "wifi",
     points: [
       {
+        // Identidade confirmada pela MOBTV no Google Maps: "Biblioteca Pública
+        // de Ceilândia Carlos Drummond de Andrade", QNN 13 Área Especial
+        // Módulo B, Ceilândia Norte. Nome público MOBTV mantido. RA Ceilândia.
         nome: "Biblioteca de Ceilândia",
         slug: "biblioteca-de-ceilandia",
         wifi: { status: "temporarily_unavailable" },
+        location: {
+          lat: -15.815535,
+          lng: -48.1165929,
+          mapsUrl: "https://www.google.com/maps?q=-15.8155350,-48.1165929",
+        },
       },
     ],
   },

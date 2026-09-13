@@ -2,6 +2,7 @@ import type { PlannerSimConfig } from "../../data/planner-options.ts";
 import {
   clampSimInput,
   formatCount,
+  formatCurrency,
   WIFI_METRIC_LABELS,
   WIFI_MISSING_LABEL,
 } from "./audience/index.ts";
@@ -22,6 +23,10 @@ export function buildPlannerProposal(
       `• ${point.name}${point.region ? ` — ${point.region}` : ""}`,
       `  Serviços: ${point.media.map((media) => PLANNER_MEDIA_LABELS[media]).join(" + ")}`,
     );
+    // CPE unitário do WiFi Ads (padrão da rede). Sem volume de engajamentos
+    // definido aqui, não há total de WiFi — só o preço por engajamento.
+    if (point.media.includes("wifi") && point.wifiCpe != null)
+      lines.push(`  WiFi Ads — CPE: ${formatCurrency(point.wifiCpe)}`);
     const intelligence = point.dooh;
     const metric = intelligence?.monthly ?? intelligence?.baseMetric;
     if (metric) {

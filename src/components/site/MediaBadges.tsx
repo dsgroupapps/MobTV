@@ -5,6 +5,8 @@ import {
   Stethoscope,
   Store,
   Building2,
+  Library,
+  Cross,
   Monitor,
   Grid3x3,
   Wifi,
@@ -26,8 +28,8 @@ export const categoryIcon: Record<CategoryKey, LucideIcon> = {
   hospitais: Stethoscope,
   feiras: Store,
   servicos: Building2,
-  bibliotecas: Building2,
-  ubs: HeartPulse,
+  bibliotecas: Library,
+  ubs: Cross,
 };
 
 // TELA = preenchimento sólido gold; PAINEL LED = contorno gold-deep sobre

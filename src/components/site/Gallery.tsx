@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { WifiOff } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 import { activeRegionCount } from "@/data/df-regions";
 import transportesImg from "@/assets/network-transportes.jpg";
@@ -7,7 +8,8 @@ import feirasImg from "@/assets/network-feiras.jpg";
 import servicosImg from "@/assets/network-servicos.jpg";
 import {
   networkPoints,
-  pointMediaTypes,
+  publicMediaTypes,
+  isWifiTemporarilyUnavailable,
   type Category,
   type CategoryKey,
   type MediaTypeKey,
@@ -51,7 +53,7 @@ export function Gallery() {
     const out: { point: NetworkPoint; category: Category }[] = [];
     for (const cat of cats) {
       for (const point of cat.points) {
-        if (activeMedia !== "todos" && !pointMediaTypes(point).includes(activeMedia)) continue;
+        if (activeMedia !== "todos" && !publicMediaTypes(point).includes(activeMedia)) continue;
         out.push({ point, category: cat });
       }
     }
@@ -126,7 +128,7 @@ export function Gallery() {
           className="reveal-root grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6"
         >
           {filtered.map(({ point, category }, i) => {
-            const mediaTypes = pointMediaTypes(point);
+            const mediaTypes = publicMediaTypes(point);
             const image = point.images?.[0] ?? categoryFallbackImage[category.key];
             return (
               <article
@@ -159,7 +161,13 @@ export function Gallery() {
                 {/* Bottom content — nome, chips de mídia e impacto num único bloco
                     empilhado, sem sobreposição com nada mais no card */}
                 <div className="relative z-10 flex h-full flex-col justify-end gap-2 p-5">
-                  <MediaTypeChips types={mediaTypes} />
+                  {mediaTypes.length > 0 && <MediaTypeChips types={mediaTypes} />}
+                  {isWifiTemporarilyUnavailable(point) && (
+                    <span className="inline-flex w-fit items-center gap-1 rounded-md px-2 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-white/60 ring-1 ring-white/20">
+                      <WifiOff className="h-3 w-3" strokeWidth={2.4} />
+                      WiFi indisponível no momento
+                    </span>
+                  )}
                   <h3 className="font-display font-semibold text-white text-lg leading-tight">
                     {point.nome}
                   </h3>
