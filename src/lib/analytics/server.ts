@@ -6,8 +6,16 @@ import {
   type FunnelEventPayload,
   type PointEventPayload,
 } from "./types";
+import { insertAnalyticsEvent, mapFunnelEventToRow, mapPointEventToRow } from "./persistence";
+import { getAnalyticsSupabaseClient } from "./supabase";
 
-/** País aproximado resolvido na borda da Cloudflare — nunca o IP. */
+/**
+ * País aproximado via `CF-IPCountry` — nunca o IP. Esse cabeçalho só existe
+ * se o tráfego passar por um proxy Cloudflare na frente do serviço (o
+ * deploy em si é um Node server no Render, não um Cloudflare Worker); onde
+ * não houver esse proxy, ou em `vite dev` local, isto fica sempre
+ * `undefined` — comportamento esperado, não um bug.
+ */
 function readApproxCountry(): string | undefined {
   try {
     return getRequestHeader("cf-ipcountry" as never) ?? undefined;
@@ -17,33 +25,23 @@ function readApproxCountry(): string | undefined {
 }
 
 /**
- * Sumidouro server-side dos eventos de perfil de ponto.
+ * Sumidouro server-side dos eventos de perfil de ponto (QR Code).
  *
- * ESTADO ATUAL (ver relatório da tarefa para o detalhe completo): este
- * projeto roda como Cloudflare Worker sem nenhum binding de persistência
- * (sem KV, D1, R2 ou Durable Objects configurado) e sem SDK de analytics de
- * terceiros instalado. Por isso, o que esta função faz HOJE é validar o
- * payload e emitir uma linha de log estruturada (`console.log`) — visível
- * via `wrangler tail`/painel de logs do Worker em produção. Isso já tira a
- * captura do cliente (não fica preso a localStorage) e prova a arquitetura
- * ponta a ponta, mas NÃO é uma base consultável — não dá para responder
- * "quantos cliques teve o ponto X essa semana" sem persistência real.
- *
- * Para virar analytics consultável, sem trocar a arquitetura acima, falta
- * só UM passo: trocar o `console.log` abaixo por uma escrita numa das
- * opções (nenhuma delas exige serviço pago para o volume de uma página de
- * perfil por QR Code):
- *   - Cloudflare KV/D1 — adicionar o binding no wrangler config e trocar
- *     este `console.log` por `env.DB.insert(...)`/`env.KV.put(...)`;
- *   - Cloudflare Workers Analytics Engine — feito sob medida para esse tipo
- *     de evento de alto volume, sem schema prévio;
- *   - Encaminhar o payload já validado para um serviço externo (ex.
- *     PostHog/Plausible) via fetch, se a MOBTV preferir não manter infra própria.
+ * BLOCO A (persistência): valida o payload, mapeia para uma linha de
+ * `analytics_events` (`src/lib/analytics/persistence.ts`) e insere via
+ * Supabase — o mesmo projeto/credenciais que o resto do app já usa, com
+ * RLS que permite só INSERT (ver
+ * `supabase/migrations/20260917000000_create_analytics_events.sql`). O
+ * `console.log` deixou de ser o destino principal; ele só roda se o INSERT
+ * falhar, como log de diagnóstico (ver `insertAnalyticsEvent`).
  *
  * Deliberadamente NUNCA lemos/persistimos o IP do visitante aqui — só o
- * país aproximado (`CF-IPCountry`, cabeçalho padrão da Cloudflare quando a
- * geolocalização por IP está ativa na zona), que não é considerado dado
- * pessoal isolado. Nenhum identificador é derivado de IP.
+ * país aproximado (`CF-IPCountry`, ver `readApproxCountry`), que não é
+ * considerado dado pessoal isolado. Nenhum identificador é derivado de IP.
+ *
+ * Tracking é best-effort: uma falha de INSERT (Supabase fora do ar, RLS mal
+ * configurada etc.) nunca deve derrubar a página pública — por isso o
+ * `handler` sempre responde `ok`, mesmo quando a gravação falhou.
  */
 export const trackPointEvent = createServerFn({ method: "POST" })
   .validator((data: unknown): PointEventPayload => {
@@ -55,27 +53,17 @@ export const trackPointEvent = createServerFn({ method: "POST" })
     return payload;
   })
   .handler(async ({ data }) => {
-    // Cabeçalho padrão da Cloudflare — não é o IP, só o país resolvido por ele
-    // na borda. Ausente em ambientes fora da Cloudflare (ex. `vite dev` local).
-    console.log(
-      JSON.stringify({
-        kind: "point_analytics_event",
-        ...data,
-        approxCountry: readApproxCountry(),
-        receivedAt: new Date().toISOString(),
-      }),
-    );
-
-    return { ok: true } as const;
+    const row = mapPointEventToRow(data, { countryCode: readApproxCountry() });
+    const result = await insertAnalyticsEvent(getAnalyticsSupabaseClient(), row);
+    return { ok: true, persisted: result.ok } as const;
   });
 
 /**
  * Sumidouro server-side dos eventos de FUNIL (jornada QR → site → planejador
- * → CTA). Mesma arquitetura do `trackPointEvent`: valida o payload e emite
- * uma linha de log estruturada (`kind: "funnel_analytics_event"`). Sem IP,
- * sem PII — só o país aproximado da borda. A persistência consultável
- * continua sendo o próximo passo documentado (KV/D1/Analytics Engine),
- * fora do escopo desta fase ("sem dashboard analytics").
+ * → CTA). Mesma arquitetura do `trackPointEvent`: valida, mapeia
+ * (`mapFunnelEventToRow`) e insere na mesma tabela `analytics_events`
+ * (`event_domain: "funnel"`). Sem IP, sem PII — só o país aproximado da
+ * borda, quando disponível.
  */
 export const trackFunnelEvent = createServerFn({ method: "POST" })
   .validator((data: unknown): FunnelEventPayload => {
@@ -90,14 +78,7 @@ export const trackFunnelEvent = createServerFn({ method: "POST" })
     return payload;
   })
   .handler(async ({ data }) => {
-    console.log(
-      JSON.stringify({
-        kind: "funnel_analytics_event",
-        ...data,
-        approxCountry: readApproxCountry(),
-        receivedAt: new Date().toISOString(),
-      }),
-    );
-
-    return { ok: true } as const;
+    const row = mapFunnelEventToRow(data, { countryCode: readApproxCountry() });
+    const result = await insertAnalyticsEvent(getAnalyticsSupabaseClient(), row);
+    return { ok: true, persisted: result.ok } as const;
   });
