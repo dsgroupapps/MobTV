@@ -2,8 +2,10 @@
 
 Instrumentação e persistência dos eventos gerados pela página de perfil de
 ponto (`/ponto/$slug`, destino dos QR Codes físicos) e pelo funil da jornada
-(QR → site → planejador → WhatsApp). **Sem dashboard, relatório ou export
-neste bloco** — só a captura e a gravação dos eventos.
+(QR → site → planejador → WhatsApp), a camada de agregação/reporting que
+transforma esses eventos em métricas, e o envio desse relatório por e-mail
+(HTML + CSV anexado). **Ainda sem agendamento/cron automático** — o envio é
+manual/sob demanda por enquanto.
 
 ## Arquitetura
 
@@ -23,6 +25,25 @@ não como Cloudflare Worker — não há binding de KV/D1/R2/Analytics Engine
 disponível. `readApproxCountry()` em `server.ts` lê o cabeçalho
 `CF-IPCountry` de forma oportunista (só existe se algum proxy Cloudflare
 estiver na frente do Render); na ausência dele, `country_code` fica `null`.
+
+**Leitura (produção)**, para gerar relatórios — nunca pelo browser:
+
+```
+analytics_events (Postgres)
+  → Edge Function privada "get-analytics-events" (Lovable Cloud,
+    autenticada por ANALYTICS_API_KEY, roda com privilégio elevado do lado
+    do Lovable Cloud sem expor esse privilégio a este servidor)
+  → EdgeFunctionAnalyticsEventsRepository (reporting/repository.ts)
+  → buildAnalyticsReportForRange (reporting/report.ts)
+  → AnalyticsReport (overview, funil, breakdowns, insights — ver
+    reporting/types.ts)
+  → generateAnalyticsReportPackage (report-delivery/package.ts)
+    → HTML + texto + CSV bruto (report-delivery/html.ts, text.ts, csv.ts)
+  → sendAnalyticsReport (report-delivery/send.ts) → Resend (anexo CSV)
+```
+
+Ver as seções **Reporting (Blocos B/C)** e **Envio por e-mail (Bloco D)**
+abaixo para os detalhes.
 
 ## Arquivos
 
@@ -99,54 +120,132 @@ que o resto do app já usa em `src/lib/supabase/server.ts` — o browser nunca
 insere direto no Supabase. A policy de RLS cobre **exclusivamente INSERT**
 para `anon`/`authenticated`; não existe policy de `SELECT`/`UPDATE`/`DELETE`,
 então a tabela é ilegível com essa mesma key (RLS nega por padrão o que não
-tem policy). Ler os dados hoje exige acesso de administrador do projeto
-Supabase (SQL editor ou `service_role`, que este bloco **não** usa nem
-introduz).
+tem policy) — e essa policy **não foi alterada** para viabilizar a leitura.
+
+A leitura em produção passa por uma Edge Function privada
+(`get-analytics-events`, Lovable Cloud) autenticada por `ANALYTICS_API_KEY`
+— ela roda com privilégio elevado do lado do Lovable Cloud, sem expor esse
+privilégio a este servidor Node. Ver **Reporting (Blocos B/C)** abaixo.
+
+## Reporting (Blocos B/C)
+
+`src/lib/analytics/reporting/` transforma linhas de `analytics_events` em
+métricas (`buildAnalyticsReport`, puro) e busca essas linhas do banco LIVE
+(`buildAnalyticsReportForRange` + um `AnalyticsEventsRepository`).
+
+**Repositório de produção**: `createEdgeFunctionAnalyticsEventsRepository()`
+(`reporting/repository.ts`) — chama a Edge Function privada
+`get-analytics-events`, pagina via `cursor`/`hasMore`, e divide
+automaticamente períodos acima de 92 dias em janelas consecutivas (limite
+do endpoint). Autentica com o header `x-analytics-api-key`, lido de
+`ANALYTICS_API_KEY` (`process.env`, **nunca** `VITE_ANALYTICS_API_KEY` —
+essa env var não pode existir, ou vazaria a chave para o bundle do browser).
+`includeTestEvents` é repassado à Edge Function E reaplicado dentro de
+`buildAnalyticsReport` (defesa em profundidade: dois filtros independentes
+contra eventos de teste).
+
+`createSupabaseAnalyticsEventsRepository()` (mesmo arquivo) está marcada
+`@deprecated` — não é mais o caminho recomendado: a publishable/anon key
+nunca teve `SELECT` em `analytics_events` (ver seção anterior) e nenhuma
+mudança de RLS foi feita para viabilizar isso. Mantida só por compatibilidade
+com testes já existentes do Bloco B.
+
+`createInMemoryAnalyticsEventsRepository()` é o que os testes usam — nunca
+toca rede.
+
+## Envio por e-mail (Bloco D)
+
+`src/lib/analytics/report-delivery/` apresenta o `AnalyticsReport` do Bloco B
+como e-mail — **nenhuma métrica é recalculada aqui**, só formatada.
+
+- `generateAnalyticsReportPackage({ repository, start, end, timezone?, includeTestEvents? })`
+  — GERAÇÃO, sem enviar nada: busca as linhas do período atual e do anterior
+  (as mesmas duas chamadas que `buildAnalyticsReportForRange` já faz),
+  monta o `AnalyticsReport`, e a partir dele gera `html`, `text` e `csv`
+  (reaproveitando as linhas do período atual já em memória — nenhuma
+  terceira consulta à Edge Function só para o CSV). É o modo **dry-run**:
+  devolve `{ report, html, text, csv, csvBytes, filename }` para inspeção,
+  sem chamar Resend.
+- `sendAnalyticsReport({ repository, start, end, recipient? })` — ENVIO:
+  valida a configuração do Resend primeiro (falha rápido, sem gastar uma
+  chamada à Edge Function se já sabe que não vai enviar), chama
+  `generateAnalyticsReportPackage` e envia via `sendEmailWithCsvAttachment`
+  (`report-delivery/resend-client.ts` — mesmo padrão de fetch cru de
+  `src/lib/leads/point-lead.ts`, sem SDK do Resend, só com `attachments`
+  adicionado no formato documentado pela API do Resend:
+  `{ filename, content: <base64>, content_type }`).
+
+**CSV**: `mobtv-analytics-YYYY-MM-DD_YYYY-MM-DD.csv`, UTF-8 com BOM (para o
+Excel detectar a codificação certa), CRLF, escaping RFC4180 (vírgula/aspas/
+quebra de linha), `metadata` serializada como JSON dentro do campo. Reusa
+`selectRawAnalyticsEvents` do Bloco B — mesma exclusão de eventos de teste
+por padrão, mesmo `[start,end)`, mesma ausência de PII/IP/user-agent bruto
+(a tabela não tem essas colunas).
+
+**Limite do anexo**: 8 MiB de CSV bruto (~10,7 MiB em Base64) — bem abaixo
+do limite de 40 MB pós-Base64 do Resend. Se o CSV exceder isso,
+`sendAnalyticsReport` falha ANTES de enviar (nunca trunca dado bruto
+silenciosamente).
+
+**Env vars** (todas server-only, nunca `VITE_*`):
+
+```
+ANALYTICS_API_KEY=       # leitura da Edge Function (Bloco C)
+RESEND_API_KEY=          # mesma chave já usada por src/lib/leads/point-lead.ts
+MOBTV_ANALYTICS_FROM_EMAIL=  # remetente; fallback documentado p/ MOBTV_LEADS_FROM_EMAIL se ausente
+MOBTV_ANALYTICS_TO_EMAIL=    # destinatário padrão — SEM fallback para e-mail de leads
+```
+
+`sendAnalyticsReport` falha com mensagem clara (nunca a chave/secret) se
+`RESEND_API_KEY` ou um remetente/destinatário válido estiverem ausentes.
+`recipient` só é aceito como parâmetro de chamada server-side manual — esta
+função não é exposta por nenhuma rota pública.
+
+**Dry-run** (gera sem enviar, útil para testar/inspecionar):
+
+```ts
+const pkg = await generateAnalyticsReportPackage({
+  repository: createEdgeFunctionAnalyticsEventsRepository(),
+  start: new Date("2026-09-08T00:00:00.000Z"),
+  end: new Date("2026-09-15T00:00:00.000Z"),
+});
+// pkg.report / pkg.html / pkg.text / pkg.csv / pkg.filename / pkg.csvBytes
+```
 
 ## Limitações conhecidas
 
 - UTM só existe em eventos de ponto; eventos de funil ainda não carregam UTM.
 - Atribuição é por aba (`sessionStorage`): não sobrevive a nova aba, fechar o
   navegador ou trocar de dispositivo.
-- Sem dashboard/relatório/export — consulta hoje só via SQL direto no
-  Supabase (por quem tiver acesso ao projeto).
+- Sem agendamento automático (cron/scheduler) — `sendAnalyticsReport` precisa
+  ser chamado manualmente ou por alguma automação externa a este bloco.
+- Sem dashboard visual nem PDF — só HTML de e-mail, texto e CSV.
 - Sem retenção/expurgo automático — histórico preservado indefinidamente por
   enquanto.
 
 ## Status da migration remota
 
-A migration `20260917000000_create_analytics_events.sql` existe **só
-localmente neste repositório**. O ambiente onde este código foi escrito não
-tem `SUPABASE_ACCESS_TOKEN`/projeto linkado (`supabase projects list` e
-`supabase migration list` falham por falta de autenticação) — não há
-permissão nem tentativa de aplicar a migration no projeto remoto a partir
-daqui. **Alguém com acesso ao projeto Supabase precisa rodar**:
-
-```
-supabase login
-supabase link --project-ref vcatcyczpufqyfugwcyv
-supabase db push
-```
-
-(ou aplicar o SQL da migration diretamente pelo SQL editor do Supabase).
-Até isso acontecer, os `INSERT`s desta feature falham em produção — o
-`console.error` estruturado em `persistence.ts`
-(`kind: "analytics_event_insert_failed"`, código `42P01` — tabela
-inexistente) é o sinal a procurar nos logs do Render.
+Aplicada. `public.analytics_events` existe no projeto Supabase LIVE
+(`vcatcyczpufqyfugwcyv`) com RLS ativo, a policy de `INSERT` para
+`anon`/`authenticated`, e os 7 índices da migration
+(`20260917000000_create_analytics_events.sql`) — confirmado no banco real,
+não só no repositório.
 
 ## Como testar
 
 ```
-node --test src/lib/analytics/persistence.test.ts
+node --test $(find src/lib/analytics -iname "*.test.ts")
 ```
 
-Cobre o mapeamento payload → linha, sanitização/limites de texto e
-`metadata`, preservação de `visitorId`/`sessionId`/UTM/device quando
-presentes, ausência de PII/IP/user-agent bruto, e o comportamento best-effort
-de `insertAnalyticsEvent` (nunca lança, mesmo com Supabase indisponível).
-Roda 100% mockado — não toca o Supabase remoto.
-
-Depois que a migration acima for aplicada, dá para validar o `INSERT` real
-gerando um evento manualmente (ex. abrindo `/ponto/<algum-slug>?src=qr` em
-produção ou local com `.env.local` apontando pro Supabase certo) e
-conferindo a linha em `analytics_events` pelo SQL editor.
+Cobre: mapeamento payload → linha (`persistence.ts`), sanitização/limites de
+texto e `metadata`, ausência de PII/IP/user-agent bruto, comportamento
+best-effort de `insertAnalyticsEvent`; no pacote `reporting/`: definição de
+cada métrica, funil geral vs. QR, atribuição por `initial_point_slug`,
+breakdowns por sessão, período `[start,end)`, exclusão de eventos de teste,
+comparação com período anterior, e o repositório de Edge Function (request,
+paginação, janelas de 92 dias, erros); e no pacote `report-delivery/`:
+renderização HTML/texto sem NaN/Infinity, escaping HTML de valores
+dinâmicos, CSV (header/escaping/BOM/metadata JSON), geração vs. envio
+separados, configuração ausente (API key/from/recipient), sucesso/erro do
+Resend, secret nunca aparece em erro, limite de anexo. Tudo com `fetch`
+mockado, nunca contra a rede real.

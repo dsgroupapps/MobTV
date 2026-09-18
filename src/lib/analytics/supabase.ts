@@ -44,6 +44,17 @@ export function hasAnalyticsSupabaseConfig(): boolean {
 }
 
 /**
+ * Só a URL do projeto Supabase (`SUPABASE_URL`/`VITE_SUPABASE_URL`) — usada
+ * pelo repository da Edge Function de analytics (Bloco C,
+ * `src/lib/analytics/reporting/repository.ts`) para montar a URL de
+ * `get-analytics-events` sem duplicar a leitura de env. Não é uma
+ * configuração nova: é a mesma URL que `getAnalyticsSupabaseClient` já lê.
+ */
+export function getConfiguredSupabaseUrl(): string | undefined {
+  return getAnalyticsSupabaseConfig().url;
+}
+
+/**
  * `undefined` quando Supabase não está configurado no ambiente (ex.
  * `vite dev` sem `.env.local`) — quem chama decide o fallback. Nunca lança:
  * analytics é best-effort, pois a falta de config não pode derrubar a rota.
