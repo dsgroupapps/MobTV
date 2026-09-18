@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SobreRouteImport } from './routes/sobre'
 import { Route as RedeRouteImport } from './routes/rede'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as PlanejadorRouteImport } from './routes/planejador'
 import { Route as MidiaRouteImport } from './routes/midia'
 import { Route as GaleriaRouteImport } from './routes/galeria'
@@ -63,6 +64,11 @@ const SobreRoute = SobreRouteImport.update({
 const RedeRoute = RedeRouteImport.update({
   id: '/rede',
   path: '/rede',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlanejadorRoute = PlanejadorRouteImport.update({
@@ -295,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -382,6 +390,7 @@ export interface FileRoutesById {
   '/galeria': typeof GaleriaRoute
   '/midia': typeof MidiaRoute
   '/planejador': typeof PlanejadorRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/rede': typeof RedeRoute
   '/sobre': typeof SobreRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
@@ -431,6 +440,7 @@ export interface FileRouteTypes {
     | '/galeria'
     | '/midia'
     | '/planejador'
+    | '/privacidade'
     | '/rede'
     | '/sobre'
     | '/admin/analytics'
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/galeria'
     | '/midia'
     | '/planejador'
+    | '/privacidade'
     | '/rede'
     | '/sobre'
     | '/admin/analytics'
@@ -517,6 +528,7 @@ export interface FileRouteTypes {
     | '/galeria'
     | '/midia'
     | '/planejador'
+    | '/privacidade'
     | '/rede'
     | '/sobre'
     | '/admin/analytics'
@@ -565,6 +577,7 @@ export interface RootRouteChildren {
   GaleriaRoute: typeof GaleriaRoute
   MidiaRoute: typeof MidiaRoute
   PlanejadorRoute: typeof PlanejadorRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   RedeRoute: typeof RedeRoute
   SobreRoute: typeof SobreRoute
   PlayerPanelIdRoute: typeof PlayerPanelIdRoute
@@ -585,6 +598,13 @@ declare module '@tanstack/react-router' {
       path: '/rede'
       fullPath: '/rede'
       preLoaderRoute: typeof RedeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/planejador': {
@@ -1043,6 +1063,7 @@ const rootRouteChildren: RootRouteChildren = {
   GaleriaRoute: GaleriaRoute,
   MidiaRoute: MidiaRoute,
   PlanejadorRoute: PlanejadorRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   RedeRoute: RedeRoute,
   SobreRoute: SobreRoute,
   PlayerPanelIdRoute: PlayerPanelIdRoute,

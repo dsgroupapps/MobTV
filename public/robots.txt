@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /entrar
+Disallow: /criar-conta
+
+# Sitemap: pendente — depende do domínio final de produção (ainda não
+# definido). Adicionar aqui "Sitemap: https://<dominio-final>/sitemap.xml"
+# assim que o domínio estiver confirmado e o sitemap.xml existir.

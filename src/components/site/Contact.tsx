@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useReveal } from "@/hooks/useReveal";
 import { officialSocialLinks } from "@/data/social-links";
 import { Instagram, Linkedin, Mail, MapPin, Send } from "lucide-react";
@@ -270,13 +271,12 @@ export function Contact() {
 
         {/* Política de Privacidade */}
         <div className="text-center mb-12">
-          <a
-            href="#"
+          <Link
+            to="/privacidade"
             className="text-sm text-gold underline underline-offset-4 hover:text-gold-deep transition-colors"
-            // TODO: link real — substituir pelo link da política de privacidade
           >
             Política de Privacidade
-          </a>
+          </Link>
         </div>
 
         {/* CTA */}
